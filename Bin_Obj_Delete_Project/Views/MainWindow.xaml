@@ -1,0 +1,134 @@
+﻿<Window x:Class="Bin_Obj_Delete_Project.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="MainWindow" 
+        Width="1200"
+        Height="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal">
+            <Border BorderBrush ="DarkGray" 
+                    BorderThickness="2" 
+                    Margin="4,20,4,4" 
+                    Width="885" 
+                    Height="35">
+                <TextBlock Text="{Binding DeleteFolderPath}"
+                           TextAlignment="Left" 
+                           Margin="5,5,0,0" 
+                           FontSize="15"/>
+            </Border>
+
+            <Button Content="폴더 불러오기"
+                    Command="{Binding LoadFolderCommand}"
+                    Margin="5,15,0,0" 
+                    Height="30" 
+                    Width="135" 
+                    FontSize="15"/>
+
+            <Button Content="bin, obj 폴더 삭제"
+                    IsEnabled="{Binding IsDelBtnEnabledOrNot}"
+                    Command="{Binding DelFoldersCommand}"
+                    Margin="10,15,0,0" 
+                    Height="30" 
+                    Width="135" 
+                    FontSize="15"/>
+        </StackPanel>
+
+        <Border Grid.Row="1"
+                Grid.Column="1"
+                BorderBrush ="Black"
+                BorderThickness="2"
+                Margin="5, 10, 5, 5">
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <ListView ItemsSource="{Binding DelefeFolderInfo}" Margin="5">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="폴더 이름" Width="Auto">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DelFolderName}"
+                                                   Margin="8,0"
+                                                   TextDecorations="Underline"
+                                                   Foreground="DarkGreen"
+                                                   Cursor="Hand" />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+                            <GridViewColumn Header="생성한 날짜" Width="Auto">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DelFolderCreationTime}"
+                                                   Margin="8,0"
+                                                   Foreground="DarkRed"
+                                                   Cursor="Hand" />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+                            <GridViewColumn Header="폴더 유형" Width="Auto">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DelFolderCategory}"
+                                                   Margin="8,0"
+                                                   Foreground="Black"
+                                                   Cursor="Hand" />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="수정한 날짜" Width="Auto">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DelFolderModifiedTime}"
+                                                   Margin="8,0"
+                                                   Foreground="DarkRed"
+                                                   Cursor="Hand" />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+                            <GridViewColumn Header="폴더 크기" Width="Auto">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DelFolderSize}"
+                                                   Margin="8,0"
+                                                   Foreground="Black"
+                                                   Cursor="Hand" />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+                            <GridViewColumn Header="폴더 경로" Width="Auto">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DelFolderPath}"
+                                                   Margin="8,0"
+                                                   TextDecorations="Underline"
+                                                   Foreground="DarkBlue"
+                                                   Cursor="Hand" />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+                <ProgressBar Grid.Row="1" Height="25" Margin="5" Minimum="0" Maximum="100" Value="{Binding ProgressStatus}"/>
+            </Grid>
+
+        </Border>
+
+    </Grid>
+</Window>
