@@ -15,26 +15,34 @@
 
         <StackPanel Grid.Row="0" Orientation="Horizontal">
             <Border BorderBrush ="DarkGray" 
-                    BorderThickness="2" 
+                    BorderThickness="0" 
                     Margin="4,20,4,4" 
-                    Width="885" 
+                    Width="735" 
                     Height="35">
-                <TextBlock Text="{Binding DeleteFolderPath}"
-                           TextAlignment="Left" 
-                           Margin="5,5,0,0" 
-                           FontSize="15"/>
+                <TextBox Text="{Binding DeleteFolderPath, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                         TextAlignment="Left" 
+                         Margin="2,2,2,2" 
+                         FontSize="20"/>
             </Border>
 
             <Button Content="폴더 불러오기"
-                    Command="{Binding LoadFolderCommand}"
+                    Command="{Binding LoadingFolderCommand}"
                     Margin="5,15,0,0" 
                     Height="30" 
                     Width="135" 
                     FontSize="15"/>
 
-            <Button Content="bin, obj 폴더 삭제"
+            <Button Content="폴더 선택삭제"
+                    Command="{Binding DelSelFoldersCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                    IsEnabled="{Binding IsDelBtnEnabledOrNot}"             
+                    Margin="10,15,0,0" 
+                    Height="30" 
+                    Width="135" 
+                    FontSize="15"/>
+
+            <Button Content="폴더 일괄삭제"
+                    Command="{Binding DelAllFoldersCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                     IsEnabled="{Binding IsDelBtnEnabledOrNot}"
-                    Command="{Binding DelFoldersCommand}"
                     Margin="10,15,0,0" 
                     Height="30" 
                     Width="135" 
@@ -46,23 +54,27 @@
                 BorderBrush ="Black"
                 BorderThickness="2"
                 Margin="5, 10, 5, 5">
-
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <ListView ItemsSource="{Binding DelefeFolderInfo}" Margin="5">
+                <ListView ItemsSource="{Binding ActiveFolderInfo}"
+                          SelectedItem="{Binding SelectedCrFolder}"
+                          SelectionMode="Extended"
+                          SelectionChanged="ListView_SelectionChanged"
+                          Margin="5"
+                          x:Name="listView">
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Header="폴더 이름" Width="Auto">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding DelFolderName}"
+                                        <TextBlock Text="{Binding DelFolderName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                                    Margin="8,0"
                                                    TextDecorations="Underline"
                                                    Foreground="DarkGreen"
-                                                   Cursor="Hand" />
+                                                   Cursor="Hand"/>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
@@ -70,10 +82,10 @@
                             <GridViewColumn Header="생성한 날짜" Width="Auto">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding DelFolderCreationTime}"
+                                        <TextBlock Text="{Binding DelFolderCreationTime, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                                    Margin="8,0"
                                                    Foreground="DarkRed"
-                                                   Cursor="Hand" />
+                                                   Cursor="Hand"/>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
@@ -81,20 +93,20 @@
                             <GridViewColumn Header="폴더 유형" Width="Auto">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding DelFolderCategory}"
+                                        <TextBlock Text="{Binding DelFolderCategory, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                                    Margin="8,0"
                                                    Foreground="Black"
-                                                   Cursor="Hand" />
+                                                   Cursor="Hand"/>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <GridViewColumn Header="수정한 날짜" Width="Auto">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding DelFolderModifiedTime}"
+                                        <TextBlock Text="{Binding DelFolderModifiedTime, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                                    Margin="8,0"
                                                    Foreground="DarkRed"
-                                                   Cursor="Hand" />
+                                                   Cursor="Hand"/>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
@@ -102,10 +114,10 @@
                             <GridViewColumn Header="폴더 크기" Width="Auto">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding DelFolderSize}"
+                                        <TextBlock Text="{Binding DelFolderSize, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                                    Margin="8,0"
                                                    Foreground="Black"
-                                                   Cursor="Hand" />
+                                                   Cursor="Hand"/>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
@@ -113,21 +125,24 @@
                             <GridViewColumn Header="폴더 경로" Width="Auto">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding DelFolderPath}"
+                                        <TextBlock Text="{Binding DelFolderPath, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                                    Margin="8,0"
                                                    TextDecorations="Underline"
                                                    Foreground="DarkBlue"
-                                                   Cursor="Hand" />
+                                                   Cursor="Hand"/>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
-
                         </GridView>
                     </ListView.View>
                 </ListView>
-                <ProgressBar Grid.Row="1" Height="25" Margin="5" Minimum="0" Maximum="100" Value="{Binding ProgressStatus}"/>
+                <ProgressBar Grid.Row="1"
+                             Height="25"
+                             Margin="5"
+                             Value="{Binding ProgressStatus, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                             Minimum="0"
+                             Maximum="100"/>
             </Grid>
-
         </Border>
 
     </Grid>

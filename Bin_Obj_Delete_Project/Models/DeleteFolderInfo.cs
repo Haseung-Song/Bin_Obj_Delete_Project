@@ -1,9 +1,9 @@
-﻿using Bin_Obj_Delete_Project.ViewModels;
-
-namespace Bin_Obj_Delete_Project.Models
+﻿namespace Bin_Obj_Delete_Project.Models
 {
-    public class DeleteFolderInfo : MainVM
+    public class DeleteFolderInfo
     {
+        #region [DeleteFolderInfo] 모델
+
         /// <summary>
         /// [삭제할 폴더 경로]
         /// </summary>
@@ -20,11 +20,6 @@ namespace Bin_Obj_Delete_Project.Models
         public string DelFolderCreationTime { get; set; }
 
         /// <summary>
-        /// [삭제할 폴더 접근 일자]
-        /// </summary>
-        public string DelFolderAccessedTime { get; set; }
-
-        /// <summary>
         /// [삭제할 폴더 수정 일자]
         /// </summary>
         public string DelFolderModifiedTime { get; set; }
@@ -39,10 +34,15 @@ namespace Bin_Obj_Delete_Project.Models
         /// </summary>
         public string DelFolderSize { get; set; }
 
+        #endregion
+
         /// <summary>
         /// [DeleteFolderInfo 생성자]
         /// </summary>
-        public DeleteFolderInfo() { }
+        public DeleteFolderInfo()
+        {
+
+        }
 
     }
 
