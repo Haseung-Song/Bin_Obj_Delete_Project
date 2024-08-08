@@ -180,6 +180,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
         // 3. 폴더 일괄삭제
         public ICommand DelAllFoldersCommand { get; set; }
 
+        // 4. 경로 불러오기
+        public ICommand EnterLoadPathCommand { get; set; }
+
         #endregion
 
         #region 생성자 (Initialize)
@@ -193,6 +196,22 @@ namespace Bin_Obj_Delete_Project.ViewModels
             _deleteFolderInfo = new ObservableCollection<DeleteFolderInfo>();
             DelSelFoldersCommand = new RelayCommand(DelSelFolders);
             DelAllFoldersCommand = new RelayCommand(DelAllFolders);
+            EnterLoadPathCommand = new RelayCommand(EnterLoadPath);
+        }
+
+        /// <summary>
+        /// 4. [경로 불러오기] 기능
+        /// </summary>
+        private void EnterLoadPath()
+        {
+            DeleteFolderPath = Path.GetFullPath(DeleteFolderPath);
+            if (!string.IsNullOrEmpty(DeleteFolderPath))
+            {
+                IEnumerable<string> directories = Directory.EnumerateDirectories(DeleteFolderPath, "*", SearchOption.AllDirectories);
+                //.Where(dir => dir.EndsWith("bin") || dir.EndsWith("obj")); // 경로의 마지막 글자가 "bin"이거나 "obj"인 파일만 찾음!
+                DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
+            }
+
         }
 
         #endregion
@@ -216,6 +235,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 IsDelBtnEnabledOrNot = true; // [bin, obj 폴더 삭제] 버튼 활성화
                 DeleteFolderPath = folderDialog.FileName; // [폴더 경로]
+                //LoadingFolderPath();
                 // [dirInfo] = 상위 폴더 정보
                 // [dirSubInfo] = 하위 폴더 리스트 정보
                 if (!string.IsNullOrEmpty(DeleteFolderPath))

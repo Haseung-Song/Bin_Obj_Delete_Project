@@ -22,7 +22,12 @@
                 <TextBox Text="{Binding DeleteFolderPath, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                          TextAlignment="Left" 
                          Margin="2,2,2,2" 
-                         FontSize="20"/>
+                         FontSize="20">
+                    <TextBox.InputBindings>
+                        <KeyBinding Gesture="Enter" 
+                                    Command="{Binding EnterLoadPathCommand, UpdateSourceTrigger=PropertyChanged}"/>
+                    </TextBox.InputBindings>
+                </TextBox>
             </Border>
 
             <Button Content="폴더 불러오기"
@@ -136,12 +141,12 @@
                         </GridView>
                     </ListView.View>
                 </ListView>
-                <ProgressBar Grid.Row="1"
+                <!--<ProgressBar Grid.Row="1"
                              Height="25"
                              Margin="5"
                              Value="{Binding ProgressStatus, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                              Minimum="0"
-                             Maximum="100"/>
+                             Maximum="100"/>-->
             </Grid>
         </Border>
 
