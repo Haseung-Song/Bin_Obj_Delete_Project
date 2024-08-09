@@ -1,5 +1,6 @@
 ﻿using Bin_Obj_Delete_Project.Models;
 using Bin_Obj_Delete_Project.ViewModels;
+using Bin_Obj_Delete_Project.Views;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -10,15 +11,15 @@ namespace Bin_Obj_Delete_Project
     /// </summary>
     public partial class MainWindow : Window
     {
+        private readonly MainVM vm = new MainVM(); // MainVM() 객체 vm 생성
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = new MainVM();
+            DataContext = vm;
         }
 
         private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            MainVM vm = DataContext as MainVM;
             // [SelectionChanged] 이벤트 발생!
             // [SelectFolderInfo] + 선택된 항목의 목록 포함
             foreach (DeleteFolderInfo item in e.AddedItems)
@@ -37,6 +38,15 @@ namespace Bin_Obj_Delete_Project
 
             }
 
+        }
+
+        private void OpenFilterWindow(object sender, RoutedEventArgs e)
+        {
+            FilterWindow filterWindow = new FilterWindow
+            {
+                DataContext = vm // MainVM() DataContext 설정
+            };
+            _ = filterWindow.ShowDialog();
         }
 
     }

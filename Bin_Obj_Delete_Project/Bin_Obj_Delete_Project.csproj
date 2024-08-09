@@ -68,6 +68,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="Views\FilterWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -79,7 +83,11 @@
     <Compile Include="Common\ParameterRelayCommand.cs" />
     <Compile Include="Common\RelayCommand.cs" />
     <Compile Include="Models\DeleteFolderInfo.cs" />
+    <Compile Include="ViewModels\FilterWindowVM.cs" />
     <Compile Include="ViewModels\MainVM.cs" />
+    <Compile Include="Views\FilterWindow.xaml.cs">
+      <DependentUpon>FilterWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>

@@ -1,0 +1,124 @@
+﻿<Window x:Class="Bin_Obj_Delete_Project.Views.FilterWindow"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      mc:Ignorable="d" 
+      Title="검색 필터 화면"
+      Width="730"
+      Height="400">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Border Grid.Row="0"
+                BorderBrush="DarkGray"
+                BorderThickness="2"
+                Margin="5">
+            <StackPanel Margin="5">
+                <TextBlock Text="검색 필터 설정"
+                           TextAlignment="Center"
+                           HorizontalAlignment="Stretch"
+                           FontSize="18"
+                           FontWeight="Bold"
+                           Margin="0,0,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="1"
+                BorderBrush="DarkGray"
+                BorderThickness="2"
+                Margin="5">
+            <StackPanel Margin="10">
+                <Grid Margin="5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <!-- 여기에 필터 설정을 위한 UI 요소를 추가하세요. -->
+                    <!-- 필터 1 -->
+                    <TextBlock Grid.Column="0"
+                               Grid.Row="0"
+                               Text="Filter 01: 폴더이름 검색"
+                               TextAlignment="Left"
+                               HorizontalAlignment="Stretch"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Margin="0,0,0,10"/>
+                    <TextBox   Grid.Column="0"
+                               Grid.Row="1"
+                               Text="bin"
+                               Height="40"
+                               TextWrapping="Wrap"
+                               AcceptsReturn="True"
+                               TextAlignment="Left"
+                               HorizontalAlignment="Stretch"
+                               VerticalAlignment="Stretch"
+                               FontSize="14"
+                               FontWeight="Normal"
+                               Margin="0,5,0,10"/>
+                    <Button    Grid.Column="0"
+                               Grid.Row="2"
+                               Content="적용"
+                               Height="25"
+                               Width="100" 
+                               HorizontalAlignment="Left"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="2"
+                BorderBrush="DarkGray"
+                BorderThickness="2"
+                Margin="5">
+            <StackPanel Margin="10">
+                <Grid Margin="5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <!-- 여기에 필터 설정을 위한 UI 요소를 추가하세요. -->
+                    <!-- 필터 2 -->
+                    <TextBlock Grid.Column="0"
+                               Grid.Row="0"
+                               Text="Filter 02: 확장자로 검색"
+                               TextAlignment="Left"
+                               HorizontalAlignment="Stretch"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Margin="0,0,0,10"/>
+                    <TextBox   Grid.Column="0"
+                               Grid.Row="1"
+                               Text=".pdb"
+                               Height="40"
+                               TextWrapping="Wrap"
+                               AcceptsReturn="True"
+                               TextAlignment="Left"
+                               HorizontalAlignment="Stretch"
+                               VerticalAlignment="Stretch"
+                               FontSize="14"
+                               FontWeight="Normal"
+                               Margin="0,5,0,10"/>
+                    <Button    Grid.Column="0"
+                               Grid.Row="2"
+                               Content="적용"
+                               Height="25"
+                               Width="100"
+                               HorizontalAlignment="Left"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+    </Grid>
+
+</Window>
