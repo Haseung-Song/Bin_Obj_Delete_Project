@@ -24,7 +24,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// <summary>
         /// [_deleteFolderPath]
         /// </summary>
-        private string _deleteFolderPath;
+        protected string _deleteFolderPath;
 
         /// <summary>
         /// [_selectedCrFolder]

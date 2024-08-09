@@ -67,6 +67,7 @@
                     <Button    Grid.Column="0"
                                Grid.Row="2"
                                Content="적용"
+                               Command="{Binding EnterLoadPathCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                Height="25"
                                Width="100" 
                                HorizontalAlignment="Left"/>
@@ -113,6 +114,7 @@
                     <Button    Grid.Column="0"
                                Grid.Row="2"
                                Content="적용"
+                               Command="{Binding EnterLoadPathCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                Height="25"
                                Width="100"
                                HorizontalAlignment="Left"/>
