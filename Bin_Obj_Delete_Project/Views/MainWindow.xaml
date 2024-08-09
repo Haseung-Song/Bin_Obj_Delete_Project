@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="MainWindow" 
-        Width="1200"
+        Width="1280"
         Height="800">
     <Grid>
         <Grid.RowDefinitions>
@@ -17,7 +17,7 @@
             <Border BorderBrush ="DarkGray" 
                     BorderThickness="0" 
                     Margin="4,20,4,4" 
-                    Width="735" 
+                    Width="815" 
                     Height="35">
                 <TextBox Text="{Binding DeleteFolderPath, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                          TextAlignment="Left" 
@@ -127,7 +127,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Header="폴더 경로" Width="Auto">
+                            <GridViewColumn Header="폴더 경로" Width="880">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding DelFolderPath, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
