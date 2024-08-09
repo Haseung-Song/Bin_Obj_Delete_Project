@@ -27,11 +27,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private string _deleteFolderPath;
 
         /// <summary>
-        /// [_deleteFolderInfo]
-        /// </summary>
-        private ObservableCollection<DeleteFolderInfo> _deleteFolderInfo;
-
-        /// <summary>
         /// [_selectedCrFolder]
         /// </summary>
         private DeleteFolderInfo _selectedCrFolder;
@@ -40,6 +35,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// [_selectFolderInfo]
         /// </summary>
         private ObservableCollection<DeleteFolderInfo> _selectFolderInfo;
+
+        /// <summary>
+        /// [_deleteFolderInfo]
+        /// </summary>
+        private ObservableCollection<DeleteFolderInfo> _deleteFolderInfo;
 
         /// <summary>
         /// [_activeFolderInfo]
@@ -174,14 +174,14 @@ namespace Bin_Obj_Delete_Project.ViewModels
         // 1. 폴더 불러오기
         public ICommand LoadingFolderCommand { get; set; }
 
-        // 2. 폴더 선택삭제
+        // 2. 경로 불러오기
+        public ICommand EnterLoadPathCommand { get; set; }
+
+        // 3. 폴더 선택삭제
         public ICommand DelSelFoldersCommand { get; set; }
 
-        // 3. 폴더 일괄삭제
+        // 4. 폴더 일괄삭제
         public ICommand DelAllFoldersCommand { get; set; }
-
-        // 4. 경로 불러오기
-        public ICommand EnterLoadPathCommand { get; set; }
 
         #endregion
 
@@ -190,28 +190,13 @@ namespace Bin_Obj_Delete_Project.ViewModels
         public MainVM()
         {
             LoadingFolderCommand = new RelayCommand(LoadingFolder);
+            EnterLoadPathCommand = new RelayCommand(EnterLoadPath);
             _selectedCrFolder = new DeleteFolderInfo();
             _selectFolderInfo = new ObservableCollection<DeleteFolderInfo>();
-            _activeFolderInfo = new ObservableCollection<DeleteFolderInfo>();
             _deleteFolderInfo = new ObservableCollection<DeleteFolderInfo>();
+            _activeFolderInfo = new ObservableCollection<DeleteFolderInfo>();
             DelSelFoldersCommand = new RelayCommand(DelSelFolders);
             DelAllFoldersCommand = new RelayCommand(DelAllFolders);
-            EnterLoadPathCommand = new RelayCommand(EnterLoadPath);
-        }
-
-        /// <summary>
-        /// 4. [경로 불러오기] 기능
-        /// </summary>
-        private void EnterLoadPath()
-        {
-            DeleteFolderPath = Path.GetFullPath(DeleteFolderPath);
-            if (!string.IsNullOrEmpty(DeleteFolderPath))
-            {
-                IEnumerable<string> directories = Directory.EnumerateDirectories(DeleteFolderPath, "*", SearchOption.AllDirectories);
-                //.Where(dir => dir.EndsWith("bin") || dir.EndsWith("obj")); // 경로의 마지막 글자가 "bin"이거나 "obj"인 파일만 찾음!
-                DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
-            }
-
         }
 
         #endregion
@@ -219,7 +204,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         #region [버튼기능]
 
         /// <summary>
-        /// 1. [폴더 불러오기] 기능
+        /// 1. [폴더 불러오기] 기능 (버튼)
         /// </summary>
         private void LoadingFolder()
         {
@@ -233,66 +218,82 @@ namespace Bin_Obj_Delete_Project.ViewModels
             // [폴더 불러오기] 버튼 클릭 후,
             if (folderDialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                IsDelBtnEnabledOrNot = true; // [bin, obj 폴더 삭제] 버튼 활성화
-                DeleteFolderPath = folderDialog.FileName; // [폴더 경로]
-                //LoadingFolderPath();
-                // [dirInfo] = 상위 폴더 정보
-                // [dirSubInfo] = 하위 폴더 리스트 정보
-                if (!string.IsNullOrEmpty(DeleteFolderPath))
-                {
-                    // [directoryInfo] 관련 참고해야 할 코드 (By. 박상훈 선임)
-                    //var directoryInfo = new DirectoryInfo(DeleteFolderPath);
-                    //var directoryInfos = directoryInfo.GetFileSystemInfos("*", SearchOption.AllDirectories);
-                    IEnumerable<string> directories = Directory.EnumerateDirectories(DeleteFolderPath, "*", SearchOption.AllDirectories);
-                    //.Where(dir => dir.EndsWith("bin") || dir.EndsWith("obj")); // 경로의 마지막 글자가 "bin"이거나 "obj"인 파일만 찾음!
-                    DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
-                    // 파일 경로가 존재할 때,
-                    if (directories != null)
-                    {
-                        foreach (string dir in directories)
-                        {
-                            DirectoryInfo dirInfo = new DirectoryInfo(dir);
-                            // 해당 경로의 [폴더 이름]이 "bin" 또는 "obj"인 경우에만 포함
-                            if (dirInfo.Name.Equals("bin") || dirInfo.Name.Equals("obj"))
-                            {
-                                DeleteFolderInfo.Add(new DeleteFolderInfo
-                                {
-                                    DelFolderPath = dir,
-                                    DelFolderName = dirInfo.Name,
-                                    DelFolderCreationTime = dirInfo.CreationTime.ToString(),
-                                    DelFolderModifiedTime = dirInfo.LastWriteTime.ToString(),
-                                    DelFolderCategory = "파일 폴더",
-                                    DelFolderSize = dir.Length.ToString() + " Byte"
-                                });
-
-                            }
-
-                        }
-
-                    }
-                    else
-                    {
-                        _ = MessageBox.Show("불러올 폴더 경로가 없습니다.", "경로 미존재", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-
-                }
-                // DeleteFolderInfo 정보 확인: 디버깅으로 확인 가능
-                foreach (DeleteFolderInfo item in DeleteFolderInfo)
-                {
-                    Console.WriteLine(item.DelFolderPath);
-                    Console.WriteLine(item.DelFolderName);
-                    Console.WriteLine(item.DelFolderCreationTime);
-                    Console.WriteLine(item.DelFolderModifiedTime);
-                    Console.WriteLine(item.DelFolderCategory);
-                    Console.WriteLine(item.DelFolderSize);
-                }
-                ActiveFolderInfo = DeleteFolderInfo; // [ActiveFolderInfo] 컬렉션에 [DeleteFolderInfo] 컬렉션을 할당
+                DeleteFolderPath = folderDialog.FileName;
+                EnumerateFolders();
             }
 
         }
 
         /// <summary>
-        /// 2. [폴더 선택삭제] 기능
+        /// 2. [경로 불러오기] 기능 (Enter 키)
+        /// </summary>
+        private void EnterLoadPath()
+        {
+            DeleteFolderPath = Path.GetFullPath(DeleteFolderPath);
+            EnumerateFolders();
+        }
+
+        /// <summary>
+        /// 선택적 [하위 디렉토리] 검색 함수
+        /// </summary>
+        private void EnumerateFolders()
+        {
+            IsDelBtnEnabledOrNot = true; // [폴더 선택삭제], [폴더 일괄삭제] 버튼 활성화
+            // [dirInfo] = 상위 폴더 정보
+            // [dirSubInfo] = 하위 폴더 리스트 정보
+            if (!string.IsNullOrEmpty(DeleteFolderPath))
+            {
+                // [directoryInfo] 관련 참고해야 할 코드 (By. 박상훈 선임)
+                //var directoryInfo = new DirectoryInfo(DeleteFolderPath);
+                //var directoryInfos = directoryInfo.GetFileSystemInfos("*", SearchOption.AllDirectories);
+                IEnumerable<string> directories = Directory.EnumerateDirectories(DeleteFolderPath, "*", SearchOption.AllDirectories);
+                //.Where(dir => dir.EndsWith("bin") || dir.EndsWith("obj")); // 경로의 마지막 글자가 "bin"이거나 "obj"인 파일만 찾음!
+                DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
+                // 파일 경로가 존재할 때,
+                if (directories != null)
+                {
+                    foreach (string dir in directories)
+                    {
+                        DirectoryInfo dirInfo = new DirectoryInfo(dir);
+                        // 해당 경로의 [폴더 이름]이 "bin" 또는 "obj"인 경우에만 포함
+                        if (dirInfo.Name.Equals("bin") || dirInfo.Name.Equals("obj"))
+                        {
+                            DeleteFolderInfo.Add(new DeleteFolderInfo
+                            {
+                                DelFolderPath = dir,
+                                DelFolderName = dirInfo.Name,
+                                DelFolderCreationTime = dirInfo.CreationTime.ToString(),
+                                DelFolderModifiedTime = dirInfo.LastWriteTime.ToString(),
+                                DelFolderCategory = "파일 폴더",
+                                DelFolderSize = dir.Length.ToString() + " Byte"
+                            });
+
+                        }
+
+                    }
+
+                }
+                else
+                {
+                    _ = MessageBox.Show("불러올 폴더 경로가 없습니다.", "경로 미존재", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+
+            }
+            // DeleteFolderInfo 정보 확인: 디버깅으로 확인 가능
+            foreach (DeleteFolderInfo item in DeleteFolderInfo)
+            {
+                Console.WriteLine(item.DelFolderPath);
+                Console.WriteLine(item.DelFolderName);
+                Console.WriteLine(item.DelFolderCreationTime);
+                Console.WriteLine(item.DelFolderModifiedTime);
+                Console.WriteLine(item.DelFolderCategory);
+                Console.WriteLine(item.DelFolderSize);
+            }
+            ActiveFolderInfo = DeleteFolderInfo; // [ActiveFolderInfo] 컬렉션에 [DeleteFolderInfo] 컬렉션을 할당
+        }
+
+        /// <summary>
+        /// 3. [폴더 선택삭제] 기능 (버튼)
         /// </summary>
         private void DelSelFolders()
         {
@@ -330,7 +331,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         }
 
         /// <summary>
-        /// 3. [폴더 일괄삭제] 기능
+        /// 4. [폴더 일괄삭제] 기능 (버튼)
         /// </summary>
         private void DelAllFolders()
         {

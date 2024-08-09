@@ -25,7 +25,7 @@
                          FontSize="20">
                     <TextBox.InputBindings>
                         <KeyBinding Gesture="Enter" 
-                                    Command="{Binding EnterLoadPathCommand, UpdateSourceTrigger=PropertyChanged}"/>
+                                    Command="{Binding EnterLoadPathCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
                     </TextBox.InputBindings>
                 </TextBox>
             </Border>
