@@ -46,7 +46,7 @@
                     FontSize="15"/>
 
             <Button Content="폴더 선택삭제"
-                    Command="{Binding DelSelFoldersCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                    Command="{Binding DelSelFoldersCommand}"
                     IsEnabled="{Binding IsDelBtnEnabledOrNot}"             
                     Margin="10,15,0,0" 
                     Height="30" 
@@ -54,7 +54,7 @@
                     FontSize="15"/>
 
             <Button Content="폴더 일괄삭제"
-                    Command="{Binding DelAllFoldersCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                    Command="{Binding DelAllFoldersCommand}"
                     IsEnabled="{Binding IsDelBtnEnabledOrNot}"
                     Margin="10,15,0,0" 
                     Height="30" 
@@ -144,7 +144,7 @@
                                                    Foreground="DarkBlue"
                                                    Cursor="Hand"/>
                                     </DataTemplate>
-                                </GridViewColumn.CellTemplate>
+                                </GridViewColumn.CellTemplate>  
                             </GridViewColumn>
                         </GridView>
                     </ListView.View>

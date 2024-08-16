@@ -42,7 +42,10 @@ namespace Bin_Obj_Delete_Project
 
         private void OpenFilterWindow(object sender, RoutedEventArgs e)
         {
-            FilterWindow filterWindow = new FilterWindow();
+            FilterWindow filterWindow = new FilterWindow
+            {
+                DataContext = vm
+            };
             _ = filterWindow.ShowDialog();
         }
 

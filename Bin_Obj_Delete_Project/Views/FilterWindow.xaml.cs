@@ -11,7 +11,6 @@ namespace Bin_Obj_Delete_Project.Views
         public FilterWindow()
         {
             InitializeComponent();
-            DataContext = new FilterWindowVM();
         }
 
     }

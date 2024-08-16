@@ -19,12 +19,27 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// <summary>
         /// [_delBtnEnabledOrNot]
         /// </summary>
-        private bool _delBtnEnabledOrNot;
+        private bool _IsdelBtnEnabledOrNot;
 
         /// <summary>
         /// [_deleteFolderPath]
         /// </summary>
         protected string _deleteFolderPath;
+
+        /// <summary>
+        /// [_folderNameFiltered]
+        /// </summary>
+        private string _folderNameFiltered;
+
+        /// <summary>
+        /// [_extensionsFiltered]
+        /// </summary>
+        private string _extensionsFiltered;
+
+        /// <summary>
+        /// [FolderPath]
+        /// </summary>
+        public static string FolderPath { get; set; }
 
         /// <summary>
         /// [_selectedCrFolder]
@@ -57,12 +72,12 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         public bool IsDelBtnEnabledOrNot
         {
-            get => _delBtnEnabledOrNot;
+            get => _IsdelBtnEnabledOrNot;
             private set
             {
-                if (_delBtnEnabledOrNot != value)
+                if (_IsdelBtnEnabledOrNot != value)
                 {
-                    _delBtnEnabledOrNot = value;
+                    _IsdelBtnEnabledOrNot = value;
                     OnPropertyChanged();
                 }
 
@@ -81,6 +96,43 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 if (_deleteFolderPath != value)
                 {
                     _deleteFolderPath = value;
+                    OnPropertyChanged();
+                    FolderPath = DeleteFolderPath;
+                }
+
+            }
+
+        }
+
+        /// <summary>
+        /// [FilterFolderName]
+        /// </summary>
+        public string FilterFolderName
+        {
+            get => _folderNameFiltered;
+            set
+            {
+                if (_folderNameFiltered != value)
+                {
+                    _folderNameFiltered = value;
+                    OnPropertyChanged();
+                }
+
+            }
+
+        }
+
+        /// <summary>
+        /// [FilterExtensions]
+        /// </summary>
+        public string FilterExtensions
+        {
+            get => _extensionsFiltered;
+            set
+            {
+                if (_extensionsFiltered != value)
+                {
+                    _extensionsFiltered = value;
                     OnPropertyChanged();
                 }
 
@@ -229,35 +281,54 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private void EnterLoadPath()
         {
-            DeleteFolderPath = Path.GetFullPath(DeleteFolderPath);
+            DeleteFolderPath = Path.GetFullPath(FolderPath);
             EnumerateFolders();
         }
 
         /// <summary>
         /// 선택적 [하위 디렉토리] 검색 함수
         /// </summary>
-        private void EnumerateFolders()
+        protected void EnumerateFolders()
         {
             IsDelBtnEnabledOrNot = true; // [폴더 선택삭제], [폴더 일괄삭제] 버튼 활성화
             // [dirInfo] = 상위 폴더 정보
             // [dirSubInfo] = 하위 폴더 리스트 정보
             if (!string.IsNullOrEmpty(DeleteFolderPath))
             {
-                // [directoryInfo] 관련 참고해야 할 코드 (By. 박상훈 선임)
-                //var directoryInfo = new DirectoryInfo(DeleteFolderPath);
-                //var directoryInfos = directoryInfo.GetFileSystemInfos("*", SearchOption.AllDirectories);
+                // 모든 하위 디렉토리를 검색하되, 접근이 거부된 디렉토리는 제외함!
                 IEnumerable<string> directories = Directory.EnumerateDirectories(DeleteFolderPath, "*", SearchOption.AllDirectories);
                 //.Where(dir => dir.EndsWith("bin") || dir.EndsWith("obj")); // 경로의 마지막 글자가 "bin"이거나 "obj"인 파일만 찾음!
                 DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
                 // 파일 경로가 존재할 때,
                 if (directories != null)
                 {
-                    foreach (string dir in directories)
+                    try
                     {
-                        DirectoryInfo dirInfo = new DirectoryInfo(dir);
-                        // 해당 경로의 [폴더 이름]이 "bin" 또는 "obj"인 경우에만 포함
-                        if (dirInfo.Name.Equals("bin") || dirInfo.Name.Equals("obj"))
+                        foreach (string dir in directories)
                         {
+                            DirectoryInfo dirInfo = new DirectoryInfo(dir);
+
+                            // Filter 01: 폴더 이름으로 검색
+                            if (!string.IsNullOrEmpty(FilterFolderName) && !dirInfo.Name.Equals(FilterFolderName))
+                            {
+                                continue;
+                            }
+
+                            // Filter 02: 파일 확장자로 검색
+                            FileInfo[] fileInfo = dirInfo.GetFiles("*", SearchOption.AllDirectories);
+                            if (!string.IsNullOrEmpty(FilterExtensions))
+                            {
+                                foreach (FileInfo item in fileInfo)
+                                {
+                                    if (!item.Extension.Equals(FilterExtensions))
+                                    {
+                                        continue;
+                                    }
+
+                                }
+
+                            }
+
                             DeleteFolderInfo.Add(new DeleteFolderInfo
                             {
                                 DelFolderPath = dir,
@@ -270,6 +341,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
                         }
 
+                    }
+                    catch (UnauthorizedAccessException ex)
+                    {
+                        Console.WriteLine($"Access denied to directory: {directories}. Exception: {ex.Message}"); // 접근이 거부된 폴더는 무시
                     }
 
                 }

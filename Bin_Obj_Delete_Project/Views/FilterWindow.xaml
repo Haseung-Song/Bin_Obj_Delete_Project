@@ -5,7 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       mc:Ignorable="d" 
       Title="검색 필터 화면"
-      Width="730"
+      Width="680"
       Height="400">
 
     <Grid>
@@ -42,11 +42,10 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <!-- 여기에 필터 설정을 위한 UI 요소를 추가하세요. -->
                     <!-- 필터 1 -->
                     <TextBlock Grid.Column="0"
                                Grid.Row="0"
-                               Text="Filter 01: 폴더이름 검색"
+                               Text="Filter 01: 폴더 이름으로 검색"
                                TextAlignment="Left"
                                HorizontalAlignment="Stretch"
                                FontSize="16"
@@ -54,7 +53,7 @@
                                Margin="0,0,0,10"/>
                     <TextBox   Grid.Column="0"
                                Grid.Row="1"
-                               Text="bin"
+                               Text="{Binding FilterFolderName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                Height="40"
                                TextWrapping="Wrap"
                                AcceptsReturn="True"
@@ -67,7 +66,7 @@
                     <Button    Grid.Column="0"
                                Grid.Row="2"
                                Content="적용"
-                               Command="{Binding EnterLoadPathCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                               Command="{Binding EnterLoadPathCommand}"
                                Height="25"
                                Width="100" 
                                HorizontalAlignment="Left"/>
@@ -89,11 +88,10 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <!-- 여기에 필터 설정을 위한 UI 요소를 추가하세요. -->
                     <!-- 필터 2 -->
                     <TextBlock Grid.Column="0"
                                Grid.Row="0"
-                               Text="Filter 02: 확장자로 검색"
+                               Text="Filter 02: 파일 확장자로 검색"
                                TextAlignment="Left"
                                HorizontalAlignment="Stretch"
                                FontSize="16"
@@ -101,7 +99,7 @@
                                Margin="0,0,0,10"/>
                     <TextBox   Grid.Column="0"
                                Grid.Row="1"
-                               Text=".pdb"
+                               Text="{Binding FilterExtensions, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                Height="40"
                                TextWrapping="Wrap"
                                AcceptsReturn="True"
@@ -114,7 +112,7 @@
                     <Button    Grid.Column="0"
                                Grid.Row="2"
                                Content="적용"
-                               Command="{Binding EnterLoadPathCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                               Command="{Binding EnterLoadPathCommand}"
                                Height="25"
                                Width="100"
                                HorizontalAlignment="Left"/>
