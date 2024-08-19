@@ -128,14 +128,14 @@
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding DelMatchingSize, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                   Margin="24,0"
+                                                   Margin="30,0"
                                                    Foreground="Black"
                                                    Cursor="Hand"/>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Header="경로" Width="1020">
+                            <GridViewColumn Header="경로" Width="800">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding DelMatchingPath, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
