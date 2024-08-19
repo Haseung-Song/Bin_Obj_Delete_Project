@@ -443,121 +443,117 @@ namespace Bin_Obj_Delete_Project.ViewModels
                                 foreach (FileInfo item in fileInfo)
                                 {
                                     // 이미 처리가 된 파일 경로는 무시 (중복 제거)
-                                    //if (uniqueFilePathSet.Contains(item.FullName))
-                                    //{
-                                    //    continue;
-                                    //}
+                                    if (uniqueFilePathSet.Contains(item.FullName))
+                                    {
+                                        continue;
+                                    }
 
                                     // 지정한 배열에 정의된 조건과 일치하는지 확인 함!
                                     // 2) 콤마(',')로 구분된 [FilterExtensions]이 파일의 확장명 부분의 문자열과 일치하는 경우 (확장자 비교)
-                                    foreach (string comma2 in filterComma2)
+                                    if (Array.Exists(filterComma2, comma2 => item.Extension.Equals(comma2.Trim(), StringComparison.OrdinalIgnoreCase)))
                                     {
-                                        if (item.Extension.Equals(comma2.Trim(), StringComparison.OrdinalIgnoreCase))
+                                        matchingFileInfoOrNot = true;
+                                        matchingFileName = item.Name;
+                                        matchingFileCreationTime = item.CreationTime.ToString();
+                                        switch (item.Extension)
                                         {
-                                            matchingFileInfoOrNot = true;
-                                            matchingFileName = item.Name;
-                                            matchingFileCreationTime = item.CreationTime.ToString();
-                                            switch (item.Extension)
-                                            {
-                                                case ".pdb":
-                                                    matchingFileCategory = "Program Debug Database";
-                                                    break;
+                                            case ".pdb":
+                                                matchingFileCategory = "Program Debug Database";
+                                                break;
 
-                                                case ".sln":
-                                                    matchingFileCategory = "Visual Studio Solution";
-                                                    break;
+                                            case ".sln":
+                                                matchingFileCategory = "Visual Studio Solution";
+                                                break;
 
-                                                case ".cs":
-                                                    matchingFileCategory = "C# Source File";
-                                                    break;
+                                            case ".cs":
+                                                matchingFileCategory = "C# Source File";
+                                                break;
 
-                                                case ".csproj":
-                                                    matchingFileCategory = "C# Project File";
-                                                    break;
+                                            case ".csproj":
+                                                matchingFileCategory = "C# Project File";
+                                                break;
 
-                                                case ".user":
-                                                    matchingFileCategory = "Per-User Project Options File";
-                                                    break;
+                                            case ".user":
+                                                matchingFileCategory = "Per-User Project Options File";
+                                                break;
 
-                                                case ".config":
-                                                    matchingFileCategory = "VisualStudio.config.11.0";
-                                                    break;
+                                            case ".config":
+                                                matchingFileCategory = "VisualStudio.config.11.0";
+                                                break;
 
-                                                case ".dll":
-                                                    matchingFileCategory = "응용 프로그램 확장";
-                                                    break;
+                                            case ".dll":
+                                                matchingFileCategory = "응용 프로그램 확장";
+                                                break;
 
-                                                case ".cache":
-                                                    matchingFileCategory = "CACHE 파일";
-                                                    break;
+                                            case ".cache":
+                                                matchingFileCategory = "CACHE 파일";
+                                                break;
 
-                                                case ".resources":
-                                                    matchingFileCategory = "RESOURCES 파일";
-                                                    break;
+                                            case ".resources":
+                                                matchingFileCategory = "RESOURCES 파일";
+                                                break;
 
-                                                case ".baml":
-                                                    matchingFileCategory = "BAML 파일";
-                                                    break;
+                                            case ".baml":
+                                                matchingFileCategory = "BAML 파일";
+                                                break;
 
-                                                case ".resx":
-                                                    matchingFileCategory = "Microsoft .NET Managed Resource File";
-                                                    break;
+                                            case ".resx":
+                                                matchingFileCategory = "Microsoft .NET Managed Resource File";
+                                                break;
 
-                                                case ".settings":
-                                                    matchingFileCategory = "Settings-Designer File";
-                                                    break;
+                                            case ".settings":
+                                                matchingFileCategory = "Settings-Designer File";
+                                                break;
 
-                                                case ".xaml":
-                                                    matchingFileCategory = "Windows 태그 파일";
-                                                    break;
+                                            case ".xaml":
+                                                matchingFileCategory = "Windows 태그 파일";
+                                                break;
 
-                                                case ".xml":
-                                                    matchingFileCategory = "xmlfile";
-                                                    break;
+                                            case ".xml":
+                                                matchingFileCategory = "xmlfile";
+                                                break;
 
-                                                case ".nupkg":
-                                                    matchingFileCategory = "NUPKG 파일";
-                                                    break;
+                                            case ".nupkg":
+                                                matchingFileCategory = "NUPKG 파일";
+                                                break;
 
-                                                case ".gitattributes":
-                                                    matchingFileCategory = "txtfile";
-                                                    break;
+                                            case ".gitattributes":
+                                                matchingFileCategory = "txtfile";
+                                                break;
 
-                                                case ".gitignore":
-                                                    matchingFileCategory = "txtfile";
-                                                    break;
+                                            case ".gitignore":
+                                                matchingFileCategory = "txtfile";
+                                                break;
 
-                                                case ".md":
-                                                    matchingFileCategory = "MD 파일";
-                                                    break;
+                                            case ".md":
+                                                matchingFileCategory = "MD 파일";
+                                                break;
 
-                                                case ".p7s":
-                                                    matchingFileCategory = "PKCS #7 서명";
-                                                    break;
+                                            case ".p7s":
+                                                matchingFileCategory = "PKCS #7 서명";
+                                                break;
 
-                                                case ".txt":
-                                                    matchingFileCategory = "텍스트 문서";
-                                                    break;
+                                            case ".txt":
+                                                matchingFileCategory = "텍스트 문서";
+                                                break;
 
-                                                case ".exe":
-                                                    matchingFileCategory = "응용 프로그램";
-                                                    break;
+                                            case ".exe":
+                                                matchingFileCategory = "응용 프로그램";
+                                                break;
 
-                                                case ".suo":
-                                                    matchingFileCategory = "Visual Studio Solution User Options";
-                                                    break;
+                                            case ".suo":
+                                                matchingFileCategory = "Visual Studio Solution User Options";
+                                                break;
 
-                                                default:
-                                                    matchingFileCategory = "기타 파일";
-                                                    break;
-                                            }
-                                            matchingFileModifiedTime = item.LastWriteTime.ToString();
-                                            matchingFileSize = (item.Length / 1024.0).ToString("F1") + " KB";
-                                            matchingFilePath = item.FullName;
-                                            _ = uniqueFilePathSet.Add(matchingFilePath); // 중복 제거
-                                            break;
+                                            default:
+                                                matchingFileCategory = "기타 파일";
+                                                break;
                                         }
-
+                                        matchingFileModifiedTime = item.LastWriteTime.ToString();
+                                        matchingFileSize = (item.Length / 1024.0).ToString("F1") + " KB";
+                                        matchingFilePath = item.FullName;
+                                        _ = uniqueFilePathSet.Add(matchingFilePath); // 중복 제거
+                                        break;
                                     }
 
                                 }
