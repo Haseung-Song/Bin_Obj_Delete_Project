@@ -22,14 +22,14 @@ namespace Bin_Obj_Delete_Project
         {
             // [SelectionChanged] 이벤트 발생!
             // [SelectFolderInfo] + 선택된 항목의 목록 포함
-            foreach (DeleteFolderInfo item in e.AddedItems)
+            foreach (DelMatchingInfo item in e.AddedItems)
             {
                 vm.SelectFolderInfo?.Add(item);
             }
 
             // [SelectionChanged] 이벤트 발생!
             // [SelectFolderInfo] + 선택된 항목의 목록을 제거
-            foreach (DeleteFolderInfo item in e.RemovedItems)
+            foreach (DelMatchingInfo item in e.RemovedItems)
             {
                 if (vm.SelectFolderInfo?.Count > 0)
                 {
@@ -46,7 +46,7 @@ namespace Bin_Obj_Delete_Project
             {
                 DataContext = vm
             };
-            _ = filterWindow.ShowDialog();
+            filterWindow.Show();
         }
 
     }

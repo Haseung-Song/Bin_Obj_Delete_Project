@@ -45,16 +45,16 @@
                     Width="135" 
                     FontSize="15"/>
 
-            <Button Content="폴더 선택삭제"
-                    Command="{Binding DelSelFoldersCommand}"
+            <Button Content="선택 삭제하기"
+                    Command="{Binding DelSelMatchesCommand}"
                     IsEnabled="{Binding IsDelBtnEnabledOrNot}"             
                     Margin="10,15,0,0" 
                     Height="30" 
                     Width="135" 
                     FontSize="15"/>
 
-            <Button Content="폴더 일괄삭제"
-                    Command="{Binding DelAllFoldersCommand}"
+            <Button Content="일괄 삭제하기"
+                    Command="{Binding DelAllMatchesCommand}"
                     IsEnabled="{Binding IsDelBtnEnabledOrNot}"
                     Margin="10,15,0,0" 
                     Height="30" 
@@ -74,17 +74,17 @@
                 </Grid.RowDefinitions>
                 <ListView ItemsSource="{Binding ActiveFolderInfo}"
                           SelectedItem="{Binding SelectedCrFolder}"
-                          SelectionMode="Extended"                         
+                          SelectionMode="Extended"
                           SelectionChanged="ListView_SelectionChanged"
                           Margin="5"
                           x:Name="listView">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Header="폴더 이름" Width="Auto">
+                            <GridViewColumn Header="이름" Width="320">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding DelFolderName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                   Margin="8,0"
+                                        <TextBlock Text="{Binding DelMatchingName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                   Margin="2,0"
                                                    TextDecorations="Underline"
                                                    Foreground="DarkGreen"
                                                    Cursor="Hand"/>
@@ -95,7 +95,7 @@
                             <GridViewColumn Header="생성한 날짜" Width="Auto">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding DelFolderCreationTime, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                        <TextBlock Text="{Binding DelMatchingCreationTime, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                                    Margin="8,0"
                                                    Foreground="DarkRed"
                                                    Cursor="Hand"/>
@@ -103,10 +103,10 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Header="폴더 유형" Width="Auto">
+                            <GridViewColumn Header="유형" Width="Auto">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding DelFolderCategory, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                        <TextBlock Text="{Binding DelMatchingCategory, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                                    Margin="8,0"
                                                    Foreground="Black"
                                                    Cursor="Hand"/>
@@ -116,7 +116,7 @@
                             <GridViewColumn Header="수정한 날짜" Width="Auto">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding DelFolderModifiedTime, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                        <TextBlock Text="{Binding DelMatchingModifiedTime, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                                    Margin="8,0"
                                                    Foreground="DarkRed"
                                                    Cursor="Hand"/>
@@ -124,27 +124,27 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Header="폴더 크기" Width="Auto">
+                            <GridViewColumn Header="크기" Width="120">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding DelFolderSize, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                   Margin="8,0"
+                                        <TextBlock Text="{Binding DelMatchingSize, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                   Margin="24,0"
                                                    Foreground="Black"
                                                    Cursor="Hand"/>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Header="폴더 경로" Width="1020">
+                            <GridViewColumn Header="경로" Width="1020">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding DelFolderPath, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                   Margin="8,0"
+                                        <TextBlock Text="{Binding DelMatchingPath, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                   Margin="4,0"
                                                    TextDecorations="Underline"
                                                    Foreground="DarkBlue"
                                                    Cursor="Hand"/>
                                     </DataTemplate>
-                                </GridViewColumn.CellTemplate>  
+                                </GridViewColumn.CellTemplate>
                             </GridViewColumn>
                         </GridView>
                     </ListView.View>

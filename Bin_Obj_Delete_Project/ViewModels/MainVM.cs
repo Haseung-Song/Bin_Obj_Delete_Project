@@ -17,9 +17,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
         #region [프로퍼티]
 
         /// <summary>
-        /// [_delBtnEnabledOrNot]
+        /// [_IsDelBtnEnabledOrNot]
         /// </summary>
-        private bool _IsdelBtnEnabledOrNot;
+        private bool _IsDelBtnEnabledOrNot;
 
         /// <summary>
         /// [_deleteFolderPath]
@@ -37,29 +37,99 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private string _extensionsFiltered;
 
         /// <summary>
-        /// [FolderPath]
+        /// [matchingFileInfoOrNot]
         /// </summary>
-        public static string FolderPath { get; set; }
+        private bool matchingFileInfoOrNot;
+
+        /// <summary>
+        /// [matchingFldrName]
+        /// </summary>
+        private string matchingFldrName;
+
+        /// <summary>
+        /// [matchingFileName]
+        /// </summary>
+        private string matchingFileName;
+
+        /// <summary>
+        /// [matchingFldrCreationTime]
+        /// </summary>
+        private string matchingFldrCreationTime;
+
+        /// <summary>
+        /// [matchingFileCreationTime]
+        /// </summary>
+        private string matchingFileCreationTime;
+
+        /// <summary>
+        /// [matchingFldrCategory]
+        /// </summary>
+        private string matchingFldrCategory;
+
+        /// <summary>
+        /// [matchingFileCategory]
+        /// </summary>
+        private string matchingFileCategory;
+
+        /// <summary>
+        /// [matchingFldrModifiedTime]
+        /// </summary>
+        private string matchingFldrModifiedTime;
+
+        /// <summary>
+        /// [matchingFileModifiedTime]
+        /// </summary>
+        private string matchingFileModifiedTime;
+
+        /// <summary>
+        /// [matchingFldrSize]
+        /// </summary>
+        private string matchingFldrSize;
+
+        /// <summary>
+        /// [matchingFileSize]
+        /// </summary>
+        private string matchingFileSize;
+
+        /// <summary>
+        /// [matchingFldrPath]
+        /// </summary>
+        private string matchingFldrPath;
+
+        /// <summary>
+        /// [matchingFilePath]
+        /// </summary>
+        private string matchingFilePath;
+
+        /// <summary>
+        /// [AbsolutePath]
+        /// </summary>
+        public static string AbsolutePath { get; set; }
+
+        /// <summary>
+        /// [uniqueFilePathSet]
+        /// </summary>
+        private readonly HashSet<string> uniqueFilePathSet;
 
         /// <summary>
         /// [_selectedCrFolder]
         /// </summary>
-        private DeleteFolderInfo _selectedCrFolder;
+        private DelMatchingInfo _selectedCrFolder;
 
         /// <summary>
         /// [_selectFolderInfo]
         /// </summary>
-        private ObservableCollection<DeleteFolderInfo> _selectFolderInfo;
+        private ObservableCollection<DelMatchingInfo> _selectFolderInfo;
 
         /// <summary>
         /// [_deleteFolderInfo]
         /// </summary>
-        private ObservableCollection<DeleteFolderInfo> _deleteFolderInfo;
+        private ObservableCollection<DelMatchingInfo> _deleteFolderInfo;
 
         /// <summary>
         /// [_activeFolderInfo]
         /// </summary>
-        private ObservableCollection<DeleteFolderInfo> _activeFolderInfo;
+        private ObservableCollection<DelMatchingInfo> _activeFolderInfo;
 
         #endregion
 
@@ -72,12 +142,12 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         public bool IsDelBtnEnabledOrNot
         {
-            get => _IsdelBtnEnabledOrNot;
+            get => _IsDelBtnEnabledOrNot;
             private set
             {
-                if (_IsdelBtnEnabledOrNot != value)
+                if (_IsDelBtnEnabledOrNot != value)
                 {
-                    _IsdelBtnEnabledOrNot = value;
+                    _IsDelBtnEnabledOrNot = value;
                     OnPropertyChanged();
                 }
 
@@ -97,7 +167,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 {
                     _deleteFolderPath = value;
                     OnPropertyChanged();
-                    FolderPath = DeleteFolderPath;
+                    AbsolutePath = DeleteFolderPath;
                 }
 
             }
@@ -143,7 +213,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// <summary>
         /// [DeleteFolderInfo]
         /// </summary>
-        public ObservableCollection<DeleteFolderInfo> DeleteFolderInfo
+        public ObservableCollection<DelMatchingInfo> DeleteFolderInfo
         {
             get => _deleteFolderInfo;
             set
@@ -161,7 +231,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// <summary>
         /// [SelectedCrFolder]
         /// </summary>
-        public DeleteFolderInfo SelectedCrFolder
+        public DelMatchingInfo SelectedCrFolder
         {
             get => _selectedCrFolder;
             set
@@ -179,7 +249,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// <summary>
         /// [SelectFolderInfo]
         /// </summary>
-        public ObservableCollection<DeleteFolderInfo> SelectFolderInfo
+        public ObservableCollection<DelMatchingInfo> SelectFolderInfo
         {
             get => _selectFolderInfo;
             set
@@ -199,7 +269,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// [폴더 선택삭제] 시 => [ActiveFolderInfo = SelectFolderInfo]
         /// [폴더 일괄삭제] 시 => [ActiveFolderInfo = DeleteFolderInfo]
         /// </summary>
-        public ObservableCollection<DeleteFolderInfo> ActiveFolderInfo
+        public ObservableCollection<DelMatchingInfo> ActiveFolderInfo
         {
             get => _activeFolderInfo;
             set
@@ -229,11 +299,17 @@ namespace Bin_Obj_Delete_Project.ViewModels
         // 2. 경로 불러오기
         public ICommand EnterLoadPathCommand { get; set; }
 
-        // 3. 폴더 선택삭제
-        public ICommand DelSelFoldersCommand { get; set; }
+        // 3. 선택 삭제하기
+        public ICommand DelSelMatchesCommand { get; set; }
 
-        // 4. 폴더 일괄삭제
-        public ICommand DelAllFoldersCommand { get; set; }
+        // 4. 일괄 삭제하기
+        public ICommand DelAllMatchesCommand { get; set; }
+
+        // 5. 검색 필터리셋 (FilterResetFN)
+        public ICommand FilterResetFNCommand { get; set; }
+
+        // 6. 검색 필터리셋 (FilterResetFE)
+        public ICommand FilterResetFECommand { get; set; }
 
         #endregion
 
@@ -243,12 +319,27 @@ namespace Bin_Obj_Delete_Project.ViewModels
         {
             LoadingFolderCommand = new RelayCommand(LoadingFolder);
             EnterLoadPathCommand = new RelayCommand(EnterLoadPath);
-            _selectedCrFolder = new DeleteFolderInfo();
-            _selectFolderInfo = new ObservableCollection<DeleteFolderInfo>();
-            _deleteFolderInfo = new ObservableCollection<DeleteFolderInfo>();
-            _activeFolderInfo = new ObservableCollection<DeleteFolderInfo>();
-            DelSelFoldersCommand = new RelayCommand(DelSelFolders);
-            DelAllFoldersCommand = new RelayCommand(DelAllFolders);
+            _selectedCrFolder = new DelMatchingInfo();
+            _selectFolderInfo = new ObservableCollection<DelMatchingInfo>();
+            _deleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
+            _activeFolderInfo = new ObservableCollection<DelMatchingInfo>();
+            uniqueFilePathSet = new HashSet<string>();
+            matchingFldrName = string.Empty;
+            matchingFileName = string.Empty;
+            matchingFldrCreationTime = string.Empty;
+            matchingFileCreationTime = string.Empty;
+            matchingFldrCategory = string.Empty;
+            matchingFileCategory = string.Empty;
+            matchingFldrModifiedTime = string.Empty;
+            matchingFileModifiedTime = string.Empty;
+            matchingFldrSize = string.Empty;
+            matchingFileSize = string.Empty;
+            matchingFldrPath = string.Empty;
+            matchingFilePath = string.Empty;
+            DelSelMatchesCommand = new RelayCommand(DelSelMatches);
+            DelAllMatchesCommand = new RelayCommand(DelAllMatches);
+            FilterResetFNCommand = new RelayCommand(FilterResetFN);
+            FilterResetFECommand = new RelayCommand(FilterResetFE);
         }
 
         #endregion
@@ -281,7 +372,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private void EnterLoadPath()
         {
-            DeleteFolderPath = Path.GetFullPath(FolderPath);
+            DeleteFolderPath = Path.GetFullPath(AbsolutePath);
             EnumerateFolders();
         }
 
@@ -299,7 +390,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 IEnumerable<string> directories = Directory.EnumerateDirectories(DeleteFolderPath, "*", SearchOption.AllDirectories);
                 //.Where(dir => dir.EndsWith("bin") || dir.EndsWith("obj")); // 경로의 마지막 글자가 "bin"이거나 "obj"인 파일만 찾음!
                 DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
-                // 파일 경로가 존재할 때,
+                uniqueFilePathSet.Clear(); // (중복) 해쉬셋 초기화
+
+                // 파일 경로가 존재하면,
                 if (directories != null)
                 {
                     try
@@ -307,37 +400,184 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         foreach (string dir in directories)
                         {
                             DirectoryInfo dirInfo = new DirectoryInfo(dir);
+                            matchingFldrName = dirInfo.Name;
+                            matchingFldrCreationTime = dirInfo.CreationTime.ToString();
+                            matchingFldrCategory = "파일 폴더";
+                            matchingFldrModifiedTime = dirInfo.LastWriteTime.ToString();
+                            matchingFldrSize = dir.Length == 1 ? dir.Length.ToString() + " Byte" : dir.Length.ToString() + " Bytes";
+                            matchingFldrPath = dir;
 
-                            // Filter 01: 폴더 이름으로 검색
-                            if (!string.IsNullOrEmpty(FilterFolderName) && !dirInfo.Name.Equals(FilterFolderName))
+                            // 1. 필터 키워드를 콤마(',')로 구분 후, 배열로 생성 (FilterFolderName)
+                            string[] filterComma1 = string.IsNullOrEmpty(FilterFolderName) ? Array.Empty<string>() : FilterFolderName.Split(',');
+
+                            // Filter 01: 폴더 이름으로 검색(대소문자 구분(X))
+                            // 1) [FilterFolderName]이 null이거나 string.Empty 문자열인 경우
+                            // 2) [FilterFolderName]이 디렉토리 또는 하위 디렉토리 폴더의 이름과 일치하는 경우
+                            //bool folderMatches1 = string.IsNullOrEmpty(FilterFolderName) || dirInfo.Name.Equals(FilterFolderName, StringComparison.OrdinalIgnoreCase);
+                            //if (!folderMatches1)
+                            //{
+                            //    continue;
+                            //}
+
+                            // Filter 01: 폴더 이름으로 검색(대소문자 구분(X))
+                            // 지정한 배열에 정의된 조건과 일치하는지 확인 함!
+                            // 1) [FilterFolderName]이 null이거나 string.Empty 문자열인 경우
+                            // 2) 콤마(',')로 구분된 [FilterFolderName]이 디렉토리 또는 하위 디렉토리 폴더의 이름과 일치하는 경우
+                            bool folderMatches2 = string.IsNullOrEmpty(FilterFolderName) ||
+                                Array.Exists(filterComma1, comma1 => dirInfo.Name.Equals(comma1.Trim(), StringComparison.OrdinalIgnoreCase));
+                            // 1), 2)가 아닐 때,
+                            if (!folderMatches2)
                             {
                                 continue;
                             }
 
-                            // Filter 02: 파일 확장자로 검색
-                            FileInfo[] fileInfo = dirInfo.GetFiles("*", SearchOption.AllDirectories);
+                            // 2. 필터 키워드를 콤마(',')로 구분 후, 배열로 생성 (FilterExtensions)
+                            string[] filterComma2 = string.IsNullOrEmpty(FilterExtensions) ? Array.Empty<string>() : FilterExtensions.Split(',');
+
+                            // Filter 02: 파일 확장자로 검색(대소문자 구분(X))
+                            // 1) [FilterExtensions]이 null이거나 string.Empty 문자열이 아닌 경우
                             if (!string.IsNullOrEmpty(FilterExtensions))
                             {
+                                matchingFileInfoOrNot = false;
+                                FileInfo[] fileInfo = dirInfo.GetFiles("*", SearchOption.AllDirectories);
                                 foreach (FileInfo item in fileInfo)
                                 {
-                                    if (!item.Extension.Equals(FilterExtensions))
+                                    // 이미 처리가 된 파일 경로는 무시 (중복 제거)
+                                    //if (uniqueFilePathSet.Contains(item.FullName))
+                                    //{
+                                    //    continue;
+                                    //}
+
+                                    // 지정한 배열에 정의된 조건과 일치하는지 확인 함!
+                                    // 2) 콤마(',')로 구분된 [FilterExtensions]이 파일의 확장명 부분의 문자열과 일치하는 경우 (확장자 비교)
+                                    foreach (string comma2 in filterComma2)
                                     {
-                                        continue;
+                                        if (item.Extension.Equals(comma2.Trim(), StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            matchingFileInfoOrNot = true;
+                                            matchingFileName = item.Name;
+                                            matchingFileCreationTime = item.CreationTime.ToString();
+                                            switch (item.Extension)
+                                            {
+                                                case ".pdb":
+                                                    matchingFileCategory = "Program Debug Database";
+                                                    break;
+
+                                                case ".sln":
+                                                    matchingFileCategory = "Visual Studio Solution";
+                                                    break;
+
+                                                case ".cs":
+                                                    matchingFileCategory = "C# Source File";
+                                                    break;
+
+                                                case ".csproj":
+                                                    matchingFileCategory = "C# Project File";
+                                                    break;
+
+                                                case ".user":
+                                                    matchingFileCategory = "Per-User Project Options File";
+                                                    break;
+
+                                                case ".config":
+                                                    matchingFileCategory = "VisualStudio.config.11.0";
+                                                    break;
+
+                                                case ".dll":
+                                                    matchingFileCategory = "응용 프로그램 확장";
+                                                    break;
+
+                                                case ".cache":
+                                                    matchingFileCategory = "CACHE 파일";
+                                                    break;
+
+                                                case ".resources":
+                                                    matchingFileCategory = "RESOURCES 파일";
+                                                    break;
+
+                                                case ".baml":
+                                                    matchingFileCategory = "BAML 파일";
+                                                    break;
+
+                                                case ".resx":
+                                                    matchingFileCategory = "Microsoft .NET Managed Resource File";
+                                                    break;
+
+                                                case ".settings":
+                                                    matchingFileCategory = "Settings-Designer File";
+                                                    break;
+
+                                                case ".xaml":
+                                                    matchingFileCategory = "Windows 태그 파일";
+                                                    break;
+
+                                                case ".xml":
+                                                    matchingFileCategory = "xmlfile";
+                                                    break;
+
+                                                case ".nupkg":
+                                                    matchingFileCategory = "NUPKG 파일";
+                                                    break;
+
+                                                case ".gitattributes":
+                                                    matchingFileCategory = "txtfile";
+                                                    break;
+
+                                                case ".gitignore":
+                                                    matchingFileCategory = "txtfile";
+                                                    break;
+
+                                                case ".md":
+                                                    matchingFileCategory = "MD 파일";
+                                                    break;
+
+                                                case ".p7s":
+                                                    matchingFileCategory = "PKCS #7 서명";
+                                                    break;
+
+                                                case ".txt":
+                                                    matchingFileCategory = "텍스트 문서";
+                                                    break;
+
+                                                case ".exe":
+                                                    matchingFileCategory = "응용 프로그램";
+                                                    break;
+
+                                                case ".suo":
+                                                    matchingFileCategory = "Visual Studio Solution User Options";
+                                                    break;
+
+                                                default:
+                                                    matchingFileCategory = "기타 파일";
+                                                    break;
+                                            }
+                                            matchingFileModifiedTime = item.LastWriteTime.ToString();
+                                            matchingFileSize = (item.Length / 1024.0).ToString("F1") + " KB";
+                                            matchingFilePath = item.FullName;
+                                            _ = uniqueFilePathSet.Add(matchingFilePath); // 중복 제거
+                                            break;
+                                        }
+
                                     }
 
                                 }
 
                             }
-
-                            DeleteFolderInfo.Add(new DeleteFolderInfo
+                            // 1) [FilterFolderName] => 해당 폴더 및 정보를 리스트 형태로 전시함.
+                            // 2) [FilterExtensions] => 해당 파일 및 정보를 리스트 형태로 전시함.
+                            if (string.IsNullOrEmpty(FilterExtensions) || matchingFileInfoOrNot)
                             {
-                                DelFolderPath = dir,
-                                DelFolderName = dirInfo.Name,
-                                DelFolderCreationTime = dirInfo.CreationTime.ToString(),
-                                DelFolderModifiedTime = dirInfo.LastWriteTime.ToString(),
-                                DelFolderCategory = "파일 폴더",
-                                DelFolderSize = dir.Length.ToString() + " Byte"
-                            });
+                                DeleteFolderInfo.Add(new DelMatchingInfo
+                                {
+                                    DelMatchingName = matchingFileInfoOrNot ? matchingFileName : matchingFldrName,
+                                    DelMatchingCreationTime = matchingFileInfoOrNot ? matchingFileCreationTime : matchingFldrCreationTime,
+                                    DelMatchingCategory = matchingFileInfoOrNot ? matchingFileCategory : matchingFldrCategory,
+                                    DelMatchingModifiedTime = matchingFileInfoOrNot ? matchingFileModifiedTime : matchingFldrModifiedTime,
+                                    DelMatchingSize = matchingFileInfoOrNot ? matchingFileSize : matchingFldrSize,
+                                    DelMatchingPath = matchingFileInfoOrNot ? matchingFilePath : matchingFldrPath,
+                                });
+
+                            }
 
                         }
 
@@ -350,51 +590,65 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 }
                 else
                 {
-                    _ = MessageBox.Show("불러올 폴더 경로가 없습니다.", "경로 미존재", MessageBoxButton.OK, MessageBoxImage.Error);
+                    _ = MessageBox.Show("불러올 폴더 경로가 없습니다.", "경로 재확인", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
 
             }
-            // DeleteFolderInfo 정보 확인: 디버깅으로 확인 가능
-            foreach (DeleteFolderInfo item in DeleteFolderInfo)
+            // DelMatchingInfo 정보 확인: 디버깅으로 확인 가능
+            foreach (DelMatchingInfo item in DeleteFolderInfo)
             {
-                Console.WriteLine(item.DelFolderPath);
-                Console.WriteLine(item.DelFolderName);
-                Console.WriteLine(item.DelFolderCreationTime);
-                Console.WriteLine(item.DelFolderModifiedTime);
-                Console.WriteLine(item.DelFolderCategory);
-                Console.WriteLine(item.DelFolderSize);
+                Console.WriteLine(item.DelMatchingName);
+                Console.WriteLine(item.DelMatchingCreationTime);
+                Console.WriteLine(item.DelMatchingCategory);
+                Console.WriteLine(item.DelMatchingModifiedTime);
+                Console.WriteLine(item.DelMatchingSize);
+                Console.WriteLine(item.DelMatchingPath);
             }
             ActiveFolderInfo = DeleteFolderInfo; // [ActiveFolderInfo] 컬렉션에 [DeleteFolderInfo] 컬렉션을 할당
         }
 
         /// <summary>
-        /// 3. [폴더 선택삭제] 기능 (버튼)
+        /// 3. [선택 삭제하기] 기능 (버튼)
         /// </summary>
-        private void DelSelFolders()
+        private void DelSelMatches()
         {
-            IsDelBtnEnabledOrNot = false; // [폴더 선택삭제] 버튼 비활성화
+            IsDelBtnEnabledOrNot = false; // [선택 삭제] 버튼 비활성화
             if (!string.IsNullOrEmpty(DeleteFolderPath))
             {
                 if (SelectFolderInfo?.Count > 0)
                 {
-                    // [SelectFolderInfo] 컬렉션 항목들 기반 새로운 List<DeleteFolderInfo> 객체를 생성함.
-                    List<DeleteFolderInfo> selectToDelete = new List<DeleteFolderInfo>(SelectFolderInfo);
-                    foreach (DeleteFolderInfo folder in selectToDelete)
+                    // [SelectFolderInfo] 컬렉션 항목들 기반 새로운 List<DeleteFolderInfo> 객체를 생성!
+                    List<DelMatchingInfo> selectToDelete = new List<DelMatchingInfo>(SelectFolderInfo);
+                    foreach (DelMatchingInfo match in selectToDelete)
                     {
-                        string dir = folder.DelFolderPath;
-                        // [try ~ catch]문 활용 예외 처리!
+                        string dir = match.DelMatchingPath;
+                        // [try ~ catch]문 활용, 예외 처리!
                         try
                         {
+                            // 해당 폴더 경로 존재 시,
                             if (Directory.Exists(dir))
                             {
-                                Directory.Delete(dir, true); // 지정된 디렉터리 및 해당 디렉터리의 하위 디렉터리 및 파일 삭제
-                                _ = ActiveFolderInfo.Remove(folder); // [ActiveFolderInfo] 컬렉션 => selectToDelete 항목 제외
+                                Directory.Delete(dir, true); // 지정한 디렉터리 및 해당 디렉터리의 하위 디렉터리 및 폴더 삭제
+                            }
+                            // 해당 파일 경로 존재 시,
+                            else if (File.Exists(dir))
+                            {
+                                File.Delete(dir); // 지정한 파일 삭제
+                            }
+                            else
+                            {
+                                _ = MessageBox.Show("경로가 존재하지 않습니다.", "경로 미존재", MessageBoxButton.OK, MessageBoxImage.Error);
+                                break;
                             }
                             IsDelBtnEnabledOrNot = true; // [폴더 선택삭제] 버튼 활성화
                         }
                         catch (Exception ex)
                         {
                             Console.WriteLine($"Error Deleting Folder... FolderPath: {dir} : {ex.Message}");
+                        }
+                        finally
+                        {
+                            _ = ActiveFolderInfo.Remove(match); // [ActiveFolderInfo] 컬렉션 => selectToDelete 항목 제외
                         }
 
                     }
@@ -406,24 +660,35 @@ namespace Bin_Obj_Delete_Project.ViewModels
         }
 
         /// <summary>
-        /// 4. [폴더 일괄삭제] 기능 (버튼)
+        /// 4. [일괄 삭제하기] 기능 (버튼)
         /// </summary>
-        private void DelAllFolders()
+        private void DelAllMatches()
         {
-            IsDelBtnEnabledOrNot = false; // [폴더 일괄삭제] 버튼 비활성화
+            IsDelBtnEnabledOrNot = false; // [일괄 삭제] 버튼 비활성화
             if (!string.IsNullOrEmpty(DeleteFolderPath))
             {
                 if (DeleteFolderInfo?.Count > 0)
                 {
-                    foreach (DeleteFolderInfo folder in DeleteFolderInfo)
+                    foreach (DelMatchingInfo match in DeleteFolderInfo)
                     {
-                        string dir = folder.DelFolderPath;
-                        // [try ~ catch]문 활용 예외 처리!
+                        string dir = match.DelMatchingPath;
+                        // [try ~ catch]문 활용, 예외 처리!
                         try
                         {
+                            // 해당 폴더 경로 존재 시,
                             if (Directory.Exists(dir))
                             {
-                                Directory.Delete(dir, true); // 지정된 디렉터리 및 해당 디렉터리의 하위 디렉터리 및 파일 삭제
+                                Directory.Delete(dir, true); // 지정한 디렉터리 및 해당 디렉터리의 하위 디렉터리 및 폴더 삭제
+                            }
+                            // 해당 파일 경로 존재 시,
+                            else if (File.Exists(dir))
+                            {
+                                File.Delete(dir); // 지정한 파일 삭제
+                            }
+                            else
+                            {
+                                _ = MessageBox.Show("경로가 존재하지 않습니다.", "경로 미존재", MessageBoxButton.OK, MessageBoxImage.Error);
+                                break;
                             }
                             IsDelBtnEnabledOrNot = true; // [폴더 일괄삭제] 버튼 활성화
                         }
@@ -438,6 +703,30 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
             }
 
+        }
+
+        /// <summary>
+        /// 5. [검색 필터리셋] 기능 (FilterFolderName)
+        /// </summary>
+        private void FilterResetFN()
+        {
+            if (FilterFolderName?.Length > 0)
+            {
+                FilterFolderName = string.Empty;
+            }
+            EnumerateFolders(); // 필터링 초기화
+        }
+
+        /// <summary>
+        /// 6. [검색 필터리셋] 기능 (FilterExtensions)
+        /// </summary>
+        private void FilterResetFE()
+        {
+            if (FilterExtensions?.Length > 0)
+            {
+                FilterExtensions = string.Empty;
+            }
+            EnumerateFolders(); // 필터링 초기화
         }
 
     }

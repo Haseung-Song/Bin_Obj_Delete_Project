@@ -1,5 +1,4 @@
-﻿using Bin_Obj_Delete_Project.ViewModels;
-using System.Windows;
+﻿using System.Windows;
 
 namespace Bin_Obj_Delete_Project.Views
 {
