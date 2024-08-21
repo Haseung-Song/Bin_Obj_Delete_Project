@@ -561,7 +561,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             }
                             // 1) [FilterFolderName] => 해당 폴더 및 정보를 리스트 형태로 전시함.
                             // 2) [FilterExtensions] => 해당 파일 및 정보를 리스트 형태로 전시함.
-                            if (!string.IsNullOrEmpty(FilterExtensions) && matchingFileInfoOrNot)
+                            if (string.IsNullOrEmpty(FilterExtensions) || matchingFileInfoOrNot)
                             {
                                 DeleteFolderInfo.Add(new DelMatchingInfo
                                 {
