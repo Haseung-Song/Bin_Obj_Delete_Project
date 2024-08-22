@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="MainWindow" 
-        Width="1360"
+        Width="1680"
         Height="800">
     <Grid>
         <Grid.RowDefinitions>
@@ -16,8 +16,8 @@
         <StackPanel Grid.Row="0" Orientation="Horizontal">
             <Border BorderBrush ="DarkGray" 
                     BorderThickness="0" 
-                    Margin="4,20,4,4" 
-                    Width="750" 
+                    Margin="8,20,4,4" 
+                    Width="1065" 
                     Height="35">
                 <TextBox Text="{Binding DeleteFolderPath, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                          TextAlignment="Left" 
@@ -135,7 +135,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Header="경로" Width="800">
+                            <GridViewColumn Header="경로" Width="1030">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding DelMatchingPath, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
