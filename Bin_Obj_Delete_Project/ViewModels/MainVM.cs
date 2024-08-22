@@ -167,6 +167,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 {
                     _deleteFolderPath = value;
                     OnPropertyChanged();
+                    // static 필드에 절대 경로 설정.
                     AbsolutePath = DeleteFolderPath;
                 }
 
@@ -266,8 +267,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
         /// <summary>
         /// [ActiveFolderInfo]
-        /// [폴더 선택삭제] 시 => [ActiveFolderInfo = SelectFolderInfo]
-        /// [폴더 일괄삭제] 시 => [ActiveFolderInfo = DeleteFolderInfo]
+        /// [선택 삭제하기] 시 => [ActiveFolderInfo = SelectFolderInfo]
+        /// [일괄 삭제하기] 시 => [ActiveFolderInfo = DeleteFolderInfo]
         /// </summary>
         public ObservableCollection<DelMatchingInfo> ActiveFolderInfo
         {
@@ -305,10 +306,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
         // 4. 일괄 삭제하기
         public ICommand DelAllMatchesCommand { get; set; }
 
-        // 5. 검색 필터리셋 (FilterResetFN)
+        // 5. 검색 필터리셋 (FilterFolderName)
         public ICommand FilterResetFNCommand { get; set; }
 
-        // 6. 검색 필터리셋 (FilterResetFE)
+        // 6. 검색 필터리셋 (FilterExtensions)
         public ICommand FilterResetFECommand { get; set; }
 
         #endregion
@@ -382,8 +383,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
         protected void EnumerateFolders()
         {
             IsDelBtnEnabledOrNot = true; // [폴더 선택삭제], [폴더 일괄삭제] 버튼 활성화
-            // [dirInfo] = 상위 폴더 정보
-            // [dirSubInfo] = 하위 폴더 리스트 정보
             if (!string.IsNullOrEmpty(DeleteFolderPath))
             {
                 // 모든 하위 디렉토리를 검색하되, 접근이 거부된 디렉토리는 제외함!
@@ -414,6 +413,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             // 1) [FilterFolderName]이 null이거나 string.Empty 문자열인 경우
                             // 2) [FilterFolderName]이 디렉토리 또는 하위 디렉토리 폴더의 이름과 일치하는 경우
                             //bool folderMatches1 = string.IsNullOrEmpty(FilterFolderName) || dirInfo.Name.Equals(FilterFolderName, StringComparison.OrdinalIgnoreCase);
+
                             //if (!folderMatches1)
                             //{
                             //    continue;
@@ -425,6 +425,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             // 2) 콤마(',')로 구분된 [FilterFolderName]이 디렉토리 또는 하위 디렉토리 폴더의 이름과 일치하는 경우
                             bool folderMatches2 = string.IsNullOrEmpty(FilterFolderName) ||
                                 Array.Exists(filterComma1, comma1 => dirInfo.Name.Equals(comma1.Trim(), StringComparison.OrdinalIgnoreCase));
+
                             // 1), 2)가 아닐 때,
                             if (!folderMatches2)
                             {
@@ -559,8 +560,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
                                 }
 
                             }
-                            // 1) [FilterFolderName] => 해당 폴더 및 정보를 리스트 형태로 전시함.
-                            // 2) [FilterExtensions] => 해당 파일 및 정보를 리스트 형태로 전시함.
+                            // 1) [FilterFolderName] => 해당 폴더 및 정보를 리스트의 형태로 전시
+                            // 2) [FilterExtensions] => 해당 파일 및 정보를 리스트의 형태로 전시
+                            // 즉, 필터링 (X) => 필터링 없이 전시, 필터링 (O) => 필터링해서 전시
                             if (string.IsNullOrEmpty(FilterExtensions) || matchingFileInfoOrNot)
                             {
                                 DeleteFolderInfo.Add(new DelMatchingInfo
@@ -608,7 +610,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private void DelSelMatches()
         {
-            IsDelBtnEnabledOrNot = false; // [선택 삭제] 버튼 비활성화
+            IsDelBtnEnabledOrNot = false; // [선택 삭제하기] 버튼 비활성화
             if (!string.IsNullOrEmpty(DeleteFolderPath))
             {
                 if (SelectFolderInfo?.Count > 0)
@@ -618,9 +620,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     foreach (DelMatchingInfo match in selectToDelete)
                     {
                         string dir = match.DelMatchingPath;
+
                         // [try ~ catch]문 활용, 예외 처리!
                         try
                         {
+                            IsDelBtnEnabledOrNot = true; // [선택 삭제하기] 버튼 활성화
                             // 해당 폴더 경로 존재 시,
                             if (Directory.Exists(dir))
                             {
@@ -636,7 +640,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                                 _ = MessageBox.Show("경로가 존재하지 않습니다.", "경로 미존재", MessageBoxButton.OK, MessageBoxImage.Error);
                                 break;
                             }
-                            IsDelBtnEnabledOrNot = true; // [폴더 선택삭제] 버튼 활성화
+
                         }
                         catch (Exception ex)
                         {
@@ -660,7 +664,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private void DelAllMatches()
         {
-            IsDelBtnEnabledOrNot = false; // [일괄 삭제] 버튼 비활성화
+            IsDelBtnEnabledOrNot = false; // [일괄 삭제하기] 버튼 비활성화
             if (!string.IsNullOrEmpty(DeleteFolderPath))
             {
                 if (DeleteFolderInfo?.Count > 0)
@@ -668,9 +672,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     foreach (DelMatchingInfo match in DeleteFolderInfo)
                     {
                         string dir = match.DelMatchingPath;
+
                         // [try ~ catch]문 활용, 예외 처리!
                         try
                         {
+                            IsDelBtnEnabledOrNot = true; // [일괄 삭제하기] 버튼 활성화
                             // 해당 폴더 경로 존재 시,
                             if (Directory.Exists(dir))
                             {
@@ -686,15 +692,19 @@ namespace Bin_Obj_Delete_Project.ViewModels
                                 _ = MessageBox.Show("경로가 존재하지 않습니다.", "경로 미존재", MessageBoxButton.OK, MessageBoxImage.Error);
                                 break;
                             }
-                            IsDelBtnEnabledOrNot = true; // [폴더 일괄삭제] 버튼 활성화
+
                         }
                         catch (Exception ex)
                         {
                             Console.WriteLine($"Error Deleting Folder... FolderPath: {dir} : {ex.Message}");
                         }
+                        finally
+                        {
+                            DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
+                        }
 
                     }
-                    DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
+
                 }
 
             }
