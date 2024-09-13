@@ -456,100 +456,32 @@ namespace Bin_Obj_Delete_Project.ViewModels
                                         matchingFileInfoOrNot = true;
                                         matchingFileName = item.Name;
                                         matchingFileCreationTime = item.CreationTime.ToString();
-                                        switch (item.Extension)
+                                        Dictionary<string, string> extensionCategoryMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                                         {
-                                            case ".pdb":
-                                                matchingFileCategory = "Program Debug Database";
-                                                break;
-
-                                            case ".sln":
-                                                matchingFileCategory = "Visual Studio Solution";
-                                                break;
-
-                                            case ".cs":
-                                                matchingFileCategory = "C# Source File";
-                                                break;
-
-                                            case ".csproj":
-                                                matchingFileCategory = "C# Project File";
-                                                break;
-
-                                            case ".user":
-                                                matchingFileCategory = "Per-User Project Options File";
-                                                break;
-
-                                            case ".config":
-                                                matchingFileCategory = "VisualStudio.config.11.0";
-                                                break;
-
-                                            case ".dll":
-                                                matchingFileCategory = "응용 프로그램 확장";
-                                                break;
-
-                                            case ".cache":
-                                                matchingFileCategory = "CACHE 파일";
-                                                break;
-
-                                            case ".resources":
-                                                matchingFileCategory = "RESOURCES 파일";
-                                                break;
-
-                                            case ".baml":
-                                                matchingFileCategory = "BAML 파일";
-                                                break;
-
-                                            case ".resx":
-                                                matchingFileCategory = "Microsoft .NET Managed Resource File";
-                                                break;
-
-                                            case ".settings":
-                                                matchingFileCategory = "Settings-Designer File";
-                                                break;
-
-                                            case ".xaml":
-                                                matchingFileCategory = "Windows 태그 파일";
-                                                break;
-
-                                            case ".xml":
-                                                matchingFileCategory = "xmlfile";
-                                                break;
-
-                                            case ".nupkg":
-                                                matchingFileCategory = "NUPKG 파일";
-                                                break;
-
-                                            case ".gitattributes":
-                                                matchingFileCategory = "txtfile";
-                                                break;
-
-                                            case ".gitignore":
-                                                matchingFileCategory = "txtfile";
-                                                break;
-
-                                            case ".md":
-                                                matchingFileCategory = "MD 파일";
-                                                break;
-
-                                            case ".p7s":
-                                                matchingFileCategory = "PKCS #7 서명";
-                                                break;
-
-                                            case ".txt":
-                                                matchingFileCategory = "텍스트 문서";
-                                                break;
-
-                                            case ".exe":
-                                                matchingFileCategory = "응용 프로그램";
-                                                break;
-
-                                            case ".suo":
-                                                matchingFileCategory = "Visual Studio Solution User Options";
-                                                break;
-
-                                            default:
-                                                matchingFileCategory = "기타 파일";
-                                                break;
-                                        }
+                                            { ".pdb", "Program Debug Database" },
+                                            { ".sln", "Visual Studio Solution" },
+                                            { ".cs", "C# Source File" },
+                                            { ".csproj", "C# Project File" },
+                                            { ".user", "Per-User Project Options File" },
+                                            { ".config", "VisualStudio.config.11.0" },
+                                            { ".dll", "응용 프로그램 확장" },
+                                            { ".cache", "CACHE 파일" },
+                                            { ".resources", "RESOURCES 파일" },
+                                            { ".baml", "BAML 파일" },
+                                            { ".resx", "Microsoft .NET Managed Resource File" },
+                                            { ".settings", "Settings-Designer File" },
+                                            { ".xaml", "Windows 태그 파일" },
+                                            { ".xml", "xmlfile" },
+                                            { ".nupkg", "NUPKG 파일" },
+                                            { ".gitattributes", "txtfile" },
+                                            { ".gitignore", "txtfile" },
+                                            { ".md", "MD 파일" },
+                                            { ".p7s", "PKCS #7 서명" },
+                                            { ".txt", "텍스트 문서" },
+                                            { ".exe", "응용 프로그램" },
+                                            { ".suo", "Visual Studio Solution User Options" }
+                                        };
+                                        matchingFileCategory = extensionCategoryMap.TryGetValue(item.Extension, out string category) ? category : "기타 파일";
                                         matchingFileModifiedTime = item.LastWriteTime.ToString();
                                         matchingFileSize = (item.Length / 1024.0).ToString("F1") + " KB";
                                         matchingFilePath = item.FullName;
@@ -617,6 +549,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 {
                     // [SelectFolderInfo] 컬렉션 항목들 기반 새로운 List<DeleteFolderInfo> 객체를 생성!
                     List<DelMatchingInfo> selectToDelete = new List<DelMatchingInfo>(SelectFolderInfo);
+
                     foreach (DelMatchingInfo match in selectToDelete)
                     {
                         string dir = match.DelMatchingPath;
@@ -625,6 +558,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         try
                         {
                             IsDelBtnEnabledOrNot = true; // [선택 삭제하기] 버튼 활성화
+
                             // 해당 폴더 경로 존재 시,
                             if (Directory.Exists(dir))
                             {
@@ -677,6 +611,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         try
                         {
                             IsDelBtnEnabledOrNot = true; // [일괄 삭제하기] 버튼 활성화
+
                             // 해당 폴더 경로 존재 시,
                             if (Directory.Exists(dir))
                             {
