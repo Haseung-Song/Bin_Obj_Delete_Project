@@ -662,9 +662,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
             if (!string.IsNullOrWhiteSpace(FilterFolderName))
             {
                 FilterFolderName = string.Empty;
-                EnumerateFolders(); // [Filter 01] 초기화
             }
-
+            // Filter 01 초기화
+            EnumerateFolders();
         }
 
         /// <summary>
@@ -675,9 +675,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
             if (!string.IsNullOrWhiteSpace(FilterExtensions))
             {
                 FilterExtensions = string.Empty;
-                EnumerateFolders(); // [Filter 02] 초기화
             }
-
+            // Filter 02 초기화
+            EnumerateFolders();
         }
 
     }
