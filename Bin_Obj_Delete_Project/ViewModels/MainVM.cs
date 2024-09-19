@@ -650,6 +650,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     }
 
                 }
+                // 일괄 삭제 후, UI 클리어
                 DeleteFolderInfo?.Clear();
             }
 
