@@ -1,5 +1,6 @@
 ﻿using Bin_Obj_Delete_Project.Common;
 using Bin_Obj_Delete_Project.Models;
+using Microsoft.VisualBasic.FileIO;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.Collections.Generic;
@@ -386,7 +387,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             if (!string.IsNullOrEmpty(DeleteFolderPath))
             {
                 // 모든 하위 디렉토리를 검색하되, 접근이 거부된 디렉토리는 제외함!
-                IEnumerable<string> directories = Directory.EnumerateDirectories(DeleteFolderPath, "*", SearchOption.AllDirectories);
+                IEnumerable<string> directories = Directory.EnumerateDirectories(DeleteFolderPath, "*", System.IO.SearchOption.AllDirectories);
                 //.Where(dir => dir.EndsWith("bin") || dir.EndsWith("obj")); // 경로의 마지막 글자가 "bin"이거나 "obj"인 파일만 찾음!
                 DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
                 uniqueFilePathSet.Clear(); // (중복) 해쉬셋 초기화
@@ -440,7 +441,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             if (!string.IsNullOrEmpty(FilterExtensions))
                             {
                                 matchingFileInfoOrNot = false;
-                                FileInfo[] fileInfo = dirInfo.GetFiles("*", SearchOption.AllDirectories);
+                                FileInfo[] fileInfo = dirInfo.GetFiles("*", System.IO.SearchOption.AllDirectories);
                                 foreach (FileInfo item in fileInfo)
                                 {
                                     // 이미 처리가 된 파일 경로는 무시 (중복 제거)
@@ -559,15 +560,21 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         {
                             IsDelBtnEnabledOrNot = true; // [선택 삭제하기] 버튼 활성화
 
-                            // 해당 폴더 경로 존재 시,
-                            if (Directory.Exists(dir))
+                            // 해당 디렉터리의 경로가 존재할 때,
+                            if (FileSystem.DirectoryExists(dir))
                             {
-                                Directory.Delete(dir, true); // 지정한 디렉터리 및 해당 디렉터리의 하위 디렉터리 및 폴더 삭제
+                                // 1) 지정한 디렉터리 및 해당 디렉터리의 하위 디렉터리 및 폴더 휴지통에서 삭제
+                                FileSystem.DeleteDirectory(dir, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                                // 2) 지정한 디렉터리 및 해당 디렉터리의 하위 디렉터리 및 폴더 영구적으로 삭제
+                                //FileSystem.DeleteDirectory(dir, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
                             }
                             // 해당 파일 경로 존재 시,
-                            else if (File.Exists(dir))
+                            else if (FileSystem.FileExists(dir))
                             {
-                                File.Delete(dir); // 지정한 파일 삭제
+                                // 1) 지정한 파일 휴지통에서 삭제
+                                FileSystem.DeleteFile(dir, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                                // 2) 지정한 파일 영구적으로 삭제
+                                //FileSystem.DeleteFile(dir, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
                             }
                             else
                             {
@@ -612,15 +619,21 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         {
                             IsDelBtnEnabledOrNot = true; // [일괄 삭제하기] 버튼 활성화
 
-                            // 해당 폴더 경로 존재 시,
-                            if (Directory.Exists(dir))
+                            // 해당 디렉터리의 경로가 존재할 때,
+                            if (FileSystem.DirectoryExists(dir))
                             {
-                                Directory.Delete(dir, true); // 지정한 디렉터리 및 해당 디렉터리의 하위 디렉터리 및 폴더 삭제
+                                // 1) 지정한 디렉터리 및 해당 디렉터리의 하위 디렉터리 및 폴더 휴지통에서 삭제
+                                FileSystem.DeleteDirectory(dir, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                                // 2) 지정한 디렉터리 및 해당 디렉터리의 하위 디렉터리 및 폴더 영구적으로 삭제
+                                //FileSystem.DeleteDirectory(dir, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
                             }
-                            // 해당 파일 경로 존재 시,
-                            else if (File.Exists(dir))
+                            // 해당 지정파일의 경로가 존재할 때, 
+                            else if (FileSystem.FileExists(dir))
                             {
-                                File.Delete(dir); // 지정한 파일 삭제
+                                // 1) 지정한 파일 휴지통에서 삭제
+                                FileSystem.DeleteFile(dir, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                                // 2) 지정한 파일 영구적으로 삭제
+                                //FileSystem.DeleteFile(dir, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
                             }
                             else
                             {
@@ -633,15 +646,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         {
                             Console.WriteLine($"Error Deleting Folder... FolderPath: {dir} : {ex.Message}");
                         }
-                        finally
-                        {
-                            DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
-                        }
 
                     }
 
                 }
-
+                DeleteFolderInfo?.Clear();
             }
 
         }
