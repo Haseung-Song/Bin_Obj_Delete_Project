@@ -372,7 +372,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// <summary>
         /// 2. [경로 불러오기] 기능 (Enter 키)
         /// </summary>
-        private void EnterLoadPath()
+        public void EnterLoadPath()
         {
             DeleteFolderPath = Path.GetFullPath(AbsolutePath);
             EnumerateFolders();
@@ -559,7 +559,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         try
                         {
                             IsDelBtnEnabledOrNot = true; // [선택 삭제하기] 버튼 활성화
-
                             // 해당 디렉터리의 경로가 존재할 때,
                             if (FileSystem.DirectoryExists(dir))
                             {
@@ -618,7 +617,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         try
                         {
                             IsDelBtnEnabledOrNot = true; // [일괄 삭제하기] 버튼 활성화
-
                             // 해당 디렉터리의 경로가 존재할 때,
                             if (FileSystem.DirectoryExists(dir))
                             {
@@ -659,25 +657,27 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// <summary>
         /// 5. [검색 필터리셋] 기능 (FilterFolderName)
         /// </summary>
-        private void FilterResetFN()
+        public void FilterResetFN()
         {
-            if (FilterFolderName?.Length > 0)
+            if (!string.IsNullOrWhiteSpace(FilterFolderName))
             {
                 FilterFolderName = string.Empty;
+                EnumerateFolders(); // [Filter 01] 초기화
             }
-            EnumerateFolders(); // 필터링 초기화
+
         }
 
         /// <summary>
         /// 6. [검색 필터리셋] 기능 (FilterExtensions)
         /// </summary>
-        private void FilterResetFE()
+        public void FilterResetFE()
         {
-            if (FilterExtensions?.Length > 0)
+            if (!string.IsNullOrWhiteSpace(FilterExtensions))
             {
                 FilterExtensions = string.Empty;
+                EnumerateFolders(); // [Filter 02] 초기화
             }
-            EnumerateFolders(); // 필터링 초기화
+
         }
 
     }
