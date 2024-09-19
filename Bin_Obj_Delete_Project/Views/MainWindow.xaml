@@ -80,7 +80,11 @@
                           x:Name="listView">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Header="이름" Width="320">
+                            <GridViewColumn Width="320">
+                                <GridViewColumn.Header>
+                                    <!-- [이름] 열의 헤더에 클릭 이벤트를 연결 -->
+                                    <GridViewColumnHeader Content="이름" Click="GridViewColumnName_Click"/>
+                                </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding DelMatchingName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
