@@ -102,7 +102,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Width="Auto">
+                            <GridViewColumn Width="160">
                                 <GridViewColumn.Header>
                                     <GridViewColumnHeader Content="생성한 날짜"
                                                           Command="{Binding OrderByCrTimeCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
@@ -110,7 +110,7 @@
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding DelMatchingCreationTime, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                   Margin="8,0"
+                                                   Margin="4,0"
                                                    TextAlignment="Center"
                                                    Foreground="DarkRed"
                                                    Cursor="Hand"/>
@@ -134,7 +134,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Width="Auto">
+                            <GridViewColumn Width="160">
                                 <GridViewColumn.Header>
                                     <GridViewColumnHeader Content="수정한 날짜"
                                                           Command="{Binding OrderByMdTimeCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
@@ -142,7 +142,7 @@
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding DelMatchingModifiedTime, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                   Margin="8,0"
+                                                   Margin="4,0"
                                                    Foreground="DarkRed"
                                                    Cursor="Hand"/>
                                     </DataTemplate>
@@ -165,7 +165,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Width="1030">
+                            <GridViewColumn Width="950">
                                 <GridViewColumn.Header>
                                     <GridViewColumnHeader Content="경로"
                                                           Command="{Binding GoOrderByPathCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
