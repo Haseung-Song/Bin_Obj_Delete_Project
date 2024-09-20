@@ -9,7 +9,7 @@
         Width="1680"
         Height="800">
     <Window.Resources>
-        <converter:FormatConverter x:Key="FileSizeConverter"/>
+        <converter:FormatConverter x:Key="FormatConverter"/>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -133,6 +133,7 @@
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
+
                             <GridViewColumn Width="Auto">
                                 <GridViewColumn.Header>
                                     <GridViewColumnHeader Content="수정한 날짜"
@@ -155,7 +156,7 @@
                                 </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding DelMatchingSize, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, Converter={StaticResource FileSizeConverter}}"
+                                        <TextBlock Text="{Binding DelMatchingOfSize, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FormatConverter}, Mode=TwoWay}"
                                                    Margin="30,0"
                                                    TextAlignment="Center"
                                                    Foreground="Black"
