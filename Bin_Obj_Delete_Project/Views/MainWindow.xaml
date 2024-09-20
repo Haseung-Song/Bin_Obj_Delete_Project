@@ -3,10 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:converter="clr-namespace:Bin_Obj_Delete_Project.Converter"
         mc:Ignorable="d"
         Title="MainWindow" 
         Width="1680"
         Height="800">
+    <Window.Resources>
+        <converter:FormatConverter x:Key="FileSizeConverter"/>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -40,6 +44,7 @@
 
             <Button Content="검색 필터"
                     Click="OpenFilterWindow"
+                    IsEnabled="{Binding IsDelBtnEnabledOrNot}"
                     Margin="10,15,0,0" 
                     Height="30" 
                     Width="135" 
@@ -82,8 +87,8 @@
                         <GridView>
                             <GridViewColumn Width="320">
                                 <GridViewColumn.Header>
-                                    <!-- [이름] 열의 헤더에 클릭 이벤트를 연결 -->
-                                    <GridViewColumnHeader Content="이름" Click="GridViewColumnName_Click"/>
+                                    <GridViewColumnHeader Content="이름"
+                                                          Command="{Binding GoOrderByNameCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
                                 </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
@@ -97,7 +102,11 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Header="생성한 날짜" Width="Auto">
+                            <GridViewColumn Width="Auto">
+                                <GridViewColumn.Header>
+                                    <GridViewColumnHeader Content="생성한 날짜"
+                                                          Command="{Binding OrderByCrTimeCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding DelMatchingCreationTime, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
@@ -109,7 +118,11 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Header="유형" Width="Auto">
+                            <GridViewColumn Width="Auto">
+                                <GridViewColumn.Header>
+                                    <GridViewColumnHeader Content="유형"
+                                                          Command="{Binding GoOrderByTypeCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding DelMatchingCategory, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
@@ -120,7 +133,11 @@
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
-                            <GridViewColumn Header="수정한 날짜" Width="Auto">
+                            <GridViewColumn Width="Auto">
+                                <GridViewColumn.Header>
+                                    <GridViewColumnHeader Content="수정한 날짜"
+                                                          Command="{Binding OrderByMdTimeCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding DelMatchingModifiedTime, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
@@ -131,10 +148,14 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Header="크기" Width="120">
+                            <GridViewColumn Width="120">
+                                <GridViewColumn.Header>
+                                    <GridViewColumnHeader Content="크기"
+                                                          Command="{Binding GoOrderBySizeCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding DelMatchingSize, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                        <TextBlock Text="{Binding DelMatchingSize, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, Converter={StaticResource FileSizeConverter}}"
                                                    Margin="30,0"
                                                    TextAlignment="Center"
                                                    Foreground="Black"
@@ -143,7 +164,11 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Header="경로" Width="1030">
+                            <GridViewColumn Width="1030">
+                                <GridViewColumn.Header>
+                                    <GridViewColumnHeader Content="경로"
+                                                          Command="{Binding GoOrderByPathCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding DelMatchingPath, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"

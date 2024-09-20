@@ -7,9 +7,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
+using SearchOption = System.IO.SearchOption;
 
 namespace Bin_Obj_Delete_Project.ViewModels
 {
@@ -41,6 +43,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// [matchingFileInfoOrNot]
         /// </summary>
         private bool matchingFileInfoOrNot;
+
+        /// <summary>
+        /// [ascendingOrDescending]
+        /// </summary>
+        private bool orderByAscendingOrNot;
 
         /// <summary>
         /// [matchingFldrName]
@@ -85,12 +92,12 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// <summary>
         /// [matchingFldrSize]
         /// </summary>
-        private string matchingFldrSize;
+        private long matchingFldrSize;
 
         /// <summary>
         /// [matchingFileSize]
         /// </summary>
-        private string matchingFileSize;
+        private long matchingFileSize;
 
         /// <summary>
         /// [matchingFldrPath]
@@ -111,6 +118,36 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// [uniqueFilePathSet]
         /// </summary>
         private readonly HashSet<string> uniqueFilePathSet;
+
+        /// <summary>
+        /// [lstOrderByName]
+        /// </summary>
+        private List<DelMatchingInfo> lstOrderByName;
+
+        /// <summary>
+        /// [lstOrderByCrTime]
+        /// </summary>
+        private List<DelMatchingInfo> lstOrderByCrTime;
+
+        /// <summary>
+        /// [lstOrderByType]
+        /// </summary>
+        private List<DelMatchingInfo> lstOrderByType;
+
+        /// <summary>
+        /// [lstOrderByMdTime]
+        /// </summary>
+        private List<DelMatchingInfo> lstOrderByMdTime;
+
+        /// <summary>
+        /// [lstOrderBySize]
+        /// </summary>
+        private List<DelMatchingInfo> lstOrderBySize;
+
+        /// <summary>
+        /// [lstOrderByPath]
+        /// </summary>
+        private List<DelMatchingInfo> lstOrderByPath;
 
         /// <summary>
         /// [_selectedCrFolder]
@@ -307,11 +344,29 @@ namespace Bin_Obj_Delete_Project.ViewModels
         // 4. 일괄 삭제하기
         public ICommand DelAllMatchesCommand { get; set; }
 
-        // 5. 검색 필터리셋 (FilterFolderName)
+        // 5-1. 검색 필터리셋 (FilterFolderName)
         public ICommand FilterResetFNCommand { get; set; }
 
-        // 6. 검색 필터리셋 (FilterExtensions)
+        // 5-2. 검색 필터리셋 (FilterExtensions)
         public ICommand FilterResetFECommand { get; set; }
+
+        // 6-1. 정렬 (이름 순)
+        public ICommand GoOrderByNameCommand { get; set; }
+
+        // 6-2. 정렬 (생성한 날짜 순)
+        public ICommand OrderByCrTimeCommand { get; set; }
+
+        // 6-3. 정렬 (유형 순)
+        public ICommand GoOrderByTypeCommand { get; set; }
+
+        // 6-4. 정렬 (수정한 날짜 순)
+        public ICommand OrderByMdTimeCommand { get; set; }
+
+        // 6-5. 정렬 (크기 순)
+        public ICommand GoOrderBySizeCommand { get; set; }
+
+        // 6-6. 정렬 (경로 순)
+        public ICommand GoOrderByPathCommand { get; set; }
 
         #endregion
 
@@ -326,6 +381,14 @@ namespace Bin_Obj_Delete_Project.ViewModels
             _deleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
             _activeFolderInfo = new ObservableCollection<DelMatchingInfo>();
             uniqueFilePathSet = new HashSet<string>();
+            lstOrderByName = new List<DelMatchingInfo>();
+            lstOrderByCrTime = new List<DelMatchingInfo>();
+            lstOrderByType = new List<DelMatchingInfo>();
+            lstOrderByMdTime = new List<DelMatchingInfo>();
+            lstOrderBySize = new List<DelMatchingInfo>();
+            lstOrderByPath = new List<DelMatchingInfo>();
+            IsDelBtnEnabledOrNot = false;
+            orderByAscendingOrNot = true;
             matchingFldrName = string.Empty;
             matchingFileName = string.Empty;
             matchingFldrCreationTime = string.Empty;
@@ -334,14 +397,20 @@ namespace Bin_Obj_Delete_Project.ViewModels
             matchingFileCategory = string.Empty;
             matchingFldrModifiedTime = string.Empty;
             matchingFileModifiedTime = string.Empty;
-            matchingFldrSize = string.Empty;
-            matchingFileSize = string.Empty;
+            matchingFldrSize = 0;
+            matchingFileSize = 0;
             matchingFldrPath = string.Empty;
             matchingFilePath = string.Empty;
             DelSelMatchesCommand = new RelayCommand(DelSelMatches);
             DelAllMatchesCommand = new RelayCommand(DelAllMatches);
             FilterResetFNCommand = new RelayCommand(FilterResetFN);
             FilterResetFECommand = new RelayCommand(FilterResetFE);
+            GoOrderByNameCommand = new RelayCommand(GoOrderByName);
+            OrderByCrTimeCommand = new RelayCommand(OrderByCrTime);
+            GoOrderByTypeCommand = new RelayCommand(GoOrderByType);
+            OrderByMdTimeCommand = new RelayCommand(OrderByMdTime);
+            GoOrderBySizeCommand = new RelayCommand(GoOrderBySize);
+            GoOrderByPathCommand = new RelayCommand(GoOrderByPath);
         }
 
         #endregion
@@ -387,10 +456,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
             if (!string.IsNullOrEmpty(DeleteFolderPath))
             {
                 // 모든 하위 디렉토리를 검색하되, 접근이 거부된 디렉토리는 제외함!
-                IEnumerable<string> directories = Directory.EnumerateDirectories(DeleteFolderPath, "*", System.IO.SearchOption.AllDirectories);
+                IEnumerable<string> directories = Directory.EnumerateDirectories(DeleteFolderPath, "*", SearchOption.AllDirectories);
                 //.Where(dir => dir.EndsWith("bin") || dir.EndsWith("obj")); // 경로의 마지막 글자가 "bin"이거나 "obj"인 파일만 찾음!
                 DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
-                uniqueFilePathSet.Clear(); // (중복) 해쉬셋 초기화
+                uniqueFilePathSet.Clear(); // (중복) 해시셋 초기화
 
                 // 파일 경로가 존재하면,
                 if (directories != null)
@@ -404,7 +473,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             matchingFldrCreationTime = dirInfo.CreationTime.ToString();
                             matchingFldrCategory = "파일 폴더";
                             matchingFldrModifiedTime = dirInfo.LastWriteTime.ToString();
-                            matchingFldrSize = dir.Length == 1 ? dir.Length.ToString() + " Byte" : dir.Length.ToString() + " Bytes";
+                            matchingFldrSize = GetDirectorySize(dir);
                             matchingFldrPath = dir;
 
                             // 1. 필터 키워드를 콤마(',')로 구분 후, 배열로 생성 (FilterFolderName)
@@ -441,22 +510,22 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             if (!string.IsNullOrEmpty(FilterExtensions))
                             {
                                 matchingFileInfoOrNot = false;
-                                FileInfo[] fileInfo = dirInfo.GetFiles("*", System.IO.SearchOption.AllDirectories);
-                                foreach (FileInfo item in fileInfo)
+                                FileInfo[] arrayInfo = dirInfo.GetFiles("*", SearchOption.AllDirectories);
+                                foreach (FileInfo files in arrayInfo)
                                 {
-                                    // 이미 처리가 된 파일 경로는 무시 (중복 제거)
-                                    if (uniqueFilePathSet.Contains(item.FullName))
+                                    // 이미 처리가 된 파일 경로는 무시! (중복 제거)
+                                    if (uniqueFilePathSet.Contains(files.FullName))
                                     {
                                         continue;
                                     }
 
                                     // 지정한 배열에 정의된 조건과 일치하는지 확인 함!
                                     // 2) 콤마(',')로 구분된 [FilterExtensions]이 파일의 확장명 부분의 문자열과 일치하는 경우 (확장자 비교)
-                                    if (Array.Exists(filterComma2, comma2 => item.Extension.Equals(comma2.Trim(), StringComparison.OrdinalIgnoreCase)))
+                                    if (Array.Exists(filterComma2, comma2 => files.Extension.Equals(comma2.Trim(), StringComparison.OrdinalIgnoreCase)))
                                     {
                                         matchingFileInfoOrNot = true;
-                                        matchingFileName = item.Name;
-                                        matchingFileCreationTime = item.CreationTime.ToString();
+                                        matchingFileName = files.Name;
+                                        matchingFileCreationTime = files.CreationTime.ToString();
                                         Dictionary<string, string> extensionCategoryMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                                         {
                                             { ".pdb", "Program Debug Database" },
@@ -482,10 +551,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
                                             { ".exe", "응용 프로그램" },
                                             { ".suo", "Visual Studio Solution User Options" }
                                         };
-                                        matchingFileCategory = extensionCategoryMap.TryGetValue(item.Extension, out string category) ? category : "기타 파일";
-                                        matchingFileModifiedTime = item.LastWriteTime.ToString();
-                                        matchingFileSize = (item.Length / 1024.0).ToString("F1") + " KB";
-                                        matchingFilePath = item.FullName;
+                                        matchingFileCategory = extensionCategoryMap.TryGetValue(files.Extension, out string category) ? category : "기타 파일";
+                                        matchingFileModifiedTime = files.LastWriteTime.ToString();
+                                        matchingFileSize = files.Length;
+                                        matchingFilePath = files.FullName;
                                         _ = uniqueFilePathSet.Add(matchingFilePath); // 중복 제거
                                         break;
                                     }
@@ -504,7 +573,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                                     DelMatchingCreationTime = matchingFileInfoOrNot ? matchingFileCreationTime : matchingFldrCreationTime,
                                     DelMatchingCategory = matchingFileInfoOrNot ? matchingFileCategory : matchingFldrCategory,
                                     DelMatchingModifiedTime = matchingFileInfoOrNot ? matchingFileModifiedTime : matchingFldrModifiedTime,
-                                    DelMatchingSize = matchingFileInfoOrNot ? matchingFileSize : matchingFldrSize,
+                                    DelMatchingOfSize = matchingFileInfoOrNot ? matchingFileSize : matchingFldrSize,
                                     DelMatchingPath = matchingFileInfoOrNot ? matchingFilePath : matchingFldrPath,
                                 });
 
@@ -532,10 +601,32 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 Console.WriteLine(item.DelMatchingCreationTime);
                 Console.WriteLine(item.DelMatchingCategory);
                 Console.WriteLine(item.DelMatchingModifiedTime);
-                Console.WriteLine(item.DelMatchingSize);
+                Console.WriteLine(item.DelMatchingOfSize);
                 Console.WriteLine(item.DelMatchingPath);
             }
             ActiveFolderInfo = DeleteFolderInfo; // [ActiveFolderInfo] 컬렉션에 [DeleteFolderInfo] 컬렉션을 할당
+        }
+
+        /// <summary>
+        /// [하위 디렉토리] 파일의 총량 계산 함수
+        /// </summary>
+        /// <param name="directory"></param>
+        /// <returns></returns>
+        private static long GetDirectorySize(string dir)
+        {
+            DirectoryInfo dirInfo = new DirectoryInfo(dir); // DirectoryInfo 객체 생성
+
+            long sizeofDir = 0;
+
+            // [현재 디렉토리] 및 [모든 하위 디렉토리]를 포함한 파일 목록 배열을 반환!
+            FileInfo[] arrayInfo = dirInfo.GetFiles("*", SearchOption.AllDirectories);
+
+            // 파일 목록을 돌며 파일의 총량 계산!
+            foreach (FileInfo files in arrayInfo)
+            {
+                sizeofDir += files.Length;
+            };
+            return sizeofDir;
         }
 
         /// <summary>
@@ -543,28 +634,24 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private void DelSelMatches()
         {
-            IsDelBtnEnabledOrNot = false; // [선택 삭제하기] 버튼 비활성화
             if (!string.IsNullOrEmpty(DeleteFolderPath))
             {
                 if (SelectFolderInfo?.Count > 0)
                 {
                     // [SelectFolderInfo] 컬렉션 항목들 기반 새로운 List<DeleteFolderInfo> 객체를 생성!
                     List<DelMatchingInfo> selectToDelete = new List<DelMatchingInfo>(SelectFolderInfo);
-
                     foreach (DelMatchingInfo match in selectToDelete)
                     {
                         string dir = match.DelMatchingPath;
-
                         // [try ~ catch]문 활용, 예외 처리!
                         try
                         {
-                            IsDelBtnEnabledOrNot = true; // [선택 삭제하기] 버튼 활성화
-                            // 해당 디렉터리의 경로가 존재할 때,
+                            // 해당 디렉토리의 경로가 존재할 때,
                             if (FileSystem.DirectoryExists(dir))
                             {
-                                // 1) 지정한 디렉터리 및 해당 디렉터리의 하위 디렉터리 및 폴더 휴지통에서 삭제
+                                // 1) 지정한 디렉토리 및 해당 디렉토리의 하위 디렉토리 및 폴더 휴지통에서 삭제
                                 FileSystem.DeleteDirectory(dir, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
-                                // 2) 지정한 디렉터리 및 해당 디렉터리의 하위 디렉터리 및 폴더 영구적으로 삭제
+                                // 2) 지정한 디렉토리 및 해당 디렉토리의 하위 디렉토리 및 폴더 영구적으로 삭제
                                 //FileSystem.DeleteDirectory(dir, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
                             }
                             // 해당 파일 경로 존재 시,
@@ -588,7 +675,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         }
                         finally
                         {
-                            _ = ActiveFolderInfo.Remove(match); // [ActiveFolderInfo] 컬렉션 => selectToDelete 항목 제외
+                            _ = ActiveFolderInfo.Remove(match); // [선택 삭제하기] 이후, UI 클리어
                         }
 
                     }
@@ -604,7 +691,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private void DelAllMatches()
         {
-            IsDelBtnEnabledOrNot = false; // [일괄 삭제하기] 버튼 비활성화
             if (!string.IsNullOrEmpty(DeleteFolderPath))
             {
                 if (DeleteFolderInfo?.Count > 0)
@@ -612,17 +698,15 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     foreach (DelMatchingInfo match in DeleteFolderInfo)
                     {
                         string dir = match.DelMatchingPath;
-
                         // [try ~ catch]문 활용, 예외 처리!
                         try
                         {
-                            IsDelBtnEnabledOrNot = true; // [일괄 삭제하기] 버튼 활성화
-                            // 해당 디렉터리의 경로가 존재할 때,
+                            // 해당 디렉토리의 경로가 존재할 때,
                             if (FileSystem.DirectoryExists(dir))
                             {
-                                // 1) 지정한 디렉터리 및 해당 디렉터리의 하위 디렉터리 및 폴더 휴지통에서 삭제
+                                // 1) 지정한 디렉토리 및 해당 디렉토리의 하위 디렉토리 및 폴더 휴지통에서 삭제
                                 FileSystem.DeleteDirectory(dir, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
-                                // 2) 지정한 디렉터리 및 해당 디렉터리의 하위 디렉터리 및 폴더 영구적으로 삭제
+                                // 2) 지정한 디렉토리 및 해당 디렉토리의 하위 디렉토리 및 폴더 영구적으로 삭제
                                 //FileSystem.DeleteDirectory(dir, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
                             }
                             // 해당 지정파일의 경로가 존재할 때, 
@@ -648,14 +732,13 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     }
 
                 }
-                // 일괄 삭제 후, UI 클리어
-                DeleteFolderInfo?.Clear();
+                DeleteFolderInfo?.Clear(); // [일괄 삭제하기] 이후, UI 클리어
             }
 
         }
 
         /// <summary>
-        /// 5. [검색 필터리셋] 기능 (FilterFolderName)
+        /// 5-1. [검색 필터리셋] 기능 (FilterFolderName)
         /// </summary>
         public void FilterResetFN()
         {
@@ -663,12 +746,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 FilterFolderName = string.Empty;
             }
-            // Filter 01 초기화
-            EnumerateFolders();
+            EnumerateFolders(); // [Filter 01] 초기화
         }
 
         /// <summary>
-        /// 6. [검색 필터리셋] 기능 (FilterExtensions)
+        /// 5-2. [검색 필터리셋] 기능 (FilterExtensions)
         /// </summary>
         public void FilterResetFE()
         {
@@ -676,8 +758,121 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 FilterExtensions = string.Empty;
             }
-            // Filter 02 초기화
-            EnumerateFolders();
+            EnumerateFolders(); // [Filter 02] 초기화
+        }
+
+        /// <summary>
+        /// 6-1. 정렬 (이름 순)
+        /// </summary>
+        private void GoOrderByName()
+        {
+            // (n = 1, 2, 3...)
+            // (2n - 1)번 클릭 후: [오름차순] 정렬!
+            // (2n)번 클릭 후: [내림차순]으로 정렬!
+            lstOrderByName = orderByAscendingOrNot
+                ? ActiveFolderInfo.OrderBy(item => item.DelMatchingName).ToList()
+                : ActiveFolderInfo.OrderByDescending(item => item.DelMatchingName).ToList();
+
+            // 1) 정렬 후, 컬렉션 초기화 작업
+            ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>(lstOrderByName);
+
+            // 2) 플래그(flag) 값, 반전시키기
+            orderByAscendingOrNot = !orderByAscendingOrNot;
+        }
+
+        /// <summary>
+        /// 6-2. 정렬 (생성한 날짜 순)
+        /// </summary>
+        private void OrderByCrTime()
+        {
+            // (n = 1, 2, 3...)
+            // (2n - 1)번 클릭 후: [오름차순] 정렬!
+            // (2n)번 클릭 후: [내림차순]으로 정렬!
+            lstOrderByCrTime = orderByAscendingOrNot
+                ? ActiveFolderInfo.OrderBy(item => item.DelMatchingCreationTime).ToList()
+                : ActiveFolderInfo.OrderByDescending(item => item.DelMatchingCreationTime).ToList();
+
+            // 1) 정렬 후, 컬렉션 초기화 작업
+            ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>(lstOrderByCrTime);
+
+            // 2) 플래그(flag) 값, 반전시키기
+            orderByAscendingOrNot = !orderByAscendingOrNot;
+        }
+
+        /// <summary>
+        /// 6-3. 정렬 (유형 순)
+        /// </summary>
+        private void GoOrderByType()
+        {
+            // (n = 1, 2, 3...)
+            // (2n - 1)번 클릭 후: [오름차순] 정렬!
+            // (2n)번 클릭 후: [내림차순]으로 정렬!
+            lstOrderByType = orderByAscendingOrNot
+                ? ActiveFolderInfo.OrderBy(item => item.DelMatchingCategory).ToList()
+                : ActiveFolderInfo.OrderByDescending(item => item.DelMatchingCategory).ToList();
+
+            // 1) 정렬 후, 컬렉션 초기화 작업
+            ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>(lstOrderByType);
+
+            // 2) 플래그(flag) 값, 반전시키기
+            orderByAscendingOrNot = !orderByAscendingOrNot;
+        }
+
+        /// <summary>
+        /// 6-4. 정렬 (수정한 날짜 순)
+        /// </summary>
+        private void OrderByMdTime()
+        {
+            // (n = 1, 2, 3...)
+            // (2n - 1)번 클릭 후: [오름차순] 정렬!
+            // (2n)번 클릭 후: [내림차순]으로 정렬!
+            lstOrderByMdTime = orderByAscendingOrNot
+                ? ActiveFolderInfo.OrderBy(item => item.DelMatchingModifiedTime).ToList()
+                : ActiveFolderInfo.OrderByDescending(item => item.DelMatchingModifiedTime).ToList();
+
+            // 1) 정렬 후, 컬렉션 초기화 작업
+            ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>(lstOrderByMdTime);
+
+            // 2) 플래그(flag) 값, 반전시키기
+            orderByAscendingOrNot = !orderByAscendingOrNot;
+        }
+
+        /// <summary>
+        /// 6-5. 정렬 (크기 순)
+        /// </summary>
+        private void GoOrderBySize()
+        {
+            // (n = 1, 2, 3...)
+            // (2n - 1)번 클릭 후: [오름차순] 정렬!
+            // (2n)번 클릭 후: [내림차순]으로 정렬!
+            lstOrderBySize = orderByAscendingOrNot
+                ? ActiveFolderInfo.OrderBy(item => item.DelMatchingOfSize).ToList()
+                : ActiveFolderInfo.OrderByDescending(item => item.DelMatchingOfSize).ToList();
+
+            // 1) 정렬 후, 컬렉션 초기화 작업
+            ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>(lstOrderBySize);
+
+            // 2) 플래그(flag) 값, 반전시키기
+            orderByAscendingOrNot = !orderByAscendingOrNot;
+        }
+
+        /// <summary>
+        /// 6-6. 정렬 (경로 순)
+        /// </summary>
+        private void GoOrderByPath()
+        {
+            // (n = 1, 2, 3...)
+            // (2n - 1)번 클릭 후: [오름차순] 정렬!
+            // (2n)번 클릭 후: [내림차순]으로 정렬!
+            lstOrderByPath = orderByAscendingOrNot
+                ? ActiveFolderInfo.OrderBy(item => item.DelMatchingPath).ToList()
+                : ActiveFolderInfo.OrderByDescending(item => item.DelMatchingPath).ToList();
+
+            // 1) 정렬 후, 컬렉션 초기화 작업
+            ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>(lstOrderByPath);
+
+            // 2) 플래그(flag) 값, 반전시키기
+            orderByAscendingOrNot = !orderByAscendingOrNot;
         }
 
     }

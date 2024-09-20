@@ -1,9 +1,6 @@
 ﻿using Bin_Obj_Delete_Project.Models;
 using Bin_Obj_Delete_Project.ViewModels;
 using Bin_Obj_Delete_Project.Views;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -50,21 +47,6 @@ namespace Bin_Obj_Delete_Project
                 DataContext = vm
             };
             filterWindow.Show();
-        }
-
-        private void GridViewColumnName_Click(object sender, RoutedEventArgs e)
-        {
-            if (e.OriginalSource is GridViewColumnHeader headerClicked && headerClicked.Content.ToString() == "이름")
-            {
-                SortByName();
-            }
-
-        }
-
-        private void SortByName()
-        {
-            List<DelMatchingInfo> lstOrderByName = vm.ActiveFolderInfo.OrderBy(item => item.DelMatchingName).ToList();
-            vm.ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>(lstOrderByName);
         }
 
     }

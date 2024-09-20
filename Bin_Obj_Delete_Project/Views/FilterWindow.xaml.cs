@@ -38,7 +38,7 @@ namespace Bin_Obj_Delete_Project.Views
         }
 
         /// <summary>
-        /// (Filter 01) [초기화] 버튼 클릭 이벤트
+        /// (Filter 02) [초기화] 버튼 클릭 이벤트
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>

@@ -83,7 +83,8 @@
     </Compile>
     <Compile Include="Common\ParameterRelayCommand.cs" />
     <Compile Include="Common\RelayCommand.cs" />
-    <Compile Include="Models\DelMatchingInfo.cs" />
+    <Compile Include="Converter\FormatConverter.cs" />
+    <Compile Include="Models\DelmatchingInfo.cs" />
     <Compile Include="ViewModels\FilterWindowVM.cs" />
     <Compile Include="ViewModels\MainVM.cs" />
     <Compile Include="Views\FilterWindow.xaml.cs">

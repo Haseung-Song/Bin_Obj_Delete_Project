@@ -27,7 +27,7 @@
         /// <summary>
         /// [삭제할 폴더 크기]
         /// </summary>
-        public string DelMatchingSize { get; set; }
+        public long DelMatchingOfSize { get; set; }
 
         /// <summary>
         /// [삭제할 폴더 경로]
