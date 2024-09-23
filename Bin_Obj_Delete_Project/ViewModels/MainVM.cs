@@ -436,9 +436,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 if (folderDialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
+                    IsDelBtnEnabledOrNot = false;
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        IsDelBtnEnabledOrNot = false;
                         // [폴더 다이얼로그] 확인 시, (전체) 컬렉션 초기화
                         DeleteFolderInfo?.Clear();
                         loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
@@ -471,14 +471,13 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// 2. [경로 불러오기] 기능 (Enter 키)
         /// </summary>
         public async void EnterLoadPath()
-
         {
             LoadingWindow loadingWindow = new LoadingWindow(); // [LoadingWindow] 클래스 객체 생성
             try
             {
+                IsDelBtnEnabledOrNot = false;
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    IsDelBtnEnabledOrNot = false;
                     DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
                     loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
                 });
@@ -671,7 +670,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private static long GetDirectorySize(string dir)
         {
             DirectoryInfo dirInfo = new DirectoryInfo(dir); // DirectoryInfo 객체 생성
-
             long sizeofDir = 0;
 
             // [현재 디렉토리] 및 [모든 하위 디렉토리]를 포함한 파일 목록 배열을 반환!
@@ -801,27 +799,33 @@ namespace Bin_Obj_Delete_Project.ViewModels
             LoadingWindow loadingWindow = new LoadingWindow(); // [LoadingWindow] 클래스 객체 생성
             try
             {
-                await Application.Current.Dispatcher.InvokeAsync(() =>
+                if (!string.IsNullOrWhiteSpace(FilterFolderName))
                 {
                     IsDelBtnEnabledOrNot = false;
-                    DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
-                    loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
-                });
-
-                await Task.Run(() =>
-                {
-                    DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
-                    if (!string.IsNullOrWhiteSpace(FilterFolderName))
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        FilterFolderName = string.Empty;
-                    }
-                    EnumerateFolders(); // [Filter 01] 초기화
-                    Application.Current.Dispatcher.InvokeAsync(() =>
-                    {
-                        loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
+                        DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
+                        loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
                     });
-                    IsDelBtnEnabledOrNot = true;
-                });
+
+                    FilterFolderName = string.Empty;
+
+                    await Task.Run(() =>
+                    {
+                        DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
+                        EnumerateFolders(); // [Filter 01] 초기화
+                        Application.Current.Dispatcher.InvokeAsync(() =>
+                        {
+                            loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
+                        });
+                        IsDelBtnEnabledOrNot = true;
+                    });
+
+                }
+                else
+                {
+                    _ = MessageBox.Show("초기화 할 내용이 없습니다.", "재입력 필요", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
 
             }
             catch (Exception ex)
@@ -840,27 +844,33 @@ namespace Bin_Obj_Delete_Project.ViewModels
             LoadingWindow loadingWindow = new LoadingWindow(); // [LoadingWindow] 클래스 객체 생성
             try
             {
-                await Application.Current.Dispatcher.InvokeAsync(() =>
+                if (!string.IsNullOrWhiteSpace(FilterExtensions))
                 {
                     IsDelBtnEnabledOrNot = false;
-                    DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
-                    loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
-                });
-
-                await Task.Run(() =>
-                {
-                    DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
-                    if (!string.IsNullOrWhiteSpace(FilterExtensions))
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        FilterExtensions = string.Empty;
-                    }
-                    EnumerateFolders(); // [Filter 02] 초기화
-                    Application.Current.Dispatcher.InvokeAsync(() =>
-                    {
-                        loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
+                        DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
+                        loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
                     });
-                    IsDelBtnEnabledOrNot = true;
-                });
+
+                    FilterExtensions = string.Empty;
+
+                    await Task.Run(() =>
+                    {
+                        DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
+                        EnumerateFolders(); // [Filter 02] 초기화
+                        Application.Current.Dispatcher.InvokeAsync(() =>
+                        {
+                            loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
+                        });
+                        IsDelBtnEnabledOrNot = true;
+                    });
+
+                }
+                else
+                {
+                    _ = MessageBox.Show("초기화 할 내용이 없습니다.", "재입력 필요", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
 
             }
             catch (Exception ex)
