@@ -10,7 +10,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -439,7 +438,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 {
                     // [폴더 다이얼로그] 확인 누를 때, (전체) 컬렉션 초기화
                     DeleteFolderInfo?.Clear();
-                    Application.Current.Dispatcher.Invoke(() =>
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
                         IsDelBtnEnabledOrNot = false;
                         loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
@@ -450,12 +449,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
                         DeleteFolderPath = folderDialog.FileName;
                         EnumerateFolders();
-                        Application.Current.Dispatcher.Invoke(() =>
+                        Application.Current.Dispatcher.InvokeAsync(() =>
                         {
-                            IsDelBtnEnabledOrNot = true;
                             loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
                         });
-
+                        IsDelBtnEnabledOrNot = true;
                     });
 
                 }
@@ -463,15 +461,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
             catch (Exception ex)
             {
-                if (loadingWindow != null)
-                {
-                    loadingWindow.Close();
-                }
+                loadingWindow?.Close();
                 _ = MessageBox.Show("Error Opening [loadingWindow]: " + ex.Message);
-            }
-            finally
-            {
-                Thread.Sleep(300);
             }
 
         }
@@ -480,12 +471,13 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// 2. [경로 불러오기] 기능 (Enter 키)
         /// </summary>
         public async void EnterLoadPath()
+
         {
             LoadingWindow loadingWindow = new LoadingWindow(); // [LoadingWindow] 클래스 객체 생성
             try
             {
                 DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
-                Application.Current.Dispatcher.Invoke(() =>
+                await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     IsDelBtnEnabledOrNot = false;
                     loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
@@ -498,24 +490,16 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     EnumerateFolders();
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        IsDelBtnEnabledOrNot = true;
                         loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
                     });
-
+                    IsDelBtnEnabledOrNot = true;
                 });
 
             }
             catch (Exception ex)
             {
-                if (loadingWindow != null)
-                {
-                    loadingWindow.Close();
-                }
+                loadingWindow?.Close();
                 _ = MessageBox.Show("Error Opening [loadingWindow]: " + ex.Message);
-            }
-            finally
-            {
-                Thread.Sleep(300);
             }
 
         }
@@ -525,7 +509,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         protected void EnumerateFolders()
         {
-            IsDelBtnEnabledOrNot = true; // [폴더 선택삭제], [폴더 일괄삭제] 버튼 활성화
             if (!string.IsNullOrEmpty(DeleteFolderPath))
             {
                 // 모든 하위 디렉토리를 검색하되, 접근이 거부된 디렉토리는 제외함!
@@ -819,7 +802,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             try
             {
                 DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
-                Application.Current.Dispatcher.Invoke(() =>
+                await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     IsDelBtnEnabledOrNot = false;
                     loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
@@ -833,27 +816,18 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         FilterFolderName = string.Empty;
                     }
                     EnumerateFolders(); // [Filter 01] 초기화
-
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        IsDelBtnEnabledOrNot = true;
                         loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
                     });
-
+                    IsDelBtnEnabledOrNot = true;
                 });
 
             }
             catch (Exception ex)
             {
-                if (loadingWindow != null)
-                {
-                    loadingWindow.Close();
-                }
+                loadingWindow?.Close();
                 _ = MessageBox.Show("Error Opening [loadingWindow]: " + ex.Message);
-            }
-            finally
-            {
-                Thread.Sleep(300);
             }
 
         }
@@ -867,7 +841,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             try
             {
                 DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
-                Application.Current.Dispatcher.Invoke(() =>
+                await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     IsDelBtnEnabledOrNot = false;
                     loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
@@ -881,27 +855,18 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         FilterExtensions = string.Empty;
                     }
                     EnumerateFolders(); // [Filter 02] 초기화
-
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        IsDelBtnEnabledOrNot = true;
                         loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
                     });
-
+                    IsDelBtnEnabledOrNot = true;
                 });
 
             }
             catch (Exception ex)
             {
-                if (loadingWindow != null)
-                {
-                    loadingWindow.Close();
-                }
+                loadingWindow?.Close();
                 _ = MessageBox.Show("Error Opening [loadingWindow]: " + ex.Message);
-            }
-            finally
-            {
-                Thread.Sleep(300);
             }
 
         }
