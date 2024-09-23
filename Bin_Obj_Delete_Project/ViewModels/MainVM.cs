@@ -1,5 +1,6 @@
 ﻿using Bin_Obj_Delete_Project.Common;
 using Bin_Obj_Delete_Project.Models;
+using Bin_Obj_Delete_Project.Views;
 using Microsoft.VisualBasic.FileIO;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
@@ -9,6 +10,8 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using SearchOption = System.IO.SearchOption;
@@ -420,7 +423,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// <summary>
         /// 1. [폴더 불러오기] 기능 (버튼)
         /// </summary>
-        private void LoadingFolder()
+        private async void LoadingFolder()
         {
             CommonOpenFileDialog folderDialog = new CommonOpenFileDialog
             {
@@ -429,11 +432,46 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 IsFolderPicker = true
             };
 
-            // [폴더 불러오기] 버튼 클릭 후,
-            if (folderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            LoadingWindow loadingWindow = new LoadingWindow(); // [LoadingWindow] 클래스 객체 생성
+            try
             {
-                DeleteFolderPath = folderDialog.FileName;
-                EnumerateFolders();
+                if (folderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+                {
+                    // [폴더 다이얼로그] 확인 누를 때, (전체) 컬렉션 초기화
+                    DeleteFolderInfo?.Clear();
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        IsDelBtnEnabledOrNot = false;
+                        loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
+                    });
+
+                    await Task.Run(() =>
+                    {
+                        DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
+                        DeleteFolderPath = folderDialog.FileName;
+                        EnumerateFolders();
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            IsDelBtnEnabledOrNot = true;
+                            loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
+                        });
+
+                    });
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                if (loadingWindow != null)
+                {
+                    loadingWindow.Close();
+                }
+                _ = MessageBox.Show("Error Opening [loadingWindow]: " + ex.Message);
+            }
+            finally
+            {
+                Thread.Sleep(300);
             }
 
         }
@@ -441,10 +479,45 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// <summary>
         /// 2. [경로 불러오기] 기능 (Enter 키)
         /// </summary>
-        public void EnterLoadPath()
+        public async void EnterLoadPath()
         {
-            DeleteFolderPath = Path.GetFullPath(AbsolutePath);
-            EnumerateFolders();
+            LoadingWindow loadingWindow = new LoadingWindow(); // [LoadingWindow] 클래스 객체 생성
+            try
+            {
+                DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    IsDelBtnEnabledOrNot = false;
+                    loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
+                });
+
+                await Task.Run(() =>
+                {
+                    DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
+                    DeleteFolderPath = Path.GetFullPath(AbsolutePath);
+                    EnumerateFolders();
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        IsDelBtnEnabledOrNot = true;
+                        loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
+                    });
+
+                });
+
+            }
+            catch (Exception ex)
+            {
+                if (loadingWindow != null)
+                {
+                    loadingWindow.Close();
+                }
+                _ = MessageBox.Show("Error Opening [loadingWindow]: " + ex.Message);
+            }
+            finally
+            {
+                Thread.Sleep(300);
+            }
+
         }
 
         /// <summary>
@@ -740,25 +813,97 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// <summary>
         /// 5-1. [검색 필터리셋] 기능 (FilterFolderName)
         /// </summary>
-        public void FilterResetFN()
+        public async void FilterResetFN()
         {
-            if (!string.IsNullOrWhiteSpace(FilterFolderName))
+            LoadingWindow loadingWindow = new LoadingWindow(); // [LoadingWindow] 클래스 객체 생성
+            try
             {
-                FilterFolderName = string.Empty;
+                DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    IsDelBtnEnabledOrNot = false;
+                    loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
+                });
+
+                await Task.Run(() =>
+                {
+                    DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
+                    if (!string.IsNullOrWhiteSpace(FilterFolderName))
+                    {
+                        FilterFolderName = string.Empty;
+                    }
+                    EnumerateFolders(); // [Filter 01] 초기화
+
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        IsDelBtnEnabledOrNot = true;
+                        loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
+                    });
+
+                });
+
             }
-            EnumerateFolders(); // [Filter 01] 초기화
+            catch (Exception ex)
+            {
+                if (loadingWindow != null)
+                {
+                    loadingWindow.Close();
+                }
+                _ = MessageBox.Show("Error Opening [loadingWindow]: " + ex.Message);
+            }
+            finally
+            {
+                Thread.Sleep(300);
+            }
+
         }
 
         /// <summary>
         /// 5-2. [검색 필터리셋] 기능 (FilterExtensions)
         /// </summary>
-        public void FilterResetFE()
+        public async void FilterResetFE()
         {
-            if (!string.IsNullOrWhiteSpace(FilterExtensions))
+            LoadingWindow loadingWindow = new LoadingWindow(); // [LoadingWindow] 클래스 객체 생성
+            try
             {
-                FilterExtensions = string.Empty;
+                DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    IsDelBtnEnabledOrNot = false;
+                    loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
+                });
+
+                await Task.Run(() =>
+                {
+                    DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
+                    if (!string.IsNullOrWhiteSpace(FilterExtensions))
+                    {
+                        FilterExtensions = string.Empty;
+                    }
+                    EnumerateFolders(); // [Filter 02] 초기화
+
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        IsDelBtnEnabledOrNot = true;
+                        loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
+                    });
+
+                });
+
             }
-            EnumerateFolders(); // [Filter 02] 초기화
+            catch (Exception ex)
+            {
+                if (loadingWindow != null)
+                {
+                    loadingWindow.Close();
+                }
+                _ = MessageBox.Show("Error Opening [loadingWindow]: " + ex.Message);
+            }
+            finally
+            {
+                Thread.Sleep(300);
+            }
+
         }
 
         /// <summary>

@@ -35,6 +35,7 @@ namespace Bin_Obj_Delete_Project.Views
             MainVM vm = DataContext as MainVM;
             // (Filter 01) Reset
             vm?.FilterResetFN();
+            Close(); // 창 닫기!
         }
 
         /// <summary>
@@ -47,6 +48,7 @@ namespace Bin_Obj_Delete_Project.Views
             MainVM vm = DataContext as MainVM;
             // (Filter 02) Reset
             vm?.FilterResetFE();
+            Close(); // 창 닫기!
         }
 
     }
