@@ -488,7 +488,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
                     DeleteFolderPath = Path.GetFullPath(AbsolutePath);
                     EnumerateFolders();
-                    Application.Current.Dispatcher.Invoke(() =>
+                    Application.Current.Dispatcher.InvokeAsync(() =>
                     {
                         loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
                     });
@@ -816,7 +816,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         FilterFolderName = string.Empty;
                     }
                     EnumerateFolders(); // [Filter 01] 초기화
-                    Application.Current.Dispatcher.Invoke(() =>
+                    Application.Current.Dispatcher.InvokeAsync(() =>
                     {
                         loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
                     });
@@ -855,7 +855,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         FilterExtensions = string.Empty;
                     }
                     EnumerateFolders(); // [Filter 02] 초기화
-                    Application.Current.Dispatcher.Invoke(() =>
+                    Application.Current.Dispatcher.InvokeAsync(() =>
                     {
                         loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
                     });
