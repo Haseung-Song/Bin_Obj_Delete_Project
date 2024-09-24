@@ -449,10 +449,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
                         DeleteFolderPath = folderDialog.FileName;
                         EnumerateFolders();
-                        Application.Current.Dispatcher.InvokeAsync(() =>
-                        {
-                            loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
-                        });
+                        _ = Application.Current.Dispatcher.InvokeAsync(() =>
+                          {
+                              loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
+                          });
                         IsDelBtnEnabledOrNot = true;
                     });
 
@@ -487,10 +487,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
                     DeleteFolderPath = Path.GetFullPath(AbsolutePath);
                     EnumerateFolders();
-                    Application.Current.Dispatcher.InvokeAsync(() =>
-                    {
-                        loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
-                    });
+                    _ = Application.Current.Dispatcher.InvokeAsync(() =>
+                      {
+                          loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
+                      });
                     IsDelBtnEnabledOrNot = true;
                 });
 
@@ -814,10 +814,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     {
                         DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
                         EnumerateFolders(); // [Filter 01] 초기화
-                        Application.Current.Dispatcher.InvokeAsync(() =>
-                        {
-                            loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
-                        });
+                        _ = Application.Current.Dispatcher.InvokeAsync(() =>
+                          {
+                              loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
+                          });
                         IsDelBtnEnabledOrNot = true;
                     });
 
@@ -859,10 +859,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     {
                         DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
                         EnumerateFolders(); // [Filter 02] 초기화
-                        Application.Current.Dispatcher.InvokeAsync(() =>
-                        {
-                            loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
-                        });
+                        _ = Application.Current.Dispatcher.InvokeAsync(() =>
+                          {
+                              loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
+                          });
                         IsDelBtnEnabledOrNot = true;
                     });
 
