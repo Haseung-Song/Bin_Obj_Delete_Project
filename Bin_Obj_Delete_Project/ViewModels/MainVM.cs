@@ -10,6 +10,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -446,6 +447,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     // [폴더 다이얼로그] 확인 이후, (전체) 컬렉션 초기화!!
                     DeleteFolderInfo?.Clear();
                     DelBtnEnabledOrNot = false;
+                    Thread.Sleep(100);
+
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
                         loadingWindow.Owner = curmainWindow; // [loadingWindow] => MainWindow 동기화 (완료)
@@ -503,6 +506,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 // (전체) 컬렉션 초기화!!!
                 DeleteFolderInfo?.Clear();
                 DelBtnEnabledOrNot = false;
+                Thread.Sleep(100);
+
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     loadingWindow.Owner = curmainWindow; // [loadingWindow] => MainWindow 동기화 (완료)
@@ -858,7 +863,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
                         // 방법 2: [전역 마우스 후킹] 클래스 활용
                         // [전체 화면] (마우스 클릭 및 입력 차단)
-                        mouseHook.HookMouse();
+                        //mouseHook.HookMouse();
                     });
 
                     FilterFolderName = string.Empty;
@@ -877,7 +882,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
                               // 방법 2: [전역 마우스 후킹] 클래스 활용
                               // [전체 화면] (마우스 클릭 및 입력 가능)
-                              mouseHook.UnhookMouse();
+                              //mouseHook.UnhookMouse();
                           });
                         DelBtnEnabledOrNot = true;
                     });
@@ -922,7 +927,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
                         // 방법 2: [전역 마우스 후킹] 클래스 활용
                         // [전체 화면] (마우스 클릭 및 입력 차단)
-                        mouseHook.HookMouse();
+                        //mouseHook.HookMouse();
                     });
 
                     FilterExtensions = string.Empty;
@@ -941,7 +946,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
                               // 방법 2: [전역 마우스 후킹] 클래스 활용
                               // [전체 화면] (마우스 클릭 및 입력 가능)
-                              mouseHook.UnhookMouse();
+                              //mouseHook.UnhookMouse();
                           });
                         DelBtnEnabledOrNot = true;
                     });
