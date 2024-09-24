@@ -429,7 +429,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// <summary>
         /// 1. [폴더 불러오기] 기능 (버튼)
         /// </summary>
-        private async void LoadingFolder()
+        private void LoadingFolder()
         {
             CommonOpenFileDialog folderDialog = new CommonOpenFileDialog
             {
@@ -438,58 +438,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 IsFolderPicker = true
             };
 
-            LoadingWindow loadingWindow = new LoadingWindow(); // [LoadingWindow] 클래스 객체 생성
             if (folderDialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                try
-                {
-                    Window curmainWindow = Application.Current.MainWindow;
-                    // [폴더 다이얼로그] 확인 이후, (전체) 컬렉션 초기화!!
-                    DeleteFolderInfo?.Clear();
-                    DelBtnEnabledOrNot = false;
-                    Thread.Sleep(100);
-
-                    await Application.Current.Dispatcher.InvokeAsync(() =>
-                    {
-                        loadingWindow.Owner = curmainWindow; // [loadingWindow] => MainWindow 동기화 (완료)
-                        loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
-
-                        // 방법 1: [IsHitTestVisible] 메서드 사용
-                        // [MainWindow] 창 버튼 (클릭, 입력 차단)
-                        curmainWindow.IsHitTestVisible = false;
-
-                        // 방법 2: [전역 마우스 후킹] 클래스 활용
-                        // [전체 화면] (마우스 클릭 및 입력 차단)
-                        mouseHook.HookMouse();
-                    });
-
-                    await Task.Run(() =>
-                    {
-                        DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
-                        DeleteFolderPath = folderDialog.FileName;
-                        EnumerateFolders();
-                        _ = Application.Current.Dispatcher.InvokeAsync(() =>
-                        {
-                            loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
-
-                            // 방법 1: [IsHitTestVisible] 메서드 사용
-                            // [MainWindow] 창 버튼 (클릭, 입력 가능)
-                            curmainWindow.IsHitTestVisible = true;
-
-                            // 방법 2: [전역 마우스 후킹] 클래스 활용
-                            // [전체 화면] (마우스 클릭 및 입력 가능)
-                            mouseHook.UnhookMouse();
-                        });
-                        DelBtnEnabledOrNot = true;
-                    });
-
-                }
-                catch (Exception ex)
-                {
-                    loadingWindow?.Close();
-                    _ = MessageBox.Show("Error Opening [loadingWindow]: " + ex.Message);
-                }
-
+                DeleteFolderPath = folderDialog.FileName;
+                EnumerateFolders();
             }
 
         }
@@ -497,64 +449,16 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// <summary>
         /// 2. [경로 불러오기] 기능 (Enter 키)
         /// </summary>
-        public async void EnterLoadPath()
+        public void EnterLoadPath()
         {
-            LoadingWindow loadingWindow = new LoadingWindow(); // [LoadingWindow] 클래스 객체 생성
-            try
-            {
-                Window curmainWindow = Application.Current.MainWindow;
-                // (전체) 컬렉션 초기화!!!
-                DeleteFolderInfo?.Clear();
-                DelBtnEnabledOrNot = false;
-                Thread.Sleep(100);
-
-                await Application.Current.Dispatcher.InvokeAsync(() =>
-                {
-                    loadingWindow.Owner = curmainWindow; // [loadingWindow] => MainWindow 동기화 (완료)
-                    loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
-
-                    // 방법 1: [IsHitTestVisible] 메서드 사용
-                    // [MainWindow] 창 버튼 (클릭, 입력 차단)
-                    curmainWindow.IsHitTestVisible = false;
-
-                    // 방법 2: [전역 마우스 후킹] 클래스 활용
-                    // [전체 화면] (마우스 클릭 및 입력 차단)
-                    mouseHook.HookMouse();
-                });
-
-                await Task.Run(() =>
-                {
-                    DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
-                    DeleteFolderPath = Path.GetFullPath(AbsolutePath);
-                    EnumerateFolders();
-                    _ = Application.Current.Dispatcher.InvokeAsync(() =>
-                      {
-                          loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
-
-                          // 방법 1: [IsHitTestVisible] 메서드 사용
-                          // [MainWindow] 창 버튼 (클릭, 입력 가능)
-                          curmainWindow.IsHitTestVisible = true;
-
-                          // 방법 2: [전역 마우스 후킹] 클래스 활용
-                          // [전체 화면] (마우스 클릭 및 입력 가능)
-                          mouseHook.UnhookMouse();
-                      });
-                    DelBtnEnabledOrNot = true;
-                });
-
-            }
-            catch (Exception ex)
-            {
-                loadingWindow?.Close();
-                _ = MessageBox.Show("Error Opening [loadingWindow]: " + ex.Message);
-            }
-
+            DeleteFolderPath = Path.GetFullPath(AbsolutePath);
+            EnumerateFolders();
         }
 
         /// <summary>
         /// 선택적 [하위 디렉토리] 검색 함수
         /// </summary>
-        protected void EnumerateFolders()
+        protected async void EnumerateFolders()
         {
             if (!string.IsNullOrEmpty(DeleteFolderPath))
             {
@@ -563,72 +467,93 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 //.Where(dir => dir.EndsWith("bin") || dir.EndsWith("obj")); // 경로의 마지막 글자가 "bin"이거나 "obj"인 파일만 찾음!
                 DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
                 uniqueFilePathSet.Clear(); // (중복) 해시셋 초기화
-
-                if (directories != null)
+                // 하위 디렉토리 중 요소가 하나라도 존재하면,
+                if (directories != null && directories.Any())
                 {
+                    LoadingWindow loadingWindow = new LoadingWindow(); // [LoadingWindow] 클래스 객체 생성
                     try
                     {
-                        foreach (string dir in directories)
+                        Window curmainWindow = Application.Current.MainWindow;
+                        DelBtnEnabledOrNot = false;
+                        Thread.Sleep(100);
+                        await Application.Current.Dispatcher.InvokeAsync(() =>
                         {
-                            DirectoryInfo dirInfo = new DirectoryInfo(dir);
-                            matchingFldrName = dirInfo.Name;
-                            matchingFldrCreationTime = dirInfo.CreationTime.ToString();
-                            matchingFldrCategory = "파일 폴더";
-                            matchingFldrModifiedTime = dirInfo.LastWriteTime.ToString();
-                            matchingFldrSize = GetDirectorySize(dir);
-                            matchingFldrPath = dir;
+                            loadingWindow.Owner = curmainWindow; // [loadingWindow] => MainWindow 동기화 (완료)
+                            loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
 
-                            // 1. 필터 키워드를 콤마(',')로 구분 후, 배열로 생성 (FilterFolderName)
-                            string[] filterComma1 = string.IsNullOrEmpty(FilterFolderName) ? Array.Empty<string>() : FilterFolderName.Split(',');
+                            // 방법 1: [IsHitTestVisible] 메서드 사용
+                            // [MainWindow] 창 버튼 (클릭, 입력 차단)
+                            curmainWindow.IsHitTestVisible = false;
 
-                            // Filter 01: 폴더 이름으로 검색(대소문자 구분(X))
-                            // 1) [FilterFolderName]이 null이거나 string.Empty 문자열인 경우
-                            // 2) [FilterFolderName]이 디렉토리 또는 하위 디렉토리 폴더의 이름과 일치하는 경우
-                            //bool folderMatches1 = string.IsNullOrEmpty(FilterFolderName) || dirInfo.Name.Equals(FilterFolderName, StringComparison.OrdinalIgnoreCase);
+                            // 방법 2: [전역 마우스 후킹] 클래스 활용
+                            // [전체 화면] (마우스 클릭 및 입력 차단)
+                            //mouseHook.HookMouse();
+                        });
 
-                            //if (!folderMatches1)
-                            //{
-                            //    continue;
-                            //}
-
-                            // Filter 01: 폴더 이름으로 검색(대소문자 구분(X))
-                            // 지정한 배열에 정의된 조건과 일치하는지 확인 함!
-                            // 1) [FilterFolderName]이 null이거나 string.Empty 문자열인 경우
-                            // 2) 콤마(',')로 구분된 [FilterFolderName]이 디렉토리 또는 하위 디렉토리 폴더의 이름과 일치하는 경우
-                            bool folderMatches2 = string.IsNullOrEmpty(FilterFolderName) ||
-                                Array.Exists(filterComma1, comma1 => dirInfo.Name.Equals(comma1.Trim(), StringComparison.OrdinalIgnoreCase));
-
-                            // 1), 2)가 아닐 때,
-                            if (!folderMatches2)
+                        await Task.Run(() =>
+                        {
+                            DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
+                            foreach (string dir in directories)
                             {
-                                continue;
-                            }
+                                DirectoryInfo dirInfo = new DirectoryInfo(dir);
+                                matchingFldrName = dirInfo.Name;
+                                matchingFldrCreationTime = dirInfo.CreationTime.ToString();
+                                matchingFldrCategory = "파일 폴더";
+                                matchingFldrModifiedTime = dirInfo.LastWriteTime.ToString();
+                                matchingFldrSize = GetDirectorySize(dir);
+                                matchingFldrPath = dir;
 
-                            // 2. 필터 키워드를 콤마(',')로 구분 후, 배열로 생성 (FilterExtensions)
-                            string[] filterComma2 = string.IsNullOrEmpty(FilterExtensions) ? Array.Empty<string>() : FilterExtensions.Split(',');
+                                // 1. 필터 키워드를 콤마(',')로 구분 후, 배열로 생성 (FilterFolderName)
+                                string[] filterComma1 = string.IsNullOrEmpty(FilterFolderName) ? Array.Empty<string>() : FilterFolderName.Split(',');
 
-                            // Filter 02: 파일 확장자로 검색(대소문자 구분(X))
-                            // 1) [FilterExtensions]이 null이거나 string.Empty 문자열이 아닌 경우
-                            if (!string.IsNullOrEmpty(FilterExtensions))
-                            {
-                                matchingFileInfoOrNot = false;
-                                FileInfo[] arrayInfo = dirInfo.GetFiles("*", SearchOption.AllDirectories);
-                                foreach (FileInfo files in arrayInfo)
+                                // Filter 01: 폴더 이름으로 검색(대소문자 구분(X))
+                                // 1) [FilterFolderName]이 null이거나 string.Empty 문자열인 경우
+                                // 2) [FilterFolderName]이 디렉토리 또는 하위 디렉토리 폴더의 이름과 일치하는 경우
+                                //bool folderMatches1 = string.IsNullOrEmpty(FilterFolderName) || dirInfo.Name.Equals(FilterFolderName, StringComparison.OrdinalIgnoreCase);
+
+                                //if (!folderMatches1)
+                                //{
+                                //    continue;
+                                //}
+
+                                // Filter 01: 폴더 이름으로 검색(대소문자 구분(X))
+                                // 지정한 배열에 정의된 조건과 일치하는지 확인 함!
+                                // 1) [FilterFolderName]이 null이거나 string.Empty 문자열인 경우
+                                // 2) 콤마(',')로 구분된 [FilterFolderName]이 디렉토리 또는 하위 디렉토리 폴더의 이름과 일치하는 경우
+                                bool folderMatches2 = string.IsNullOrEmpty(FilterFolderName) ||
+                                    Array.Exists(filterComma1, comma1 => dirInfo.Name.Equals(comma1.Trim(), StringComparison.OrdinalIgnoreCase));
+
+                                // 1), 2)가 아닐 때,
+                                if (!folderMatches2)
                                 {
-                                    // 이미 처리가 된 파일 경로는 무시! (중복 제거)
-                                    if (uniqueFilePathSet.Contains(files.FullName))
-                                    {
-                                        continue;
-                                    }
+                                    continue;
+                                }
 
-                                    // 지정한 배열에 정의된 조건과 일치하는지 확인 함!
-                                    // 2) 콤마(',')로 구분된 [FilterExtensions]이 파일의 확장명 부분의 문자열과 일치하는 경우 (확장자 비교)
-                                    if (Array.Exists(filterComma2, comma2 => files.Extension.Equals(comma2.Trim(), StringComparison.OrdinalIgnoreCase)))
+                                // 2. 필터 키워드를 콤마(',')로 구분 후, 배열로 생성 (FilterExtensions)
+                                string[] filterComma2 = string.IsNullOrEmpty(FilterExtensions) ? Array.Empty<string>() : FilterExtensions.Split(',');
+
+                                // Filter 02: 파일 확장자로 검색(대소문자 구분(X))
+                                // 1) [FilterExtensions]이 null이거나 string.Empty 문자열이 아닌 경우
+                                if (!string.IsNullOrEmpty(FilterExtensions))
+                                {
+                                    matchingFileInfoOrNot = false;
+                                    FileInfo[] arrayInfo = dirInfo.GetFiles("*", SearchOption.AllDirectories);
+                                    foreach (FileInfo files in arrayInfo)
                                     {
-                                        matchingFileInfoOrNot = true;
-                                        matchingFileName = files.Name;
-                                        matchingFileCreationTime = files.CreationTime.ToString();
-                                        Dictionary<string, string> extensionCategoryMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                                        // 이미 처리가 된 파일 경로는 무시! (중복 제거)
+                                        if (uniqueFilePathSet.Contains(files.FullName))
+                                        {
+                                            continue;
+                                        }
+
+                                        // 지정한 배열에 정의된 조건과 일치하는지 확인 함!
+                                        // 2) 콤마(',')로 구분된 [FilterExtensions]이 파일의 확장명 부분의 문자열과 일치하는 경우 (확장자 비교)
+                                        if (Array.Exists(filterComma2, comma2 => files.Extension.Equals(comma2.Trim(), StringComparison.OrdinalIgnoreCase)))
+                                        {
+                                            matchingFileInfoOrNot = true;
+                                            matchingFileName = files.Name;
+                                            matchingFileCreationTime = files.CreationTime.ToString();
+                                            Dictionary<string, string> extensionCategoryMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                                         {
                                             { ".pdb", "Program Debug Database" },
                                             { ".sln", "Visual Studio Solution" },
@@ -653,40 +578,59 @@ namespace Bin_Obj_Delete_Project.ViewModels
                                             { ".exe", "응용 프로그램" },
                                             { ".suo", "Visual Studio Solution User Options" }
                                         };
-                                        matchingFileCategory = extensionCategoryMap.TryGetValue(files.Extension, out string category) ? category : "기타 파일";
-                                        matchingFileModifiedTime = files.LastWriteTime.ToString();
-                                        matchingFileSize = files.Length;
-                                        matchingFilePath = files.FullName;
-                                        _ = uniqueFilePathSet.Add(matchingFilePath); // 중복 제거
-                                        break;
+                                            matchingFileCategory = extensionCategoryMap.TryGetValue(files.Extension, out string category) ? category : "기타 파일";
+                                            matchingFileModifiedTime = files.LastWriteTime.ToString();
+                                            matchingFileSize = files.Length;
+                                            matchingFilePath = files.FullName;
+                                            _ = uniqueFilePathSet.Add(matchingFilePath); // 중복 제거
+                                            break;
+                                        }
+
                                     }
+
+                                }
+                                // 1) [FilterFolderName] => 해당 폴더 및 정보를 리스트의 형태로 전시
+                                // 2) [FilterExtensions] => 해당 파일 및 정보를 리스트의 형태로 전시
+                                // 즉, 필터링 (X) => 필터링 없이 전시, 필터링 (O) => 필터링해서 전시
+                                if (string.IsNullOrEmpty(FilterExtensions) || matchingFileInfoOrNot)
+                                {
+                                    DeleteFolderInfo.Add(new DelMatchingInfo
+                                    {
+                                        DelMatchingName = matchingFileInfoOrNot ? matchingFileName : matchingFldrName,
+                                        DelMatchingCreationTime = matchingFileInfoOrNot ? matchingFileCreationTime : matchingFldrCreationTime,
+                                        DelMatchingCategory = matchingFileInfoOrNot ? matchingFileCategory : matchingFldrCategory,
+                                        DelMatchingModifiedTime = matchingFileInfoOrNot ? matchingFileModifiedTime : matchingFldrModifiedTime,
+                                        DelMatchingOfSize = matchingFileInfoOrNot ? matchingFileSize : matchingFldrSize,
+                                        DelMatchingPath = matchingFileInfoOrNot ? matchingFilePath : matchingFldrPath,
+                                    });
 
                                 }
 
                             }
-                            // 1) [FilterFolderName] => 해당 폴더 및 정보를 리스트의 형태로 전시
-                            // 2) [FilterExtensions] => 해당 파일 및 정보를 리스트의 형태로 전시
-                            // 즉, 필터링 (X) => 필터링 없이 전시, 필터링 (O) => 필터링해서 전시
-                            if (string.IsNullOrEmpty(FilterExtensions) || matchingFileInfoOrNot)
+                            _ = Application.Current.Dispatcher.InvokeAsync(() =>
                             {
-                                DeleteFolderInfo.Add(new DelMatchingInfo
-                                {
-                                    DelMatchingName = matchingFileInfoOrNot ? matchingFileName : matchingFldrName,
-                                    DelMatchingCreationTime = matchingFileInfoOrNot ? matchingFileCreationTime : matchingFldrCreationTime,
-                                    DelMatchingCategory = matchingFileInfoOrNot ? matchingFileCategory : matchingFldrCategory,
-                                    DelMatchingModifiedTime = matchingFileInfoOrNot ? matchingFileModifiedTime : matchingFldrModifiedTime,
-                                    DelMatchingOfSize = matchingFileInfoOrNot ? matchingFileSize : matchingFldrSize,
-                                    DelMatchingPath = matchingFileInfoOrNot ? matchingFilePath : matchingFldrPath,
-                                });
+                                loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
 
-                            }
+                                // 방법 1: [IsHitTestVisible] 메서드 사용
+                                // [MainWindow] 창 버튼 (클릭, 입력 가능)
+                                curmainWindow.IsHitTestVisible = true;
 
-                        }
+                                // 방법 2: [전역 마우스 후킹] 클래스 활용
+                                // [전체 화면] (마우스 클릭 및 입력 가능)
+                                //mouseHook.UnhookMouse();
+                            });
+                            DelBtnEnabledOrNot = true;
+                        });
 
                     }
                     catch (UnauthorizedAccessException ex)
                     {
                         Console.WriteLine($"Access denied to directory: {directories}. Exception: {ex.Message}"); // 접근이 거부된 폴더는 무시
+                    }
+                    catch (Exception ex)
+                    {
+                        loadingWindow?.Close();
+                        _ = MessageBox.Show("Error Opening [loadingWindow]: " + ex.Message);
                     }
 
                 }
