@@ -22,6 +22,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
         #region [프로퍼티]
 
         /// <summary>
+        /// [mouseHook]
+        /// </summary>
+        public static GlobalMouseHook mouseHook; // [static 함수]
+
+        /// <summary>
         /// [_IsDelBtnEnabledOrNot]
         /// </summary>
         private bool _IsDelBtnEnabledOrNot;
@@ -180,7 +185,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// <summary>
         /// [IsDelBtnEnabledOrNot]
         /// </summary>
-        public bool IsDelBtnEnabledOrNot
+        public bool DelBtnEnabledOrNot
         {
             get => _IsDelBtnEnabledOrNot;
             private set
@@ -376,6 +381,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
         public MainVM()
         {
+            mouseHook = new GlobalMouseHook();
+            DelBtnEnabledOrNot = false;
             LoadingFolderCommand = new RelayCommand(LoadingFolder);
             EnterLoadPathCommand = new RelayCommand(EnterLoadPath);
             _selectedCrFolder = new DelMatchingInfo();
@@ -389,7 +396,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
             lstOrderByMdTime = new List<DelMatchingInfo>();
             lstOrderBySize = new List<DelMatchingInfo>();
             lstOrderByPath = new List<DelMatchingInfo>();
-            IsDelBtnEnabledOrNot = false;
             orderByAscendingOrNot = true;
             matchingFldrName = string.Empty;
             matchingFileName = string.Empty;
@@ -432,17 +438,26 @@ namespace Bin_Obj_Delete_Project.ViewModels
             };
 
             LoadingWindow loadingWindow = new LoadingWindow(); // [LoadingWindow] 클래스 객체 생성
-            try
+            if (folderDialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                if (folderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+                try
                 {
-                    // [폴더 다이얼로그] 확인 시, (전체) 컬렉션 초기화
+                    Window curmainWindow = Application.Current.MainWindow;
+                    // [폴더 다이얼로그] 확인 이후, (전체) 컬렉션 초기화!!
                     DeleteFolderInfo?.Clear();
-                    IsDelBtnEnabledOrNot = false;
+                    DelBtnEnabledOrNot = false;
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        loadingWindow.Owner = Application.Current.MainWindow; // [loadingWindow] => MainWindow 동기화 (완료)
+                        loadingWindow.Owner = curmainWindow; // [loadingWindow] => MainWindow 동기화 (완료)
                         loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
+
+                        // 방법 1: [IsHitTestVisible] 메서드 사용
+                        // [MainWindow] 창 버튼 (클릭, 입력 차단)
+                        curmainWindow.IsHitTestVisible = false;
+
+                        // 방법 2: [전역 마우스 후킹] 클래스 활용
+                        // [전체 화면] (마우스 클릭 및 입력 차단)
+                        mouseHook.HookMouse();
                     });
 
                     await Task.Run(() =>
@@ -451,19 +466,27 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         DeleteFolderPath = folderDialog.FileName;
                         EnumerateFolders();
                         _ = Application.Current.Dispatcher.InvokeAsync(() =>
-                          {
-                              loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
-                          });
-                        IsDelBtnEnabledOrNot = true;
+                        {
+                            loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
+
+                            // 방법 1: [IsHitTestVisible] 메서드 사용
+                            // [MainWindow] 창 버튼 (클릭, 입력 가능)
+                            curmainWindow.IsHitTestVisible = true;
+
+                            // 방법 2: [전역 마우스 후킹] 클래스 활용
+                            // [전체 화면] (마우스 클릭 및 입력 가능)
+                            mouseHook.UnhookMouse();
+                        });
+                        DelBtnEnabledOrNot = true;
                     });
 
                 }
+                catch (Exception ex)
+                {
+                    loadingWindow?.Close();
+                    _ = MessageBox.Show("Error Opening [loadingWindow]: " + ex.Message);
+                }
 
-            }
-            catch (Exception ex)
-            {
-                loadingWindow?.Close();
-                _ = MessageBox.Show("Error Opening [loadingWindow]: " + ex.Message);
             }
 
         }
@@ -476,12 +499,22 @@ namespace Bin_Obj_Delete_Project.ViewModels
             LoadingWindow loadingWindow = new LoadingWindow(); // [LoadingWindow] 클래스 객체 생성
             try
             {
-                DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
-                IsDelBtnEnabledOrNot = false;
+                Window curmainWindow = Application.Current.MainWindow;
+                // (전체) 컬렉션 초기화!!!
+                DeleteFolderInfo?.Clear();
+                DelBtnEnabledOrNot = false;
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    loadingWindow.Owner = Application.Current.MainWindow; // [loadingWindow] => MainWindow 동기화 (완료)
+                    loadingWindow.Owner = curmainWindow; // [loadingWindow] => MainWindow 동기화 (완료)
                     loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
+
+                    // 방법 1: [IsHitTestVisible] 메서드 사용
+                    // [MainWindow] 창 버튼 (클릭, 입력 차단)
+                    curmainWindow.IsHitTestVisible = false;
+
+                    // 방법 2: [전역 마우스 후킹] 클래스 활용
+                    // [전체 화면] (마우스 클릭 및 입력 차단)
+                    mouseHook.HookMouse();
                 });
 
                 await Task.Run(() =>
@@ -492,8 +525,16 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     _ = Application.Current.Dispatcher.InvokeAsync(() =>
                       {
                           loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
+
+                          // 방법 1: [IsHitTestVisible] 메서드 사용
+                          // [MainWindow] 창 버튼 (클릭, 입력 가능)
+                          curmainWindow.IsHitTestVisible = true;
+
+                          // 방법 2: [전역 마우스 후킹] 클래스 활용
+                          // [전체 화면] (마우스 클릭 및 입력 가능)
+                          mouseHook.UnhookMouse();
                       });
-                    IsDelBtnEnabledOrNot = true;
+                    DelBtnEnabledOrNot = true;
                 });
 
             }
@@ -518,7 +559,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
                 uniqueFilePathSet.Clear(); // (중복) 해시셋 초기화
 
-                // 파일 경로가 존재하면,
                 if (directories != null)
                 {
                     try
@@ -803,12 +843,22 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 if (!string.IsNullOrWhiteSpace(FilterFolderName))
                 {
-                    DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
-                    IsDelBtnEnabledOrNot = false;
+                    Window curmainWindow = Application.Current.MainWindow;
+                    // (전체) 컬렉션 초기화!!!
+                    DeleteFolderInfo?.Clear();
+                    DelBtnEnabledOrNot = false;
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        loadingWindow.Owner = Application.Current.MainWindow; // [loadingWindow] => MainWindow 동기화 (완료)
+                        loadingWindow.Owner = curmainWindow; // [loadingWindow] => MainWindow 동기화 (완료)
                         loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
+
+                        // 방법 1: [IsHitTestVisible] 메서드 사용
+                        // [MainWindow] 창 버튼 (클릭, 입력 차단)
+                        curmainWindow.IsHitTestVisible = false;
+
+                        // 방법 2: [전역 마우스 후킹] 클래스 활용
+                        // [전체 화면] (마우스 클릭 및 입력 차단)
+                        mouseHook.HookMouse();
                     });
 
                     FilterFolderName = string.Empty;
@@ -820,8 +870,16 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         _ = Application.Current.Dispatcher.InvokeAsync(() =>
                           {
                               loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
+
+                              // 방법 1: [IsHitTestVisible] 메서드 사용
+                              // [MainWindow] 창 버튼 (클릭, 입력 가능)
+                              curmainWindow.IsHitTestVisible = true;
+
+                              // 방법 2: [전역 마우스 후킹] 클래스 활용
+                              // [전체 화면] (마우스 클릭 및 입력 가능)
+                              mouseHook.UnhookMouse();
                           });
-                        IsDelBtnEnabledOrNot = true;
+                        DelBtnEnabledOrNot = true;
                     });
 
                 }
@@ -849,12 +907,22 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 if (!string.IsNullOrWhiteSpace(FilterExtensions))
                 {
-                    DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
-                    IsDelBtnEnabledOrNot = false;
+                    Window curmainWindow = Application.Current.MainWindow;
+                    // (전체) 컬렉션 초기화!!!
+                    DeleteFolderInfo?.Clear();
+                    DelBtnEnabledOrNot = false;
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        loadingWindow.Owner = Application.Current.MainWindow; // [loadingWindow] => MainWindow 동기화 (완료)
+                        loadingWindow.Owner = curmainWindow; // [loadingWindow] => MainWindow 동기화 (완료)
                         loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
+
+                        // 방법 1: [IsHitTestVisible] 메서드 사용
+                        // [MainWindow] 창 버튼 (클릭, 입력 차단)
+                        curmainWindow.IsHitTestVisible = false;
+
+                        // 방법 2: [전역 마우스 후킹] 클래스 활용
+                        // [전체 화면] (마우스 클릭 및 입력 차단)
+                        mouseHook.HookMouse();
                     });
 
                     FilterExtensions = string.Empty;
@@ -866,8 +934,16 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         _ = Application.Current.Dispatcher.InvokeAsync(() =>
                           {
                               loadingWindow.Close(); // 로딩 창 닫기 (Fade_Out)
+
+                              // 방법 1: [IsHitTestVisible] 메서드 사용
+                              // [MainWindow] 창 버튼 (클릭, 입력 가능)
+                              curmainWindow.IsHitTestVisible = true;
+
+                              // 방법 2: [전역 마우스 후킹] 클래스 활용
+                              // [전체 화면] (마우스 클릭 및 입력 가능)
+                              mouseHook.UnhookMouse();
                           });
-                        IsDelBtnEnabledOrNot = true;
+                        DelBtnEnabledOrNot = true;
                     });
 
                 }

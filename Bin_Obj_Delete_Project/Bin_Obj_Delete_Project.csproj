@@ -91,7 +91,8 @@
     <Compile Include="Common\ParameterRelayCommand.cs" />
     <Compile Include="Common\RelayCommand.cs" />
     <Compile Include="Converter\FormatConverter.cs" />
-    <Compile Include="Models\DelmatchingInfo.cs" />
+    <Compile Include="Models\MatchingInfo.cs" />
+    <Compile Include="Models\GlobalMouseHook.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

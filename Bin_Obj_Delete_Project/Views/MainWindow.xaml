@@ -5,13 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:converter="clr-namespace:Bin_Obj_Delete_Project.Converter"
         mc:Ignorable="d"
-        Title="MainWindow" 
+        Title="MainWindow"
         Width="1680"
         Height="800">
     <Window.Resources>
         <converter:FormatConverter x:Key="FormatConverter"/>
     </Window.Resources>
-    <Grid>
+    <Grid x:Name="LoadingOverlay">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -44,7 +44,7 @@
 
             <Button Content="검색 필터"
                     Click="OpenFilterWindow"
-                    IsEnabled="{Binding IsDelBtnEnabledOrNot}"
+                    IsEnabled="{Binding DelBtnEnabledOrNot}"
                     Margin="10,15,0,0" 
                     Height="30" 
                     Width="135" 
@@ -52,7 +52,7 @@
 
             <Button Content="선택 삭제하기"
                     Command="{Binding DelSelMatchesCommand}"
-                    IsEnabled="{Binding IsDelBtnEnabledOrNot}"             
+                    IsEnabled="{Binding DelBtnEnabledOrNot}"         
                     Margin="10,15,0,0" 
                     Height="30" 
                     Width="135" 
@@ -60,7 +60,7 @@
 
             <Button Content="일괄 삭제하기"
                     Command="{Binding DelAllMatchesCommand}"
-                    IsEnabled="{Binding IsDelBtnEnabledOrNot}"
+                    IsEnabled="{Binding DelBtnEnabledOrNot}"
                     Margin="10,15,0,0" 
                     Height="30" 
                     Width="135" 

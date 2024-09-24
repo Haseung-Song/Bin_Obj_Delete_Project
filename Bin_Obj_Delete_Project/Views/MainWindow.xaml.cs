@@ -47,8 +47,11 @@ namespace Bin_Obj_Delete_Project
             {
                 DataContext = vm
             };
+            // [filterWindow] => MainWindow 동기화 (완료)
             filterWindow.Owner = this;
-            filterWindow.Show();
+
+            // [filterWindow] => MainWindow 창(접근 불가)
+            _ = filterWindow.ShowDialog();
         }
 
     }
