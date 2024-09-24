@@ -12,6 +12,7 @@ namespace Bin_Obj_Delete_Project
     public partial class MainWindow : Window
     {
         private readonly MainVM vm = new MainVM(); // MainVM() 객체 vm 생성
+
         public MainWindow()
         {
             InitializeComponent();
@@ -46,6 +47,7 @@ namespace Bin_Obj_Delete_Project
             {
                 DataContext = vm
             };
+            filterWindow.Owner = this;
             filterWindow.Show();
         }
 
