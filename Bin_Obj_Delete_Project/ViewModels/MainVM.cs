@@ -436,11 +436,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 if (folderDialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
+                    // [폴더 다이얼로그] 확인 시, (전체) 컬렉션 초기화
+                    DeleteFolderInfo?.Clear();
                     IsDelBtnEnabledOrNot = false;
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        // [폴더 다이얼로그] 확인 시, (전체) 컬렉션 초기화
-                        DeleteFolderInfo?.Clear();
                         loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
                     });
 
@@ -475,10 +475,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
             LoadingWindow loadingWindow = new LoadingWindow(); // [LoadingWindow] 클래스 객체 생성
             try
             {
+                DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
                 IsDelBtnEnabledOrNot = false;
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
                     loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
                 });
 
@@ -801,10 +801,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 if (!string.IsNullOrWhiteSpace(FilterFolderName))
                 {
+                    DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
                     IsDelBtnEnabledOrNot = false;
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
                         loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
                     });
 
@@ -846,10 +846,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 if (!string.IsNullOrWhiteSpace(FilterExtensions))
                 {
+                    DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
                     IsDelBtnEnabledOrNot = false;
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
                         loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
                     });
 
