@@ -441,6 +441,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     IsDelBtnEnabledOrNot = false;
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
+                        loadingWindow.Owner = Application.Current.MainWindow; // [loadingWindow] => MainWindow 동기화 (완료)
                         loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
                     });
 
@@ -479,6 +480,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 IsDelBtnEnabledOrNot = false;
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
+                    loadingWindow.Owner = Application.Current.MainWindow; // [loadingWindow] => MainWindow 동기화 (완료)
                     loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
                 });
 
@@ -805,6 +807,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     IsDelBtnEnabledOrNot = false;
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
+                        loadingWindow.Owner = Application.Current.MainWindow; // [loadingWindow] => MainWindow 동기화 (완료)
                         loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
                     });
 
@@ -850,6 +853,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     IsDelBtnEnabledOrNot = false;
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
+                        loadingWindow.Owner = Application.Current.MainWindow; // [loadingWindow] => MainWindow 동기화 (완료)
                         loadingWindow.Show(); // 로딩 창 열기 (Fade_In)
                     });
 
