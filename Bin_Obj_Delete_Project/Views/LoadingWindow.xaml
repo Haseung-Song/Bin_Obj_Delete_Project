@@ -1,24 +1,39 @@
-﻿<Window x:Class="Bin_Obj_Delete_Project.Views.LoadingWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:gif="http://wpfanimatedgif.codeplex.com"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d"
-        Title="LoadingWindow" Width="200" Height="200"
-        WindowStyle="None"
-        WindowStartupLocation="CenterScreen"
-        Background="Transparent"
-        AllowsTransparency="True"
-        ResizeMode="NoResize"
-        ShowInTaskbar="False"
-        Topmost="False"
-        Loaded="Loading_Fade_In"
-        Closing="Close_Fade_Out">
+﻿<UserControl x:Class="Bin_Obj_Delete_Project.Views.LoadingView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:gif="http://wpfanimatedgif.codeplex.com"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:converter="clr-namespace:Bin_Obj_Delete_Project.Converter"
+             mc:Ignorable="d"
+             Width="200" Height="200"
+             Background="Transparent"
+             Loaded="Loading_Fade_In"
+             Unloaded="Close_Fade_Out">
+    <UserControl.Resources>
+        <converter:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converter:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
+    </UserControl.Resources>
 
     <Grid Background="Transparent">
         <Image gif:ImageBehavior.AnimatedSource= "pack://application:,,,/Bin_Obj_Delete_Project;component/Resources/Loading.gif"
                VerticalAlignment="Center" HorizontalAlignment="Center"
-               Stretch="None"/>
+               Stretch="None">
+            <Image.Style>
+                <Style TargetType="{x:Type Image}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding VisibleLoading}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding VisibleLoading}" Value="False">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Image.Style>
+        </Image>
+        <TextBlock Text="로딩중....." FontSize="20" Foreground="Red" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                   Visibility="{Binding VisibleLoading, Converter={StaticResource BooleanToVisibilityConverter}}"/>
     </Grid>
-</Window>
+</UserControl>
+    

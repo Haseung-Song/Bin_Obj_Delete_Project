@@ -1,16 +1,17 @@
-﻿using System;
-using System.ComponentModel;
+﻿using Bin_Obj_Delete_Project.ViewModels;
+using System;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media.Animation;
 
 namespace Bin_Obj_Delete_Project.Views
 {
     /// <summary>
-    /// LoadingWindow.xaml에 대한 상호 작용 논리
+    /// UserControl1.xaml에 대한 상호 작용 논리
     /// </summary>
-    public partial class LoadingWindow : Window
+    public partial class LoadingView : UserControl
     {
-        public LoadingWindow()
+        public LoadingView()
         {
             InitializeComponent();
         }
@@ -20,7 +21,7 @@ namespace Bin_Obj_Delete_Project.Views
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Loading_Fade_In(object sender, RoutedEventArgs e)
+        public void Loading_Fade_In(object sender, RoutedEventArgs e)
         {
             DoubleAnimation fade_In = new DoubleAnimation
             {
@@ -40,9 +41,8 @@ namespace Bin_Obj_Delete_Project.Views
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Close_Fade_Out(object sender, CancelEventArgs e)
+        public void Close_Fade_Out(object sender, EventArgs e)
         {
-            e.Cancel = true;
             DoubleAnimation fade_Out = new DoubleAnimation
             {
                 // [시작 값] 투명도 (완전 불투명)
@@ -54,9 +54,6 @@ namespace Bin_Obj_Delete_Project.Views
             };
             // [fade_Out] 애니메이션 시작
             BeginAnimation(OpacityProperty, fade_Out);
-
-            // 애니메이션 완료, 창 닫기 이벤트 실행!
-            fade_Out.Completed += (s, _) => Close();
         }
 
     }

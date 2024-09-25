@@ -13,9 +13,12 @@ namespace Bin_Obj_Delete_Project
     {
         private readonly MainVM vm = new MainVM(); // MainVM() 객체 vm 생성
 
+        public LoadingView LoadingView { get; } = new LoadingView();
+
         public MainWindow()
         {
             InitializeComponent();
+            LoadingView.DataContext = vm;
             DataContext = vm;
         }
 

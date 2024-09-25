@@ -44,7 +44,6 @@
 
             <Button Content="검색 필터"
                     Click="OpenFilterWindow"
-                    IsEnabled="{Binding DelBtnEnabledOrNot}"
                     Margin="10,15,0,0" 
                     Height="30" 
                     Width="135" 
@@ -66,7 +65,6 @@
                     Width="135" 
                     FontSize="15"/>
         </StackPanel>
-
         <Border Grid.Row="1"
                 Grid.Column="1"
                 BorderBrush ="Black"
@@ -194,6 +192,10 @@
 
             </Grid>
         </Border>
-
+        <Border Grid.Row="1">
+            <Grid>
+                <ContentControl Content="{Binding LoadingControl}" />
+            </Grid>
+        </Border>
     </Grid>
 </Window>
