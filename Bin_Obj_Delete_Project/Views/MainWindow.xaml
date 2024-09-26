@@ -24,6 +24,7 @@
                     Width="1065" 
                     Height="35">
                 <TextBox Text="{Binding DeleteFolderPath, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                         IsHitTestVisible="{Binding DelBtnEnabledOrNot}"
                          TextAlignment="Left" 
                          Margin="2,2,2,2" 
                          FontSize="20"
@@ -37,6 +38,7 @@
             </Border>
             <Button Content="폴더 불러오기"
                     Command="{Binding LoadingFolderCommand}"
+                    IsEnabled="{Binding DelBtnEnabledOrNot}"
                     Margin="5,15,0,0"
                     Height="30"
                     Width="135"
@@ -183,13 +185,6 @@
                         </GridView>
                     </ListView.View>
                 </ListView>
-
-                <!--<ProgressBar Grid.Row="1"
-                             Height="25"
-                             Margin="5"
-                             Value="{Binding ProgressStatus, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                             Minimum="0"
-                             Maximum="100"/>-->
 
             </Grid>
         </Border>
