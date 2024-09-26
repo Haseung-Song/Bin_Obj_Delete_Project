@@ -487,6 +487,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
                 uniqueFilePathSet.Clear(); // (중복) 해시셋 초기화
                 ActiveFolderInfo?.Clear(); // (화면) 초기화
+                //mouseHook.HookMouse();
                 DelBtnEnabledOrNot = false;
                 VisibleLoading = true;
                 await Task.Delay(1000);
@@ -494,6 +495,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 {
                     EnumerateFolders();
                 });
+                //mouseHook.UnhookMouse();
                 DelBtnEnabledOrNot = true;
                 VisibleLoading = false;
             }
@@ -510,6 +512,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
             uniqueFilePathSet.Clear(); // (중복) 해시셋 초기화
             ActiveFolderInfo?.Clear(); // (화면) 초기화
+            //mouseHook.HookMouse();
             DelBtnEnabledOrNot = false;
             VisibleLoading = true;
             await Task.Delay(1000);
@@ -517,7 +520,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 EnumerateFolders();
             });
-            DelBtnEnabledOrNot = true;
+            //mouseHook.UnhookMouse();
             VisibleLoading = false;
         }
 
@@ -603,6 +606,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                                         continue;
                                     }
                                     matchingFileInfoOrNot = true; // 파일로 구분
+
                                     // 지정한 배열에 정의된 조건과 일치하는지 확인 함!
                                     // 2) 콤마(',')로 구분된 [FilterExtensions]이 파일의 확장명 부분의 문자열과 일치하는 경우 (확장자 비교)
                                     if (Array.Exists(filterComma2, comma2 => files.Extension.Equals(comma2.Trim(), StringComparison.OrdinalIgnoreCase)))
@@ -702,7 +706,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private static long GetDirectorySize(string dir)
         {
             DirectoryInfo dirInfo = new DirectoryInfo(dir); // DirectoryInfo 객체 생성
-            long sizeofDir = 0;
+
+            long sizeofDir = 0; // [총량] 초기화
 
             // [현재 디렉토리] 및 [모든 하위 디렉토리]를 포함한 파일 목록 배열을 반환!
             FileInfo[] arrayInfo = dirInfo.GetFiles("*", SearchOption.AllDirectories);
