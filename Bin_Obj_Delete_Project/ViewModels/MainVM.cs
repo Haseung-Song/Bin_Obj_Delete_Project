@@ -23,14 +23,19 @@ namespace Bin_Obj_Delete_Project.ViewModels
         #region [프로퍼티]
 
         /// <summary>
-        /// [mouseHook]
-        /// </summary>
-        public static GlobalMouseHook mouseHook; // [static 함수]
-
-        /// <summary>
         /// [_IsDelBtnEnabledOrNot]
         /// </summary>
         private bool _IsDelBtnEnabledOrNot;
+
+        /// <summary>
+        /// [_aVisibleLoadingOrNot]
+        /// </summary>
+        private bool _aVisibleLoadingOrNot;
+
+        /// <summary>
+        /// [loadingControl]
+        /// </summary>
+        private UserControl loadingControl;
 
         /// <summary>
         /// [_deleteFolderPath]
@@ -116,6 +121,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// [matchingFilePath]
         /// </summary>
         private string matchingFilePath;
+
+        /// <summary>
+        /// [mouseHook]
+        /// </summary>
+        public static GlobalMouseHook mouseHook;
 
         /// <summary>
         /// [AbsolutePath]
@@ -257,30 +267,29 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
         }
 
-        private bool _visibleLoading;
         public bool VisibleLoading
         {
-            get => _visibleLoading;
+            get => _aVisibleLoadingOrNot;
             set
             {
-                if (_visibleLoading != value)
+                if (_aVisibleLoadingOrNot != value)
                 {
-                    _visibleLoading = value;
+                    _aVisibleLoadingOrNot = value;
                     OnPropertyChanged();
                 }
 
             }
+
         }
 
-        private UserControl _loadingControl;
         public UserControl LoadingControl
         {
-            get => _loadingControl;
+            get => loadingControl;
             set
             {
-                if (_loadingControl != value)
+                if (loadingControl != value)
                 {
-                    _loadingControl = value;
+                    loadingControl = value;
                     OnPropertyChanged();
                 }
 
@@ -413,10 +422,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
         public MainVM()
         {
+            DelBtnEnabledOrNot = false;
             VisibleLoading = false;
             LoadingControl = new LoadingView();
-            mouseHook = new GlobalMouseHook();
-            DelBtnEnabledOrNot = false;
             LoadingFolderCommand = new RelayCommand(LoadingFolder);
             EnterLoadPathCommand = new RelayCommand(EnterLoadPath);
             _selectedCrFolder = new DelMatchingInfo();
@@ -443,6 +451,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             matchingFileSize = 0;
             matchingFldrPath = string.Empty;
             matchingFilePath = string.Empty;
+            mouseHook = new GlobalMouseHook();
             DelSelMatchesCommand = new RelayCommand(DelSelMatches);
             DelAllMatchesCommand = new RelayCommand(DelAllMatches);
             FilterResetFNCommand = new RelayCommand(FilterResetFN);
@@ -474,12 +483,18 @@ namespace Bin_Obj_Delete_Project.ViewModels
             if (folderDialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 DeleteFolderPath = folderDialog.FileName;
-                DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
+                DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>(); // [ObservableCollection] 초기화
+                DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
+                uniqueFilePathSet.Clear(); // (중복) 해시셋 초기화
+                ActiveFolderInfo?.Clear(); // (화면) 초기화
+                DelBtnEnabledOrNot = false;
                 VisibleLoading = true;
+                await Task.Delay(1000);
                 await Task.Run(() =>
                 {
                     EnumerateFolders();
                 });
+                DelBtnEnabledOrNot = true;
                 VisibleLoading = false;
             }
 
@@ -491,19 +506,20 @@ namespace Bin_Obj_Delete_Project.ViewModels
         public async void EnterLoadPath()
         {
             DeleteFolderPath = Path.GetFullPath(AbsolutePath);
-            DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
-            // 로딩 작업 (예: 비동기 작업)
+            DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>(); // [ObservableCollection] 초기화
+            DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
+            uniqueFilePathSet.Clear(); // (중복) 해시셋 초기화
+            ActiveFolderInfo?.Clear(); // (화면) 초기화
+            DelBtnEnabledOrNot = false;
+            VisibleLoading = true;
+            await Task.Delay(1000);
             await Task.Run(() =>
             {
-                VisibleLoading = true;
                 EnumerateFolders();
-                VisibleLoading = false;
             });
-            //await Task.Run(() => EnumerateFolders());
-            //VisibleLoading = false;
+            DelBtnEnabledOrNot = true;
+            VisibleLoading = false;
         }
-
-
 
         protected void EnumerateFolders()
         {
@@ -512,8 +528,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 // 모든 하위 디렉토리를 검색하되, 접근이 거부된 디렉토리는 제외함!
                 IEnumerable<string> directories = Directory.EnumerateDirectories(DeleteFolderPath, "*", SearchOption.AllDirectories);
                 //.Where(dir => dir.EndsWith("bin") || dir.EndsWith("obj")); // 경로의 마지막 글자가 "bin"이거나 "obj"인 파일만 찾음!
-                DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
-                uniqueFilePathSet.Clear(); // (중복) 해시셋 초기화
                 // 하위 디렉토리 중 요소가 하나라도 존재하면,
                 if (directories != null && directories.Any())
                 {
@@ -528,7 +542,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             matchingFldrModifiedTime = dirInfo.LastWriteTime.ToString();
                             matchingFldrSize = GetDirectorySize(dir);
                             matchingFldrPath = dir;
-
+                            matchingFileInfoOrNot = false; // 폴더로 구분
                             // 1. 필터 키워드를 콤마(',')로 구분 후, 배열로 생성 (FilterFolderName)
                             string[] filterComma1 = string.IsNullOrEmpty(FilterFolderName) ? Array.Empty<string>() : FilterFolderName.Split(',');
 
@@ -555,14 +569,31 @@ namespace Bin_Obj_Delete_Project.ViewModels
                                 continue;
                             }
 
+                            // 1) [FilterFolderName] => 해당 폴더 및 정보를 리스트의 형태로 전시!
+                            // 즉, 필터링 (X) => 필터링 없이 전시, 필터링 (O) => 필터링해서 전시!
+                            if (string.IsNullOrEmpty(FilterExtensions) && !matchingFileInfoOrNot)
+                            {
+                                DeleteFolderInfo.Add(new DelMatchingInfo
+                                {
+                                    DelMatchingName = matchingFldrName,
+                                    DelMatchingCreationTime = matchingFldrCreationTime,
+                                    DelMatchingCategory = matchingFldrCategory,
+                                    DelMatchingModifiedTime = matchingFldrModifiedTime,
+                                    DelMatchingOfSize = matchingFldrSize,
+                                    DelMatchingPath = matchingFldrPath
+                                });
+
+                            }
+
                             // 2. 필터 키워드를 콤마(',')로 구분 후, 배열로 생성 (FilterExtensions)
                             string[] filterComma2 = string.IsNullOrEmpty(FilterExtensions) ? Array.Empty<string>() : FilterExtensions.Split(',');
 
                             // Filter 02: 파일 확장자로 검색(대소문자 구분(X))
-                            // 1) [FilterExtensions]이 null이거나 string.Empty 문자열이 아닌 경우
+                            // 지정한 배열에 정의된 조건과 일치하는지 확인 함!
+                            // 1) [FilterExtensions]가 null이거나 string.Empty 문자열이 아닌 경우: 빈 배열(null)을 반환
+                            // 2) [FilterExtensions]가 null이거나 string.Empty 문자열인 경우: 파일 확장자를 콤마(',')로 구분 반환
                             if (!string.IsNullOrEmpty(FilterExtensions))
                             {
-                                matchingFileInfoOrNot = false;
                                 FileInfo[] arrayInfo = dirInfo.GetFiles("*", SearchOption.AllDirectories);
                                 foreach (FileInfo files in arrayInfo)
                                 {
@@ -571,12 +602,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
                                     {
                                         continue;
                                     }
-
+                                    matchingFileInfoOrNot = true; // 파일로 구분
                                     // 지정한 배열에 정의된 조건과 일치하는지 확인 함!
                                     // 2) 콤마(',')로 구분된 [FilterExtensions]이 파일의 확장명 부분의 문자열과 일치하는 경우 (확장자 비교)
                                     if (Array.Exists(filterComma2, comma2 => files.Extension.Equals(comma2.Trim(), StringComparison.OrdinalIgnoreCase)))
                                     {
-                                        matchingFileInfoOrNot = true;
                                         matchingFileName = files.Name;
                                         matchingFileCreationTime = files.CreationTime.ToString();
                                         Dictionary<string, string> extensionCategoryMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -608,31 +638,32 @@ namespace Bin_Obj_Delete_Project.ViewModels
                                         matchingFileModifiedTime = files.LastWriteTime.ToString();
                                         matchingFileSize = files.Length;
                                         matchingFilePath = files.FullName;
-                                        _ = uniqueFilePathSet.Add(matchingFilePath); // 중복 제거
+                                        _ = uniqueFilePathSet.Add(matchingFilePath); // 중복 제거!
+
+                                        // 2) [FilterExtensions] => 해당 파일 및 정보를 리스트의 형태로 전시
+                                        // 즉, 필터링 (X) => 필터링 없이 전시, 필터링 (O) => 필터링해서 전시
+                                        if (string.IsNullOrEmpty(FilterFolderName) && matchingFileInfoOrNot)
+                                        {
+                                            DeleteFolderInfo.Add(new DelMatchingInfo
+                                            {
+                                                DelMatchingName = matchingFileName,
+                                                DelMatchingCreationTime = matchingFileCreationTime,
+                                                DelMatchingCategory = matchingFileCategory,
+                                                DelMatchingModifiedTime = matchingFileModifiedTime,
+                                                DelMatchingOfSize = matchingFileSize,
+                                                DelMatchingPath = matchingFilePath
+                                            });
+
+                                        }
+
                                     }
 
                                 }
 
                             }
-                            // 1) [FilterFolderName] => 해당 폴더 및 정보를 리스트의 형태로 전시
-                            // 2) [FilterExtensions] => 해당 파일 및 정보를 리스트의 형태로 전시
-                            // 즉, 필터링 (X) => 필터링 없이 전시, 필터링 (O) => 필터링해서 전시
-                            if (string.IsNullOrEmpty(FilterExtensions) || matchingFileInfoOrNot)
-                            {
-                                DeleteFolderInfo.Add(new DelMatchingInfo
-                                {
-                                    DelMatchingName = matchingFileInfoOrNot ? matchingFileName : matchingFldrName,
-                                    DelMatchingCreationTime = matchingFileInfoOrNot ? matchingFileCreationTime : matchingFldrCreationTime,
-                                    DelMatchingCategory = matchingFileInfoOrNot ? matchingFileCategory : matchingFldrCategory,
-                                    DelMatchingModifiedTime = matchingFileInfoOrNot ? matchingFileModifiedTime : matchingFldrModifiedTime,
-                                    DelMatchingOfSize = matchingFileInfoOrNot ? matchingFileSize : matchingFldrSize,
-                                    DelMatchingPath = matchingFileInfoOrNot ? matchingFilePath : matchingFldrPath,
-                                });
-
-                            }
 
                         }
-                        DelBtnEnabledOrNot = true;
+
                     }
                     catch (UnauthorizedAccessException ex)
                     {
@@ -640,8 +671,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     }
                     catch (Exception ex)
                     {
-                        //loadingWindow?.Close();
-                        _ = MessageBox.Show("Error Opening [loadingWindow]: " + ex.Message);
+                        Console.WriteLine($"Exception has been occured: {ex.Message}"); // 추가 [오류 메시지] 확인
                     }
 
                 }
@@ -707,6 +737,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             {
                                 // 1) 지정한 디렉토리 및 해당 디렉토리의 하위 디렉토리 및 폴더 휴지통에서 삭제
                                 FileSystem.DeleteDirectory(dir, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+
                                 // 2) 지정한 디렉토리 및 해당 디렉토리의 하위 디렉토리 및 폴더 영구적으로 삭제
                                 //FileSystem.DeleteDirectory(dir, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
                             }
@@ -715,6 +746,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             {
                                 // 1) 지정한 파일 휴지통에서 삭제
                                 FileSystem.DeleteFile(dir, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+
                                 // 2) 지정한 파일 영구적으로 삭제
                                 //FileSystem.DeleteFile(dir, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
                             }
@@ -731,7 +763,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         }
                         finally
                         {
-                            _ = ActiveFolderInfo.Remove(match); // [선택 삭제하기] 이후, UI 클리어
+                            _ = ActiveFolderInfo.Remove(match); // UI 클리어!
                         }
 
                     }
@@ -762,6 +794,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             {
                                 // 1) 지정한 디렉토리 및 해당 디렉토리의 하위 디렉토리 및 폴더 휴지통에서 삭제
                                 FileSystem.DeleteDirectory(dir, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+
                                 // 2) 지정한 디렉토리 및 해당 디렉토리의 하위 디렉토리 및 폴더 영구적으로 삭제
                                 //FileSystem.DeleteDirectory(dir, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
                             }
@@ -770,6 +803,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             {
                                 // 1) 지정한 파일 휴지통에서 삭제
                                 FileSystem.DeleteFile(dir, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+
                                 // 2) 지정한 파일 영구적으로 삭제
                                 //FileSystem.DeleteFile(dir, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
                             }
@@ -788,7 +822,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     }
 
                 }
-                DeleteFolderInfo?.Clear(); // [일괄 삭제하기] 이후, UI 클리어
+                DeleteFolderInfo?.Clear(); // UI 클리어!
             }
 
         }
@@ -798,24 +832,24 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         public async void FilterResetFN()
         {
-            LoadingView loadingView = new LoadingView(); // [LoadingWindow] 클래스 객체 생성
             try
             {
                 if (!string.IsNullOrWhiteSpace(FilterFolderName))
                 {
-                    Window curmainWindow = Application.Current.MainWindow;
-                    // (전체) 컬렉션 초기화!!!
-                    DeleteFolderInfo?.Clear();
+                    DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>(); // [ObservableCollection] 초기화
+                    DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
+                    uniqueFilePathSet.Clear(); // (중복) 해시셋 초기화
+                    ActiveFolderInfo?.Clear(); // (화면) 초기화
+                    FilterFolderName = string.Empty; // TextBox 초기화
                     DelBtnEnabledOrNot = false;
-                    _visibleLoading = true;
-
-                    FilterFolderName = string.Empty;
-
-                    DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
-                    EnumerateFolders(); // [Filter 01] 초기화
-                    _visibleLoading = false;
+                    VisibleLoading = true;
+                    await Task.Delay(1000);
+                    await Task.Run(() =>
+                    {
+                        EnumerateFolders(); // [Filter 01] 초기화
+                    });
                     DelBtnEnabledOrNot = true;
-
+                    VisibleLoading = false;
                 }
                 else
                 {
@@ -825,7 +859,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
             catch (Exception ex)
             {
-                _ = MessageBox.Show("Error Opening [loadingWindow]: " + ex.Message);
+                _ = MessageBox.Show("Error Opening LoadingView() function: ", "Exception Error!" + ex.Message);
             }
 
         }
@@ -835,24 +869,24 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         public async void FilterResetFE()
         {
-            LoadingView loadingView = new LoadingView(); // [LoadingWindow] 클래스 객체 생성
             try
             {
                 if (!string.IsNullOrWhiteSpace(FilterExtensions))
                 {
-                    Window curmainWindow = Application.Current.MainWindow;
-                    // (전체) 컬렉션 초기화!!!
-                    DeleteFolderInfo?.Clear();
+                    DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>(); // [ObservableCollection] 초기화
+                    DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
+                    uniqueFilePathSet.Clear(); // (중복) 해시셋 초기화
+                    ActiveFolderInfo?.Clear(); // (화면) 초기화
+                    FilterExtensions = string.Empty; // TextBox 초기화
                     DelBtnEnabledOrNot = false;
-                    _visibleLoading = true;
-
-                    FilterExtensions = string.Empty;
-
-                    DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
-                    EnumerateFolders(); // [Filter 01] 초기화
-                    _visibleLoading = false;
+                    VisibleLoading = true;
+                    await Task.Delay(1000);
+                    await Task.Run(() =>
+                    {
+                        EnumerateFolders(); // [Filter 02] 초기화
+                    });
+                    VisibleLoading = false;
                     DelBtnEnabledOrNot = true;
-
                 }
                 else
                 {
@@ -862,7 +896,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
             catch (Exception ex)
             {
-                _ = MessageBox.Show("Error Opening [loadingWindow]: " + ex.Message);
+                _ = MessageBox.Show("Error Opening LoadingView() function: ", "Exception Error!" + ex.Message);
             }
 
         }

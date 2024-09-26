@@ -73,8 +73,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Converter\VisibilityConverter.cs" />
-    <Compile Include="Views\LoadingWindow.xaml.cs">
-      <DependentUpon>LoadingWindow.xaml</DependentUpon>
+    <Compile Include="Views\LoadingViewControl.xaml.cs">
+      <DependentUpon>LoadingViewControl.xaml</DependentUpon>
     </Compile>
     <Page Include="Views\FilterWindow.xaml">
       <SubType>Designer</SubType>
@@ -90,7 +90,7 @@
     </Compile>
     <Compile Include="Common\ParameterRelayCommand.cs" />
     <Compile Include="Common\RelayCommand.cs" />
-    <Compile Include="Converter\FormatConverter.cs" />
+    <Compile Include="Converter\TypeConverter.cs" />
     <Compile Include="Models\MatchingInfo.cs" />
     <Compile Include="Models\GlobalMouseHook.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -107,7 +107,7 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Views\LoadingWindow.xaml">
+    <Page Include="Views\LoadingViewControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

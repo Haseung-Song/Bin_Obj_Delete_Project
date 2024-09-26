@@ -9,7 +9,7 @@
         Width="1680"
         Height="800">
     <Window.Resources>
-        <converter:FormatConverter x:Key="FormatConverter"/>
+        <converter:TypeConverter x:Key="FormatConverter"/>
     </Window.Resources>
     <Grid x:Name="LoadingOverlay">
         <Grid.RowDefinitions>
@@ -37,24 +37,25 @@
             </Border>
             <Button Content="폴더 불러오기"
                     Command="{Binding LoadingFolderCommand}"
-                    Margin="5,15,0,0" 
-                    Height="30" 
-                    Width="135" 
+                    Margin="5,15,0,0"
+                    Height="30"
+                    Width="135"
                     FontSize="15"/>
 
             <Button Content="검색 필터"
                     Click="OpenFilterWindow"
-                    Margin="10,15,0,0" 
-                    Height="30" 
-                    Width="135" 
+                    IsEnabled="{Binding DelBtnEnabledOrNot}"
+                    Margin="10,15,0,0"
+                    Height="30"
+                    Width="135"
                     FontSize="15"/>
 
             <Button Content="선택 삭제하기"
                     Command="{Binding DelSelMatchesCommand}"
-                    IsEnabled="{Binding DelBtnEnabledOrNot}"         
-                    Margin="10,15,0,0" 
-                    Height="30" 
-                    Width="135" 
+                    IsEnabled="{Binding DelBtnEnabledOrNot}"
+                    Margin="10,15,0,0"
+                    Height="30"
+                    Width="135"
                     FontSize="15"/>
 
             <Button Content="일괄 삭제하기"
@@ -124,7 +125,7 @@
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding DelMatchingCategory, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                   Margin="16,0"
+                                                   Margin="12,0"
                                                    TextAlignment="Center"
                                                    Foreground="Black"
                                                    Cursor="Hand"/>
@@ -192,10 +193,12 @@
 
             </Grid>
         </Border>
-        <Border Grid.Row="1">
+
+        <Border Grid.Row="1" Grid.Column="1">
             <Grid>
                 <ContentControl Content="{Binding LoadingControl}" />
             </Grid>
         </Border>
+
     </Grid>
 </Window>

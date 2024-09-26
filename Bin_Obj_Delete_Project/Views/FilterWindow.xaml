@@ -6,7 +6,8 @@
       mc:Ignorable="d" 
       Title="검색 필터 화면"
       Width="680"
-      Height="400">
+      Height="400"
+      WindowStartupLocation="CenterScreen">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -133,7 +134,6 @@
                 </Grid>
             </StackPanel>
         </Border>
-        
     </Grid>
 
 </Window>

@@ -6,7 +6,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:converter="clr-namespace:Bin_Obj_Delete_Project.Converter"
              mc:Ignorable="d"
-             Width="200" Height="200"
+             Height="200"
+             Width="200"
              Background="Transparent"
              Loaded="Loading_Fade_In"
              Unloaded="Close_Fade_Out">
@@ -14,10 +15,10 @@
         <converter:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <converter:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
     </UserControl.Resources>
-
     <Grid Background="Transparent">
         <Image gif:ImageBehavior.AnimatedSource= "pack://application:,,,/Bin_Obj_Delete_Project;component/Resources/Loading.gif"
-               VerticalAlignment="Center" HorizontalAlignment="Center"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center"
                Stretch="None">
             <Image.Style>
                 <Style TargetType="{x:Type Image}">
@@ -32,8 +33,13 @@
                 </Style>
             </Image.Style>
         </Image>
-        <TextBlock Text="로딩중....." FontSize="20" Foreground="Red" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+        <TextBlock Text="로딩중....."
+                   FontSize="20"
+                   Foreground="OrangeRed"
+                   FontWeight="Bold"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Bottom"
+                   TextAlignment="Center"
                    Visibility="{Binding VisibleLoading, Converter={StaticResource BooleanToVisibilityConverter}}"/>
     </Grid>
 </UserControl>
-    

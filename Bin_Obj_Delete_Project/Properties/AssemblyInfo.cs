@@ -1,6 +1,4 @@
 ﻿using System.Reflection;
-using System.Resources;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
 
@@ -27,6 +25,7 @@ using System.Windows;
 //사용하는 경우 <UICulture>를 en-US로 설정합니다. 그런 다음 아래
 //NeutralResourceLanguage 특성의 주석 처리를 제거합니다. 아래 줄의 "en-US"를 업데이트하여
 //프로젝트 파일의 UICulture 설정과 일치시킵니다.
+
 
 //[assembly: NeutralResourcesLanguage("en-US", UltimateResourceFallbackLocation.Satellite)]
 

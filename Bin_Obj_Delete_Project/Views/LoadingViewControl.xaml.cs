@@ -1,5 +1,4 @@
-﻿using Bin_Obj_Delete_Project.ViewModels;
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
@@ -32,6 +31,8 @@ namespace Bin_Obj_Delete_Project.Views
                 // [(fade_In) 지속 시간: 1초]
                 Duration = new Duration(TimeSpan.FromSeconds(1))
             };
+            // [초기화 프로세스] 시작
+            BeginInit();
             // [fade_In] 애니메이션 시작
             BeginAnimation(OpacityProperty, fade_In);
         }
@@ -54,6 +55,8 @@ namespace Bin_Obj_Delete_Project.Views
             };
             // [fade_Out] 애니메이션 시작
             BeginAnimation(OpacityProperty, fade_Out);
+            // [초기화 프로세스] 완료
+            EndInit();
         }
 
     }

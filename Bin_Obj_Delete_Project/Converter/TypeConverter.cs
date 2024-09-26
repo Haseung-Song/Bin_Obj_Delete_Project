@@ -4,7 +4,7 @@ using System.Windows.Data;
 
 namespace Bin_Obj_Delete_Project.Converter
 {
-    public class FormatConverter : IValueConverter
+    public class TypeConverter : IValueConverter
     {
         /// <summary>
         /// [Convert: {long}형 to {string}형 변환]
