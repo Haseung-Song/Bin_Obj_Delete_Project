@@ -678,11 +678,15 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    Console.WriteLine($"Access denied to directory: {directories}. Exception: {ex.Message}"); // 접근이 거부된 폴더는 무시
+                    Console.WriteLine($"Access Denied To Directories: Exception: {ex.Message}"); // 경로에 대한 엑세스거부 오류.
                 }
-                catch (Exception ex)
+                catch (DirectoryNotFoundException ex)
                 {
-                    Console.WriteLine($"Exception has been occured: {ex.Message}"); // 추가 [오류 메시지] 확인
+                    Console.WriteLine($"Directories Not Found: {directories}. Exception: {ex.Message}"); // 경로를 찾을 수 없음.
+                }
+                catch (PathTooLongException ex)
+                {
+                    Console.WriteLine($"Path Is Too Long: {DeleteFolderPath}. Exception: {ex.Message}"); // 경로가 너무 긴 경우.
                 }
 
             }
@@ -707,6 +711,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private static long GetDirectorySize(string dir)
         {
             DirectoryInfo dirInfo = new DirectoryInfo(dir); // DirectoryInfo 객체 생성
+
             long sizeofDir = 0; // [총량] 초기화
 
             // [현재 디렉토리] 및 [모든 하위 디렉토리]를 포함한 파일 목록 배열을 반환!
