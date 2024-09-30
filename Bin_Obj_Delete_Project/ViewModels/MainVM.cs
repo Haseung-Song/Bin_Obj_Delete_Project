@@ -554,7 +554,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         matchingFldrSize = GetDirectorySize(dir);
                         matchingFldrPath = dir;
                         matchingFileInfoOrNot = false; // 폴더로 구분
-                                                       // 1. 필터 키워드를 콤마(',')로 구분 후, 배열로 생성 (FilterFolderName)
+                        // 1. 필터 키워드를 콤마(',')로 구분 후, 배열로 생성 (FilterFolderName)
                         string[] filterComma1 = string.IsNullOrEmpty(FilterFolderName) ? Array.Empty<string>() : FilterFolderName.Split(',');
 
                         // Filter 01: 폴더 이름으로 검색(대소문자 구분(X))
