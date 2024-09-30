@@ -529,7 +529,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
             else
             {
-                _ = MessageBox.Show("불러올 폴더 경로가 없습니다.", "경로 재입력", MessageBoxButton.OK, MessageBoxImage.Error);
+                _ = MessageBox.Show("불러올 폴더 경로가 없습니다.", "경로 미입력", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
         }
@@ -842,7 +842,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         public async void FilterResetFN()
         {
-            try
+            if (!string.IsNullOrWhiteSpace(DeleteFolderPath))
             {
                 if (!string.IsNullOrWhiteSpace(FilterFolderName))
                 {
@@ -867,9 +867,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 }
 
             }
-            catch (Exception ex)
+            else
             {
-                _ = MessageBox.Show("Error Opening LoadingView() function: ", "Exception Error!" + ex.Message);
+                _ = MessageBox.Show("초기화 할 경로가 없습니다.", "경로 미입력", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
         }
@@ -879,7 +879,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         public async void FilterResetFE()
         {
-            try
+            if (!string.IsNullOrWhiteSpace(DeleteFolderPath))
             {
                 if (!string.IsNullOrWhiteSpace(FilterExtensions))
                 {
@@ -895,8 +895,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     {
                         EnumerateFolders(); // [Filter 02] 초기화
                     });
-                    VisibleLoading = false;
                     DelBtnEnabledOrNot = true;
+                    VisibleLoading = false;
                 }
                 else
                 {
@@ -904,9 +904,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 }
 
             }
-            catch (Exception ex)
+            else
             {
-                _ = MessageBox.Show("Error Opening LoadingView() function: ", "Exception Error!" + ex.Message);
+                _ = MessageBox.Show("초기화 할 경로가 없습니다.", "경로 미입력", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
         }
