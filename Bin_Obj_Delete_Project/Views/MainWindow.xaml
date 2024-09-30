@@ -15,6 +15,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal">
@@ -185,15 +186,19 @@
                         </GridView>
                     </ListView.View>
                 </ListView>
-
             </Grid>
         </Border>
-
+        
         <Border Grid.Row="1" Grid.Column="1">
             <Grid>
                 <ContentControl Content="{Binding LoadingControl}" />
             </Grid>
         </Border>
+
+        <Grid Grid.Row="2" Margin="10, 0, 0, 5">
+            <!-- Add your controls for the new row here -->
+            <TextBlock Text="총 항목: 1개" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16"/>
+        </Grid>
 
     </Grid>
 </Window>
