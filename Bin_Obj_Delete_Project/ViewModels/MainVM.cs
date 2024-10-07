@@ -494,7 +494,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 Console.WriteLine("Cancel the task after 30 seconds.");
                 VisibleLoading = false;
                 DelBtnEnabledOrNot = true;
-                _ = MessageBox.Show("로딩 시간을 초과하였습니다...", "작업 취소", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                _ = MessageBox.Show("로딩 시간이 초과되었습니다. 다른 작업을 수행하세요.", "작업 취소", MessageBoxButton.OK, MessageBoxImage.Exclamation);
             }
             try
             {
