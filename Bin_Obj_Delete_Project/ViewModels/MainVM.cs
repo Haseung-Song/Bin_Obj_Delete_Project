@@ -10,6 +10,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -469,9 +470,50 @@ namespace Bin_Obj_Delete_Project.ViewModels
         #region [버튼기능]
 
         /// <summary>
+        /// 0. [작업 수행]
+        /// </summary>
+        private async void OperatingTask()
+        {
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+            CancellationToken cancellationToken = cancellationTokenSource.Token;
+            //mouseHook.HookMouse();
+            DelBtnEnabledOrNot = false;
+            VisibleLoading = true;
+            await Task.Delay(1000);
+            Task enumerateTask = Task.Run(() =>
+            {
+                EnumerateFolders(cancellationToken);
+            }, cancellationToken);
+            // 30초 후 작업을 취소
+            Task cancelingTask = Task.Delay(30000);
+            Task completedTask = await Task.WhenAny(enumerateTask, cancelingTask);
+            if (completedTask == cancelingTask)
+            {
+                // 20초가 지나도 작업이 끝나지 않을 때, 작업 취소 요청!
+                cancellationTokenSource.Cancel();
+                Console.WriteLine("Cancel the task after 30 seconds.");
+                VisibleLoading = false;
+                DelBtnEnabledOrNot = true;
+                _ = MessageBox.Show("로딩 시간을 초과하였습니다...", "작업 취소", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            }
+            try
+            {
+                await enumerateTask;
+                //mouseHook.UnhookMouse();
+                VisibleLoading = false;
+                DelBtnEnabledOrNot = true;
+            }
+            catch (OperationCanceledException)
+            {
+                Console.WriteLine("The task has been canceled.");
+            }
+
+        }
+
+        /// <summary>
         /// 1. [폴더 불러오기] 기능 (버튼)
         /// </summary>
-        private async void LoadingFolder()
+        private void LoadingFolder()
         {
             CommonOpenFileDialog folderDialog = new CommonOpenFileDialog
             {
@@ -487,17 +529,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
                 uniqueFilePathSet.Clear(); // (중복) 해시셋 초기화
                 ActiveFolderInfo?.Clear(); // (화면) 초기화
-                //mouseHook.HookMouse();
-                DelBtnEnabledOrNot = false;
-                VisibleLoading = true;
-                await Task.Delay(1000);
-                await Task.Run(() =>
-                {
-                    EnumerateFolders();
-                });
-                //mouseHook.UnhookMouse();
-                VisibleLoading = false;
-                DelBtnEnabledOrNot = true;
+                OperatingTask();
             }
 
         }
@@ -505,7 +537,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// <summary>
         /// 2. [경로 불러오기] 기능 (Enter 키)
         /// </summary>
-        public async void EnterLoadPath()
+        public void EnterLoadPath()
         {
             // [DeleteFolderPath] 경로 null 처리 조건문 추가!
             if (!string.IsNullOrWhiteSpace(DeleteFolderPath))
@@ -515,17 +547,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
                 uniqueFilePathSet.Clear(); // (중복) 해시셋 초기화
                 ActiveFolderInfo?.Clear(); // (화면) 초기화
-                //mouseHook.HookMouse();
-                DelBtnEnabledOrNot = false;
-                VisibleLoading = true;
-                await Task.Delay(1000);
-                await Task.Run(() =>
-                {
-                    EnumerateFolders();
-                });
-                //mouseHook.UnhookMouse();
-                VisibleLoading = false;
-                DelBtnEnabledOrNot = true;
+                OperatingTask();
             }
             else
             {
@@ -534,7 +556,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
         }
 
-        protected void EnumerateFolders()
+        protected void EnumerateFolders(CancellationToken cancellationToken)
         {
             // 모든 하위 디렉토리를 검색하되, 접근이 거부된 디렉토리는 제외함!
             IEnumerable<string> directories = Directory.EnumerateDirectories(DeleteFolderPath, "*", SearchOption.AllDirectories);
@@ -546,6 +568,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 {
                     foreach (string dir in directories)
                     {
+                        // 작업 취소 요청 (25초 후) 후, 작업 취소 수행
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            break;
+                        }
                         DirectoryInfo dirInfo = new DirectoryInfo(dir);
                         matchingFldrName = dirInfo.Name;
                         matchingFldrCreationTime = dirInfo.CreationTime.ToString();
@@ -711,7 +738,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private static long GetDirectorySize(string dir)
         {
             DirectoryInfo dirInfo = new DirectoryInfo(dir); // DirectoryInfo 객체 생성
-
             long sizeofDir = 0; // [총량] 초기화
 
             // [현재 디렉토리] 및 [모든 하위 디렉토리]를 포함한 파일 목록 배열을 반환!
@@ -842,6 +868,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         public async void FilterResetFN()
         {
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+            CancellationToken cancellationToken = cancellationTokenSource.Token;
             if (!string.IsNullOrWhiteSpace(DeleteFolderPath))
             {
                 if (!string.IsNullOrWhiteSpace(FilterFolderName))
@@ -856,7 +884,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     await Task.Delay(1000);
                     await Task.Run(() =>
                     {
-                        EnumerateFolders(); // [Filter 01] 초기화
+                        EnumerateFolders(cancellationToken); // [Filter 01] 초기화
                     });
                     DelBtnEnabledOrNot = true;
                     VisibleLoading = false;
@@ -879,6 +907,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         public async void FilterResetFE()
         {
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+            CancellationToken cancellationToken = cancellationTokenSource.Token;
             if (!string.IsNullOrWhiteSpace(DeleteFolderPath))
             {
                 if (!string.IsNullOrWhiteSpace(FilterExtensions))
@@ -893,7 +923,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     await Task.Delay(1000);
                     await Task.Run(() =>
                     {
-                        EnumerateFolders(); // [Filter 02] 초기화
+                        EnumerateFolders(cancellationToken); // [Filter 02] 초기화
                     });
                     DelBtnEnabledOrNot = true;
                     VisibleLoading = false;
