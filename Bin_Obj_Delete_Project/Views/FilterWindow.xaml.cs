@@ -1,4 +1,5 @@
 ﻿using Bin_Obj_Delete_Project.ViewModels;
+using System;
 using System.Windows;
 
 namespace Bin_Obj_Delete_Project.Views
@@ -11,6 +12,20 @@ namespace Bin_Obj_Delete_Project.Views
         public FilterWindow()
         {
             InitializeComponent();
+
+            // UI 요소 로드 후 발생 이벤트
+            Loaded += FilterWindow_Closed;
+        }
+
+        /// <summary>
+        /// [검색 필터] 창 Close() 이벤트
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FilterWindow_Closed(object sender, EventArgs e)
+        {
+            MainVM vm = DataContext as MainVM;
+            vm.CloseWindowAction = new Action(() => Close());
         }
 
         /// <summary>

@@ -62,7 +62,12 @@
                                VerticalAlignment="Stretch"
                                FontSize="14"
                                FontWeight="Normal"
-                               Margin="0,5,0,10"/>
+                               Margin="0,5,0,10">
+                        <TextBox.InputBindings>
+                            <KeyBinding Gesture="Enter" 
+                                        Command="{Binding EnterLoadPathCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                        </TextBox.InputBindings>
+                    </TextBox>
                     <StackPanel Grid.Column="0"
                                 Grid.Row="2"
                                 Orientation="Horizontal"
@@ -115,7 +120,12 @@
                                VerticalAlignment="Stretch"
                                FontSize="14"
                                FontWeight="Normal"
-                               Margin="0,5,0,10"/>
+                               Margin="0,5,0,10">
+                        <TextBox.InputBindings>
+                            <KeyBinding Gesture="Enter" 
+                                        Command="{Binding EnterLoadPathCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                        </TextBox.InputBindings>
+                    </TextBox>
                     <StackPanel Grid.Column="0"
                                 Grid.Row="2"
                                 Orientation="Horizontal"

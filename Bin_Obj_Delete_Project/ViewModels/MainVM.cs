@@ -200,6 +200,12 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
         #endregion
 
+        #region [Action]
+
+        public Action CloseWindowAction { get; set; }
+
+        #endregion
+
         #region [OnPropertyChanged]
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -477,7 +483,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
             DelBtnEnabledOrNot = true;
             VisibleLoading = false;
             LoadingControl = new LoadingView();
-            TotalNumbersInfo = 0;
             SelectedCntsInfo = 0;
             LoadingFolderCommand = new RelayCommand(LoadingFolder);
             EnterLoadPathCommand = new RelayCommand(EnterLoadPath);
@@ -529,8 +534,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
         {
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
             CancellationToken cancellationToken = cancellationTokenSource.Token;
-            //mouseHook.HookMouse();
             TotalNumbersInfo = 0; // 총 항목 개수 초기화
+            //mouseHook.HookMouse();
             DelBtnEnabledOrNot = false;
             VisibleLoading = true;
             await Task.Delay(1000);
@@ -538,22 +543,22 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 EnumerateFolders(cancellationToken);
             }, cancellationToken);
-            // 40초 후 작업을 취소
-            Task cancelingTask = Task.Delay(40000);
-            Task completedTask = await Task.WhenAny(enumerateTask, cancelingTask);
-            // 40초가 지나도 작업이 끝나지 않을 때, 작업 취소 요청!
-            if (completedTask == cancelingTask)
-            {
-                cancellationTokenSource.Cancel();
-                Console.WriteLine("Task has been canceled. Please perform another task.");
-                VisibleLoading = false;
-                DelBtnEnabledOrNot = true;
-                completedTask.Dispose();
-                _ = MessageBox.Show("로딩 시간이 초과되었습니다. 다른 작업을 수행하세요.", "작업 취소", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-            }
             try
             {
-                await enumerateTask;
+                Task cancelingTask = Task.Delay(30000); // 30초 후 작업 취소!
+                Task completedTask = await Task.WhenAny(enumerateTask, cancelingTask);
+                // 30초가 지나도 작업이 끝나지 않을 때, 작업 취소 요청!
+                if (completedTask == cancelingTask)
+                {
+                    cancellationTokenSource.Cancel();
+                    Console.WriteLine("Task has been canceled. Please perform another task.");
+                    //mouseHook.UnhookMouse();
+                    VisibleLoading = false;
+                    DelBtnEnabledOrNot = true;
+                    _ = MessageBox.Show("로딩 시간이 초과되었습니다. 다른 작업을 수행하세요.", "작업 취소", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    return;
+                }
+                await enumerateTask; // 해당 작업 수행!
                 //mouseHook.UnhookMouse();
                 VisibleLoading = false;
                 DelBtnEnabledOrNot = true;
@@ -586,7 +591,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
                 uniqueFilePathSet.Clear(); // (중복) 해시셋 초기화
                 ActiveFolderInfo?.Clear(); // (화면) 초기화
-                OperatingTask();
+                OperatingTask(); // 작업 수행 및 취소
             }
 
         }
@@ -604,7 +609,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
                 uniqueFilePathSet.Clear(); // (중복) 해시셋 초기화
                 ActiveFolderInfo?.Clear(); // (화면) 초기화
-                OperatingTask();
+                OperatingTask(); // 작업 수행 및 취소
+                CloseWindowAction?.Invoke(); // 창 닫기 동작 호출!
             }
             else
             {
@@ -625,7 +631,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 {
                     foreach (string dir in directories)
                     {
-                        // 작업 취소 요청 (40초 후) 후, 작업 취소 수행
+                        // 작업 취소 요청 (30초 후) 후, 작업 취소 수행
                         if (cancellationToken.IsCancellationRequested)
                         {
                             return;
@@ -937,6 +943,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     uniqueFilePathSet.Clear(); // (중복) 해시셋 초기화
                     ActiveFolderInfo?.Clear(); // (화면) 초기화
                     FilterFolderName = string.Empty; // TextBox 초기화
+                    CloseWindowAction?.Invoke(); // 창 닫기 동작 호출!
                     TotalNumbersInfo = 0; // 총 항목 개수 초기화
                     DelBtnEnabledOrNot = false;
                     VisibleLoading = true;
@@ -956,6 +963,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
             else
             {
+                FilterFolderName = string.Empty;
                 _ = MessageBox.Show("초기화 할 경로가 없습니다.", "경로 미입력", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
@@ -977,6 +985,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     uniqueFilePathSet.Clear(); // (중복) 해시셋 초기화
                     ActiveFolderInfo?.Clear(); // (화면) 초기화
                     FilterExtensions = string.Empty; // TextBox 초기화
+                    CloseWindowAction?.Invoke(); // 창 닫기 동작 호출!
                     TotalNumbersInfo = 0; // 총 항목 개수 초기화
                     DelBtnEnabledOrNot = false;
                     VisibleLoading = true;
@@ -996,6 +1005,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
             else
             {
+                FilterExtensions = string.Empty;
                 _ = MessageBox.Show("초기화 할 경로가 없습니다.", "경로 미입력", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
