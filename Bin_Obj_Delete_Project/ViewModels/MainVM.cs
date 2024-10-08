@@ -861,7 +861,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         }
 
                     }
-
+                    TotalNumbersInfo = ActiveFolderInfo.Count(); // UI Update (총 항목 개수)
                 }
 
             }
@@ -914,9 +914,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         }
 
                     }
-
+                    DeleteFolderInfo?.Clear(); // UI 클리어!
                 }
-                DeleteFolderInfo?.Clear(); // UI 클리어!
+                TotalNumbersInfo = ActiveFolderInfo.Count(); // UI Update (총 항목 개수)
             }
 
         }
