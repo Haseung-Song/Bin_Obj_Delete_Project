@@ -484,14 +484,14 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 EnumerateFolders(cancellationToken);
             }, cancellationToken);
-            // 30초 후 작업을 취소
-            Task cancelingTask = Task.Delay(30000);
+            // 40초 후 작업을 취소
+            Task cancelingTask = Task.Delay(40000);
             Task completedTask = await Task.WhenAny(enumerateTask, cancelingTask);
             if (completedTask == cancelingTask)
             {
-                // 20초가 지나도 작업이 끝나지 않을 때, 작업 취소 요청!
+                // 40초가 지나도 작업이 끝나지 않을 때, 작업 취소 요청!
                 cancellationTokenSource.Cancel();
-                Console.WriteLine("Cancel the task after 30 seconds.");
+                Console.WriteLine("Cancel the task after 40 seconds.");
                 VisibleLoading = false;
                 DelBtnEnabledOrNot = true;
                 _ = MessageBox.Show("로딩 시간이 초과되었습니다. 다른 작업을 수행하세요.", "작업 취소", MessageBoxButton.OK, MessageBoxImage.Exclamation);
@@ -568,7 +568,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 {
                     foreach (string dir in directories)
                     {
-                        // 작업 취소 요청 (25초 후) 후, 작업 취소 수행
+                        // 작업 취소 요청 (40초 후) 후, 작업 취소 수행
                         if (cancellationToken.IsCancellationRequested)
                         {
                             break;
