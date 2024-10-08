@@ -12,7 +12,6 @@ namespace Bin_Obj_Delete_Project
     public partial class MainWindow : Window
     {
         private readonly MainVM vm = new MainVM(); // MainVM() 객체 vm 생성
-
         public MainWindow()
         {
             InitializeComponent();
@@ -26,6 +25,7 @@ namespace Bin_Obj_Delete_Project
             foreach (DelMatchingInfo item in e.AddedItems)
             {
                 vm.SelectFolderInfo?.Add(item);
+                vm.SelectedCntsInfo = vm.SelectFolderInfo.Count;
             }
 
             // [SelectionChanged] 이벤트 발생!
@@ -35,6 +35,7 @@ namespace Bin_Obj_Delete_Project
                 if (vm.SelectFolderInfo?.Count > 0)
                 {
                     _ = vm.SelectFolderInfo.Remove(item);
+                    vm.SelectedCntsInfo = vm.SelectFolderInfo.Count;
                 }
 
             }
@@ -49,7 +50,6 @@ namespace Bin_Obj_Delete_Project
             };
             // [filterWindow] => MainWindow 동기화 (완료)
             filterWindow.Owner = this;
-
             // [filterWindow] => MainWindow 창(접근 불가)
             _ = filterWindow.ShowDialog();
         }

@@ -169,6 +169,16 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private List<DelMatchingInfo> lstOrderByPath;
 
         /// <summary>
+        /// [totalNumbersInfo]
+        /// </summary>
+        private static int totalNumbersInfo;
+
+        /// <summary>
+        /// [selectedCntsInfo]
+        /// </summary>
+        private static int selectedCntsInfo;
+
+        /// <summary>
         /// [_selectedCrFolder]
         /// </summary>
         private DelMatchingInfo _selectedCrFolder;
@@ -268,6 +278,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
         }
 
+        /// <summary>
+        /// [VisibleLoading]
+        /// </summary>
         public bool VisibleLoading
         {
             get => _aVisibleLoadingOrNot;
@@ -283,6 +296,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
         }
 
+        /// <summary>
+        /// [LoadingControl]
+        /// </summary>
         public UserControl LoadingControl
         {
             get => loadingControl;
@@ -309,6 +325,41 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 if (_deleteFolderInfo != value)
                 {
                     _deleteFolderInfo = value;
+                    OnPropertyChanged();
+                }
+
+            }
+
+        }
+
+        /// <summary>
+        /// [TotalNumberInfo]
+        /// </summary>
+        public int TotalNumbersInfo
+        {
+            get => totalNumbersInfo;
+            set
+            {
+                if (totalNumbersInfo != value)
+                {
+                    totalNumbersInfo = value;
+                    OnPropertyChanged();
+                }
+
+            }
+        }
+
+        /// <summary>
+        /// [TotalSelectInfo]
+        /// </summary>
+        public int SelectedCntsInfo
+        {
+            get => selectedCntsInfo;
+            set
+            {
+                if (selectedCntsInfo != value)
+                {
+                    selectedCntsInfo = value;
                     OnPropertyChanged();
                 }
 
@@ -426,6 +477,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
             DelBtnEnabledOrNot = true;
             VisibleLoading = false;
             LoadingControl = new LoadingView();
+            TotalNumbersInfo = 0;
+            SelectedCntsInfo = 0;
             LoadingFolderCommand = new RelayCommand(LoadingFolder);
             EnterLoadPathCommand = new RelayCommand(EnterLoadPath);
             _selectedCrFolder = new DelMatchingInfo();
@@ -470,13 +523,14 @@ namespace Bin_Obj_Delete_Project.ViewModels
         #region [버튼기능]
 
         /// <summary>
-        /// 0. [작업 수행]
+        /// 0. [작업 수행 및 취소]
         /// </summary>
         private async void OperatingTask()
         {
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
             CancellationToken cancellationToken = cancellationTokenSource.Token;
             //mouseHook.HookMouse();
+            TotalNumbersInfo = 0; // 총 항목 개수 초기화
             DelBtnEnabledOrNot = false;
             VisibleLoading = true;
             await Task.Delay(1000);
@@ -485,15 +539,16 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 EnumerateFolders(cancellationToken);
             }, cancellationToken);
             // 40초 후 작업을 취소
-            Task cancelingTask = Task.Delay(40000);
+            Task cancelingTask = Task.Delay(400000);
             Task completedTask = await Task.WhenAny(enumerateTask, cancelingTask);
             if (completedTask == cancelingTask)
             {
                 // 40초가 지나도 작업이 끝나지 않을 때, 작업 취소 요청!
                 cancellationTokenSource.Cancel();
-                Console.WriteLine("Cancel the task after 40 seconds.");
+                Console.WriteLine("Task has been canceled. Please perform another task.");
                 VisibleLoading = false;
                 DelBtnEnabledOrNot = true;
+                completedTask.Dispose();
                 _ = MessageBox.Show("로딩 시간이 초과되었습니다. 다른 작업을 수행하세요.", "작업 취소", MessageBoxButton.OK, MessageBoxImage.Exclamation);
             }
             try
@@ -502,6 +557,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 //mouseHook.UnhookMouse();
                 VisibleLoading = false;
                 DelBtnEnabledOrNot = true;
+                TotalNumbersInfo = ActiveFolderInfo.Count(); // 총 항목 개수
+                enumerateTask.Dispose();
             }
             catch (OperationCanceledException)
             {
@@ -571,7 +628,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         // 작업 취소 요청 (40초 후) 후, 작업 취소 수행
                         if (cancellationToken.IsCancellationRequested)
                         {
-                            break;
+                            return;
                         }
                         DirectoryInfo dirInfo = new DirectoryInfo(dir);
                         matchingFldrName = dirInfo.Name;
@@ -728,6 +785,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 Console.WriteLine(item.DelMatchingPath);
             }
             ActiveFolderInfo = DeleteFolderInfo; // [ActiveFolderInfo] 컬렉션에 [DeleteFolderInfo] 컬렉션을 할당
+            TotalNumbersInfo = ActiveFolderInfo.Count(); // 총 항목 개수 표시
         }
 
         /// <summary>
@@ -879,6 +937,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     uniqueFilePathSet.Clear(); // (중복) 해시셋 초기화
                     ActiveFolderInfo?.Clear(); // (화면) 초기화
                     FilterFolderName = string.Empty; // TextBox 초기화
+                    TotalNumbersInfo = 0; // 총 항목 개수 초기화
                     DelBtnEnabledOrNot = false;
                     VisibleLoading = true;
                     await Task.Delay(1000);
@@ -918,6 +977,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     uniqueFilePathSet.Clear(); // (중복) 해시셋 초기화
                     ActiveFolderInfo?.Clear(); // (화면) 초기화
                     FilterExtensions = string.Empty; // TextBox 초기화
+                    TotalNumbersInfo = 0; // 총 항목 개수 초기화
                     DelBtnEnabledOrNot = false;
                     VisibleLoading = true;
                     await Task.Delay(1000);
@@ -1054,7 +1114,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             // 2) 플래그(flag) 값, 반전시키기
             orderByAscendingOrNot = !orderByAscendingOrNot;
         }
-
+        #endregion
     }
-    #endregion
+
 }
