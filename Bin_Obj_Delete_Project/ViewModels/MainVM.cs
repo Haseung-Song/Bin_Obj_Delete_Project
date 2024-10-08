@@ -541,9 +541,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
             // 40초 후 작업을 취소
             Task cancelingTask = Task.Delay(40000);
             Task completedTask = await Task.WhenAny(enumerateTask, cancelingTask);
+            // 40초가 지나도 작업이 끝나지 않을 때, 작업 취소 요청!
             if (completedTask == cancelingTask)
             {
-                // 40초가 지나도 작업이 끝나지 않을 때, 작업 취소 요청!
                 cancellationTokenSource.Cancel();
                 Console.WriteLine("Task has been canceled. Please perform another task.");
                 VisibleLoading = false;
