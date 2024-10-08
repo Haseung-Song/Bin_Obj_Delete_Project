@@ -539,7 +539,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 EnumerateFolders(cancellationToken);
             }, cancellationToken);
             // 40초 후 작업을 취소
-            Task cancelingTask = Task.Delay(400000);
+            Task cancelingTask = Task.Delay(40000);
             Task completedTask = await Task.WhenAny(enumerateTask, cancelingTask);
             if (completedTask == cancelingTask)
             {
