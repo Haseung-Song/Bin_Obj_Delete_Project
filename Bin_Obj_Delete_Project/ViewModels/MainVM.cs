@@ -648,6 +648,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
             else
             {
+                FilterFolderName = string.Empty;
+                FilterExtensions = string.Empty;
                 _ = MessageBox.Show("불러올 폴더 경로가 없습니다.", "경로 미입력", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 

@@ -12,8 +12,6 @@ namespace Bin_Obj_Delete_Project.Views
         public FilterWindow()
         {
             InitializeComponent();
-
-            // UI 요소 로드 후 발생 이벤트
             Loaded += FilterWindow_Closed;
         }
 
@@ -37,7 +35,6 @@ namespace Bin_Obj_Delete_Project.Views
         {
             MainVM vm = DataContext as MainVM;
             vm?.EnterLoadPath();
-            Close(); // 창 닫기!
         }
 
         /// <summary>
