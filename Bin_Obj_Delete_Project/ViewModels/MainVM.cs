@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -525,10 +526,43 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
         #endregion
 
-        #region [버튼기능]
+        #region [버튼 및 기능]
 
         /// <summary>
-        /// 0. [작업 수행 및 취소]
+        /// [폴더 및 파일 열기] (기능)
+        /// </summary>
+        public void StartContents()
+        {
+            string path = SelectedCrFolder.DelMatchingPath;
+            try
+            {
+                // 선택된 아이템이 "파일 폴더"(= 폴더)이거나, "응용 프로그램"(= 파일[.exe])일 경우, 파일 탐색기를 통해 열 수 있음.
+                _ = SelectedCrFolder.DelMatchingCategory == "파일 폴더" || SelectedCrFolder.DelMatchingCategory == "응용 프로그램"
+                    ? Process.Start(new ProcessStartInfo()
+                    {
+                        FileName = path, // 선택된 폴더의 경로
+                        UseShellExecute = true // 운영체제 셸 사용 여부: Yes
+                    })
+                    // 선택된 아이템이 (그 밖의 파일)에 해당하는 경우, [앱 선택] 창을 통해 열도록 함.
+                    : Process.Start(new ProcessStartInfo()
+                    {
+                        FileName = "rundll32.exe", // "rundll32.exe" 사용 DLL 호출
+                        Arguments = $"shell32.dll,OpenAs_RunDLL {path}", // [OpenWith] 창 호출 명령어
+                        UseShellExecute = false, // 운영체제 셸 사용 여부: No
+                        RedirectStandardError = true, // 표준 오류 리다이렉션 여부: Yes
+                        CreateNoWindow = true // 창 없이 실행
+                    });
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error opening contents: {ex.Message}");
+            }
+
+        }
+
+        /// <summary>
+        /// [작업 수행 및 취소] (기능)
         /// </summary>
         private async void OperatingTask()
         {
@@ -780,28 +814,29 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 }
 
             }
-            // DelMatchingInfo 정보 확인: 디버깅으로 확인 가능
-            foreach (DelMatchingInfo item in DeleteFolderInfo)
-            {
-                Console.WriteLine(item.DelMatchingName);
-                Console.WriteLine(item.DelMatchingCreationTime);
-                Console.WriteLine(item.DelMatchingCategory);
-                Console.WriteLine(item.DelMatchingModifiedTime);
-                Console.WriteLine(item.DelMatchingOfSize);
-                Console.WriteLine(item.DelMatchingPath);
-            }
+            // DelMatchingInfo 정보 확인: 디버깅으로 확인 가능!!
+            //foreach (DelMatchingInfo item in DeleteFolderInfo)
+            //{
+            //    Console.WriteLine(item.DelMatchingName);
+            //    Console.WriteLine(item.DelMatchingCreationTime);
+            //    Console.WriteLine(item.DelMatchingCategory);
+            //    Console.WriteLine(item.DelMatchingModifiedTime);
+            //    Console.WriteLine(item.DelMatchingOfSize);
+            //    Console.WriteLine(item.DelMatchingPath);
+            //}
             ActiveFolderInfo = DeleteFolderInfo; // [ActiveFolderInfo] 컬렉션에 [DeleteFolderInfo] 컬렉션을 할당
             TotalNumbersInfo = ActiveFolderInfo.Count(); // 총 항목 개수 표시
         }
 
         /// <summary>
-        /// [하위 디렉토리] 파일의 총량 계산 함수
+        /// [하위 디렉토리] 파일의 총량 계산 (기능)
         /// </summary>
         /// <param name="directory"></param>
         /// <returns></returns>
         private static long GetDirectorySize(string dir)
         {
             DirectoryInfo dirInfo = new DirectoryInfo(dir); // DirectoryInfo 객체 생성
+
             long sizeofDir = 0; // [총량] 초기화
 
             // [현재 디렉토리] 및 [모든 하위 디렉토리]를 포함한 파일 목록 배열을 반환!

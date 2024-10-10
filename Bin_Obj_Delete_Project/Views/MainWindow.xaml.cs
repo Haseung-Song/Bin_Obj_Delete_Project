@@ -3,6 +3,7 @@ using Bin_Obj_Delete_Project.ViewModels;
 using Bin_Obj_Delete_Project.Views;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace Bin_Obj_Delete_Project
 {
@@ -11,13 +12,28 @@ namespace Bin_Obj_Delete_Project
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly MainVM vm = new MainVM(); // MainVM() 객체 vm 생성
+        private readonly MainVM vm = new MainVM();
         public MainWindow()
         {
             InitializeComponent();
             DataContext = vm;
         }
 
+        /// <summary>
+        /// [ListView_MouseDoubleClick]
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            vm.StartContents();
+        }
+
+        /// <summary>
+        /// [ListView_SelectionChanged]
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // [SelectionChanged] 이벤트 발생!
@@ -46,10 +62,9 @@ namespace Bin_Obj_Delete_Project
         {
             FilterWindow filterWindow = new FilterWindow
             {
-                DataContext = vm
+                DataContext = vm,
+                Owner = this, // MainWindow 동기화 (완료)
             };
-            // [filterWindow] => MainWindow 동기화 (완료)
-            filterWindow.Owner = this;
             // [filterWindow] => MainWindow 창(접근 불가)
             _ = filterWindow.ShowDialog();
         }

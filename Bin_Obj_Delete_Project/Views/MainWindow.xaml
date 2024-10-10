@@ -87,6 +87,11 @@
                           SelectionChanged="ListView_SelectionChanged"
                           Margin="5"
                           x:Name="listView">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <EventSetter Event="MouseDoubleClick" Handler="ListView_MouseDoubleClick"/>
+                        </Style>
+                    </ListView.ItemContainerStyle>
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Width="320">
