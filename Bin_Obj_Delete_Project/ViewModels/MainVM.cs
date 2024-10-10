@@ -656,7 +656,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         protected void EnumerateFolders(CancellationToken cancellationToken)
         {
             // 모든 하위 디렉토리를 검색하되, 접근이 거부된 디렉토리는 제외!
-            IEnumerable<string> directories = Directory.EnumerateDirectories(DeleteFolderPath, "*", SearchOption.AllDirectories).ToList();
+            IEnumerable<string> directories = Directory.EnumerateDirectories(DeleteFolderPath, "*", SearchOption.AllDirectories);
             //.Where(dir => dir.EndsWith("bin") || dir.EndsWith("obj")); // 경로의 마지막 글자가 "bin"이거나 "obj"인 파일만 찾음!
             // 하위 디렉토리 중 요소가 하나라도 존재하면,
             if (directories != null && directories.Any())
