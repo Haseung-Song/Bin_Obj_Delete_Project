@@ -45,7 +45,6 @@ namespace Bin_Obj_Delete_Project.Views
         private void F01ResetButton_Click(object sender, RoutedEventArgs e)
         {
             MainVM vm = DataContext as MainVM;
-            // (Filter 01) Reset
             vm?.FilterResetFN();
         }
 
@@ -57,7 +56,6 @@ namespace Bin_Obj_Delete_Project.Views
         private void F02ResetButton_Click(object sender, RoutedEventArgs e)
         {
             MainVM vm = DataContext as MainVM;
-            // (Filter 02) Reset
             vm?.FilterResetFE();
         }
 

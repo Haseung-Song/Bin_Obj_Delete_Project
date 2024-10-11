@@ -1240,6 +1240,13 @@ namespace Bin_Obj_Delete_Project.ViewModels
             orderByAscendingOrNot = !orderByAscendingOrNot;
         }
         #endregion
+
+        #region [캐싱 처리]
+
+
+
+        #endregion
+
     }
 
 }
