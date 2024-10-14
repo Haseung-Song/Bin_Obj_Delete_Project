@@ -763,9 +763,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     // 2) [FilterExtensions]가 null이거나 string.Empty 문자열인 경우: 파일 확장자를 콤마(',')로 구분 반환
                     if (!string.IsNullOrEmpty(FilterExtensions))
                     {
-                        var arrayInfo = dirInfo.EnumerateFiles("*", SearchOption.AllDirectories);
+                        var filesInfo = dirInfo.EnumerateFiles("*", SearchOption.AllDirectories);
                         matchingFileInfoOrNot = true; // [파일]로 구분
-                        foreach (var files in arrayInfo)
+                        foreach (var files in filesInfo)
                         {
                             // 이미 처리가 된 파일 경로는 무시! (중복 제거)
                             if (uniqueFilePathSet.Contains(files.FullName))
