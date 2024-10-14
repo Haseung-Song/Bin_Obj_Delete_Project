@@ -595,7 +595,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }, cancellationToken);
             try
             {
-                Task cancelingTask = Task.Delay(40000); // 40초 후 작업 취소!
+                Task cancelingTask = Task.Delay(60000); // 60초 후 작업 취소!
                 Task completedTask = await Task.WhenAny(enumerateTask, cancelingTask);
                 // 40초가 지나도 작업이 끝나지 않을 때, 작업 취소 요청!
                 if (completedTask == cancelingTask)
@@ -699,7 +699,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 foreach (string dir in GetEneumerateFldrList())
                 {
-                    // 작업 취소 요청 (40초 후) 후, 작업 취소 수행
+                    // 작업 취소 요청 (60초 후) 후, 작업 취소 수행
                     if (cancellationToken.IsCancellationRequested)
                     {
                         return;
@@ -763,23 +763,21 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     // 2) [FilterExtensions]가 null이거나 string.Empty 문자열인 경우: 파일 확장자를 콤마(',')로 구분 반환
                     if (!string.IsNullOrEmpty(FilterExtensions))
                     {
-                        FileInfo[] arrayInfo = dirInfo.GetFiles("*", SearchOption.AllDirectories);
-                        if (arrayInfo?.Count() > 0)
+                        var arrayInfo = dirInfo.EnumerateFiles("*", SearchOption.AllDirectories);
+                        matchingFileInfoOrNot = true; // [파일]로 구분
+                        foreach (var files in arrayInfo)
                         {
-                            matchingFileInfoOrNot = true; // [파일]로 구분
-                            foreach (FileInfo files in arrayInfo)
+                            // 이미 처리가 된 파일 경로는 무시! (중복 제거)
+                            if (uniqueFilePathSet.Contains(files.FullName))
                             {
-                                // 이미 처리가 된 파일 경로는 무시! (중복 제거)
-                                if (uniqueFilePathSet.Contains(files.FullName))
-                                {
-                                    continue;
-                                }
-                                // 2) 콤마(',')로 구분된 [FilterExtensions]이 파일의 확장명 부분의 문자열과 일치하는 경우 (확장자 비교)
-                                if (Array.Exists(filterComma2, comma2 => files.Extension.Equals(comma2.Trim(), StringComparison.OrdinalIgnoreCase)))
-                                {
-                                    matchingFileName = files.Name;
-                                    matchingFileCreationTime = files.CreationTime.ToString();
-                                    Dictionary<string, string> extensionCategoryMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                                continue;
+                            }
+                            // 2) 콤마(',')로 구분된 [FilterExtensions]이 파일의 확장명 부분의 문자열과 일치하는 경우 (확장자 비교)
+                            if (Array.Exists(filterComma2, comma2 => files.Extension.Equals(comma2.Trim(), StringComparison.OrdinalIgnoreCase)))
+                            {
+                                matchingFileName = files.Name;
+                                matchingFileCreationTime = files.CreationTime.ToString();
+                                Dictionary<string, string> extensionCategoryMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                                     {
                                         { ".pdb", "Program Debug Database" },
                                         { ".sln", "Visual Studio Solution" },
@@ -804,27 +802,25 @@ namespace Bin_Obj_Delete_Project.ViewModels
                                         { ".exe", "응용 프로그램" },
                                         { ".suo", "Visual Studio Solution User Options" }
                                     };
-                                    matchingFileCategory = extensionCategoryMap.TryGetValue(files.Extension, out string category) ? category : "기타 파일";
-                                    matchingFileModifiedTime = files.LastWriteTime.ToString();
-                                    matchingFileSize = files.Length;
-                                    matchingFilePath = files.FullName;
-                                    _ = uniqueFilePathSet.Add(matchingFilePath); // 중복 제거!
+                                matchingFileCategory = extensionCategoryMap.TryGetValue(files.Extension, out string category) ? category : "기타 파일";
+                                matchingFileModifiedTime = files.LastWriteTime.ToString();
+                                matchingFileSize = files.Length;
+                                matchingFilePath = files.FullName;
+                                _ = uniqueFilePathSet.Add(matchingFilePath); // 중복 제거!
 
-                                    // 2. [FilterExtensions] => 해당 파일 및 정보를 리스트의 형태로 전시
-                                    // 즉, 필터링 (X) => 필터링 없이 전시, 필터링 (O) => 필터링해서 전시
-                                    if (string.IsNullOrEmpty(FilterFolderName) && matchingFileInfoOrNot)
+                                // 2. [FilterExtensions] => 해당 파일 및 정보를 리스트의 형태로 전시
+                                // 즉, 필터링 (X) => 필터링 없이 전시, 필터링 (O) => 필터링해서 전시
+                                if (string.IsNullOrEmpty(FilterFolderName) && matchingFileInfoOrNot)
+                                {
+                                    DeleteFolderInfo.Add(new DelMatchingInfo
                                     {
-                                        DeleteFolderInfo.Add(new DelMatchingInfo
-                                        {
-                                            DelMatchingName = matchingFileName,
-                                            DelMatchingCreationTime = matchingFileCreationTime,
-                                            DelMatchingCategory = matchingFileCategory,
-                                            DelMatchingModifiedTime = matchingFileModifiedTime,
-                                            DelMatchingOfSize = matchingFileSize,
-                                            DelMatchingPath = matchingFilePath
-                                        });
-
-                                    }
+                                        DelMatchingName = matchingFileName,
+                                        DelMatchingCreationTime = matchingFileCreationTime,
+                                        DelMatchingCategory = matchingFileCategory,
+                                        DelMatchingModifiedTime = matchingFileModifiedTime,
+                                        DelMatchingOfSize = matchingFileSize,
+                                        DelMatchingPath = matchingFilePath
+                                    });
 
                                 }
 
@@ -860,7 +856,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
             //    Console.WriteLine(item.DelMatchingOfSize);
             //    Console.WriteLine(item.DelMatchingPath);
             //}
-
             ActiveFolderInfo = DeleteFolderInfo; // [ActiveFolderInfo] 컬렉션에 [DeleteFolderInfo] 컬렉션을 할당
             TotalNumbersInfo = ActiveFolderInfo.Count(); // 총 항목 개수 표시
         }
