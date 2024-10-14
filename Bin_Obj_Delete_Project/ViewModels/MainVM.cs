@@ -699,7 +699,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 foreach (string dir in GetEneumerateFldrList())
                 {
-                    // 작업 취소 요청 (60초 후) 후, 작업 취소 수행
+                    // 작업 취소 요청 (약 60초) 후, 작업 취소 수행
                     if (cancellationToken.IsCancellationRequested)
                     {
                         return;
