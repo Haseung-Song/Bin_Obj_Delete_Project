@@ -72,7 +72,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Converter\VisibilityConverter.cs" />
+    <Compile Include="Converters\VisibilityConverter.cs" />
     <Compile Include="Views\LoadingViewControl.xaml.cs">
       <DependentUpon>LoadingViewControl.xaml</DependentUpon>
     </Compile>
@@ -90,7 +90,7 @@
     </Compile>
     <Compile Include="Common\ParameterRelayCommand.cs" />
     <Compile Include="Common\RelayCommand.cs" />
-    <Compile Include="Converter\TypeConverter.cs" />
+    <Compile Include="Converters\TypeConverter.cs" />
     <Compile Include="Models\MatchingInfo.cs" />
     <Compile Include="Models\GlobalMouseHook.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
