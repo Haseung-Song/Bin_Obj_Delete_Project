@@ -1017,7 +1017,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 if (DeleteFolderInfo?.Count > 0)
                 {
                     entireToDelete = new List<DelMatchingInfo>(DeleteFolderInfo);
-                    if (!entireToDelete.Any(v => v.DelMatchingName.Equals("bin") || v.DelMatchingName.Equals("obj")))
+                    if (!entireToDelete.Any(v => v.DelMatchingName.Equals("bin", StringComparison.OrdinalIgnoreCase) || v.DelMatchingName.Equals("obj", StringComparison.OrdinalIgnoreCase)))
                     {
                         MessageBoxResult messageBox = MessageBox.Show("전체 삭제하시겠습니까?", "일괄 삭제", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                         if (messageBox == MessageBoxResult.OK)
