@@ -919,7 +919,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 if (SelectFolderInfo?.Count > 0)
                 {
                     selectToDelete = new List<DelMatchingInfo>(SelectFolderInfo);
-                    if (!selectToDelete.Any(v => v.DelMatchingName.Equals("bin") || v.DelMatchingName.Equals("obj")))
+                    if (!selectToDelete.Any(v => v.DelMatchingName.Equals("bin", StringComparison.OrdinalIgnoreCase) || v.DelMatchingName.Equals("obj", StringComparison.OrdinalIgnoreCase)))
                     {
                         // 선택된 [삭제할 폴더 유형]이 모두 "파일 폴더"인 경우에 해당 사항
                         if (selectToDelete.All(v => v.DelMatchingCategory == "파일 폴더"))
