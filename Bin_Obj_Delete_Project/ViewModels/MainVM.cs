@@ -778,30 +778,30 @@ namespace Bin_Obj_Delete_Project.ViewModels
                                 matchingFileName = files.Name;
                                 matchingFileCreationTime = files.CreationTime.ToString();
                                 Dictionary<string, string> extensionCategoryMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                                    {
-                                        { ".pdb", "Program Debug Database" },
-                                        { ".sln", "Visual Studio Solution" },
-                                        { ".cs", "C# Source File" },
-                                        { ".csproj", "C# Project File" },
-                                        { ".user", "Per-User Project Options File" },
-                                        { ".config", "VisualStudio.config.11.0" },
-                                        { ".dll", "응용 프로그램 확장" },
-                                        { ".cache", "CACHE 파일" },
-                                        { ".resources", "RESOURCES 파일" },
-                                        { ".baml", "BAML 파일" },
-                                        { ".resx", "Microsoft .NET Managed Resource File" },
-                                        { ".settings", "Settings-Designer File" },
-                                        { ".xaml", "Windows 태그 파일" },
-                                        { ".xml", "xmlfile" },
-                                        { ".nupkg", "NUPKG 파일" },
-                                        { ".gitattributes", "txtfile" },
-                                        { ".gitignore", "txtfile" },
-                                        { ".md", "MD 파일" },
-                                        { ".p7s", "PKCS #7 서명" },
-                                        { ".txt", "텍스트 문서" },
-                                        { ".exe", "응용 프로그램" },
-                                        { ".suo", "Visual Studio Solution User Options" }
-                                    };
+                                {
+                                     { ".pdb", "Program Debug Database" },
+                                     { ".sln", "Visual Studio Solution" },
+                                     { ".cs", "C# Source File" },
+                                     { ".csproj", "C# Project File" },
+                                     { ".user", "Per-User Project Options File" },
+                                     { ".config", "VisualStudio.config.11.0" },
+                                     { ".dll", "응용 프로그램 확장" },
+                                     { ".cache", "CACHE 파일" },
+                                     { ".resources", "RESOURCES 파일" },
+                                     { ".baml", "BAML 파일" },
+                                     { ".resx", "Microsoft .NET Managed Resource File" },
+                                     { ".settings", "Settings-Designer File" },
+                                     { ".xaml", "Windows 태그 파일" },
+                                     { ".xml", "xmlfile" },
+                                     { ".nupkg", "NUPKG 파일" },
+                                     { ".gitattributes", "txtfile" },
+                                     { ".gitignore", "txtfile" },
+                                     { ".md", "MD 파일" },
+                                     { ".p7s", "PKCS #7 서명" },
+                                     { ".txt", "텍스트 문서" },
+                                     { ".exe", "응용 프로그램" },
+                                     { ".suo", "Visual Studio Solution User Options" }
+                                };
                                 matchingFileCategory = extensionCategoryMap.TryGetValue(files.Extension, out string category) ? category : "기타 파일";
                                 matchingFileModifiedTime = files.LastWriteTime.ToString();
                                 matchingFileSize = files.Length;
