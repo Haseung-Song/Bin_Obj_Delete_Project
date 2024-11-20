@@ -752,6 +752,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private static long GetDirectorySize(string dir)
         {
             DirectoryInfo dirInfo = new DirectoryInfo(dir); // DirectoryInfo 객체 생성
+
             long sizeofDir = 0; // [총량] 초기화
 
             // [현재 디렉토리] 및 [모든 하위 디렉토리]를 포함한 파일 목록 배열을 반환!
@@ -868,8 +869,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             // 2) 콤마(',')로 구분된 [FilterExtensions]이 파일의 확장명 부분의 문자열과 일치하는 경우 (확장자 비교)
                             if (Array.Exists(filterComma2, comma2 => files.Extension.Equals(comma2.Trim(), StringComparison.OrdinalIgnoreCase)))
                             {
-                                processedDirs++;
-                                progress.Report((double)processedDirs / totalDirs * 100);
                                 matchingFileName = files.Name;
                                 matchingFileCreationTime = files.CreationTime.ToString();
                                 Dictionary<string, string> extensionCategoryMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -918,15 +917,15 @@ namespace Bin_Obj_Delete_Project.ViewModels
                                     });
 
                                 }
-
+                                processedDirs++;
+                                progress.Report((double)processedDirs / totalDirs * 100);
                             }
 
                         }
 
                     }
                     processedDirs++;
-                    double dirProgress = (double)processedDirs / totalDirs * 100;
-                    progress.Report(dirProgress);
+                    progress.Report((double)processedDirs / totalDirs * 100);
                 }
 
             }
@@ -960,6 +959,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 //    Console.WriteLine(item.DelMatchingOfSize);
                 //    Console.WriteLine(item.DelMatchingPath);
                 //}
+
                 ActiveFolderInfo = DeleteFolderInfo; // [ActiveFolderInfo] 컬렉션에 [DeleteFolderInfo] 컬렉션을 할당
                 TotalNumbersInfo = ActiveFolderInfo.Count(); // 총 항목 개수 표시
                 progress.Report(100); // [진행률: 100] => 작업 완료
