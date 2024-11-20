@@ -795,7 +795,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     matchingFldrSize = await Task.Run(() => GetDirectorySize(dir));
                     matchingFldrPath = dir;
                     matchingFileInfoOrNot = false; // [폴더]로 구분
-                    int processedFilter1 = 0;
+
                     // 1. 필터 키워드를 콤마(',')로 구분 후, 배열로 생성 (FilterFolderName)
                     string[] filterComma1 = string.IsNullOrEmpty(FilterFolderName) ? Array.Empty<string>() : FilterFolderName.Split(',');
 
@@ -819,8 +819,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     // 1), 2)가 아닐 때,
                     if (!folderMatches2)
                     {
-                        processedFilter1++;
-                        progress.Report((double)processedFilter1 / totalDirs * 100);
+                        processedDirs++;
+                        progress.Report((double)processedDirs / totalDirs * 100);
                         continue;
                     }
 
@@ -851,7 +851,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     {
                         IEnumerable<FileInfo> lstEnumerateFilesInfo = await Task.Run(() => dirInfo.EnumerateFiles("*", SearchOption.AllDirectories));
                         matchingFileInfoOrNot = true; // [파일]로 구분됨!
-                        int processedFilter2 = 0;
+                        int processedFiles = 0;
                         foreach (FileInfo files in lstEnumerateFilesInfo)
                         {
                             // 작업 취소 요청 (약 90초) 후, 작업 취소 수행
@@ -917,8 +917,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
                                     });
 
                                 }
-                                processedFilter2++;
-                                progress.Report((double)processedFilter2 / totalDirs * 100);
+                                processedFiles++;
+                                progress.Report((double)processedFiles / totalDirs * 100);
                             }
 
                         }
