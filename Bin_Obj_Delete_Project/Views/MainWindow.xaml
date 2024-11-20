@@ -12,11 +12,13 @@
         Height="800">
     <Window.Resources>
         <converter:TypeConverter x:Key="FormatConverter"/>
+        <converter:BooleanToVisibilityConverter x:Key="VisibilityConverter"/>
     </Window.Resources>
     <Grid x:Name="LoadingOverlay">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
@@ -210,5 +212,23 @@
                        VerticalAlignment="Center"
                        Foreground="PaleVioletRed" FontWeight="Bold" FontSize="14"/>
         </Grid>
+        <!--[ProgressBar] + [TextBlock] 바인딩 및 UI 도시 (코드)-->
+        <!--<StackPanel Grid.Row="3"
+                    Orientation="Vertical"
+                    HorizontalAlignment="Center">
+            <ProgressBar Value="{Binding ProgressValue}"
+                         Minimum="0"
+                         Maximum="100"
+                         Visibility="{Binding VisibleLoading, Converter={StaticResource VisibilityConverter}}"
+                         Width="400"
+                         Height="20"/>
+            <TextBlock Text="{Binding ProgressText}"
+                       HorizontalAlignment="Center"
+                       Margin="0,5,0,0"
+                       Visibility="{Binding VisibleLoading, Converter={StaticResource VisibilityConverter}}"
+                       FontSize="14"
+                       FontWeight="Bold"/>
+        </StackPanel>-->
+
     </Grid>
 </Window>

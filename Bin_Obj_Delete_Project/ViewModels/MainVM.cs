@@ -35,6 +35,21 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private bool _aVisibleLoadingOrNot;
 
         /// <summary>
+        /// [_progressValue]
+        /// </summary>
+        private double _progressValue;
+
+        /// <summary>
+        /// [_progressStyle]
+        /// </summary>
+        private string _progressStyle;
+
+        /// <summary>
+        /// [_progressBar]
+        /// </summary>
+        private Progress<double> _progressBar;
+
+        /// <summary>
         /// [loadingControl]
         /// </summary>
         private UserControl loadingControl;
@@ -319,6 +334,60 @@ namespace Bin_Obj_Delete_Project.ViewModels
         }
 
         /// <summary>
+        /// [ProgressValue]
+        /// </summary>
+        public double ProgressValue
+        {
+            get => _progressValue;
+            set
+            {
+                if (_progressValue != value)
+                {
+                    _progressValue = value;
+                    OnPropertyChanged();
+                }
+
+            }
+
+        }
+
+        /// <summary>
+        /// [ProgressStyle]
+        /// </summary>
+        public string ProgressStyle
+        {
+            get => _progressStyle;
+            set
+            {
+                if (_progressStyle != value)
+                {
+                    _progressStyle = value;
+                    OnPropertyChanged();
+                }
+
+            }
+
+        }
+
+        /// <summary>
+        /// [ProgressBar]
+        /// </summary>
+        public Progress<double> ProgressBar
+        {
+            get => _progressBar;
+            private set
+            {
+                if (_progressBar != value)
+                {
+                    _progressBar = value;
+                    OnPropertyChanged();
+                }
+
+            }
+
+        }
+
+        /// <summary>
         /// [LoadingControl]
         /// </summary>
         public UserControl LoadingControl
@@ -498,6 +567,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
         {
             DelBtnEnabledOrNot = true;
             VisibleLoading = false;
+            ProgressBar = new Progress<double>(value =>
+            {
+                ProgressValue = value;
+                ProgressStyle = $"{value:F0}%"; // [정수 포맷] 형태
+            });
             LoadingControl = new LoadingView();
             SelectedCntsInfo = 0;
             LoadingFolderCommand = new RelayCommand(LoadingFolder);
@@ -588,16 +662,15 @@ namespace Bin_Obj_Delete_Project.ViewModels
             //mouseHook.HookMouse();
             DelBtnEnabledOrNot = false;
             VisibleLoading = true;
-            await Task.Delay(1000);
             Task enumerateTask = Task.Run(() =>
             {
-                EnumerateFolders(cancellationToken);
+                return EnumerateFolders(cancellationToken, ProgressBar); // 비동기 호출 반환
             }, cancellationToken);
             try
             {
-                Task cancelingTask = Task.Delay(60000); // 60초 후 작업 취소!
+                Task cancelingTask = Task.Delay(90000); // 90초 후 작업 취소!
                 Task completedTask = await Task.WhenAny(enumerateTask, cancelingTask);
-                // 60초가 지나도 작업이 끝나지 않을 때, 작업 취소 요청!
+                // 90초가 지나도 작업이 끝나지 않을 때, 작업 취소 요청!
                 if (completedTask == cancelingTask)
                 {
                     cancellationTokenSource.Cancel();
@@ -679,7 +752,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private static long GetDirectorySize(string dir)
         {
             DirectoryInfo dirInfo = new DirectoryInfo(dir); // DirectoryInfo 객체 생성
-
             long sizeofDir = 0; // [총량] 초기화
 
             // [현재 디렉토리] 및 [모든 하위 디렉토리]를 포함한 파일 목록 배열을 반환!
@@ -693,25 +765,37 @@ namespace Bin_Obj_Delete_Project.ViewModels
             return sizeofDir;
         }
 
-        protected void EnumerateFolders(CancellationToken cancellationToken)
+        /// <summary>
+        /// [비동기적] 폴더 열거(탐색) 및 작업의 진행률 업데이트 및 UI 도시 (기능)
+        /// </summary>
+        /// <param name="cancellationToken">작업 취소</param>
+        /// <param name="progress">진행률</param>
+        /// <returns></returns>
+        protected async Task EnumerateFolders(CancellationToken cancellationToken, IProgress<double> progress)
         {
+            progress.Report(0); // [진행률: 0]으로 초기화
             try
             {
-                foreach (string dir in GetEneumerateFldrList())
+                IEnumerable<string> lstEneumerateFldr = await Task.Run(() => GetEneumerateFldrList());
+                int processedDirs = 0;
+                int totalDirs = lstEneumerateFldr.Count();
+                foreach (string dir in lstEneumerateFldr)
                 {
-                    // 작업 취소 요청 (약 60초) 후, 작업 취소 수행
+                    // 작업 취소 요청 (약 90초) 후, 작업 취소 수행
                     if (cancellationToken.IsCancellationRequested)
                     {
                         return;
                     }
+
                     DirectoryInfo dirInfo = new DirectoryInfo(dir);
                     matchingFldrName = dirInfo.Name;
                     matchingFldrCreationTime = dirInfo.CreationTime.ToString();
                     matchingFldrCategory = "파일 폴더";
                     matchingFldrModifiedTime = dirInfo.LastWriteTime.ToString();
-                    matchingFldrSize = GetDirectorySize(dir);
+                    matchingFldrSize = await Task.Run(() => GetDirectorySize(dir));
                     matchingFldrPath = dir;
                     matchingFileInfoOrNot = false; // [폴더]로 구분
+
                     // 1. 필터 키워드를 콤마(',')로 구분 후, 배열로 생성 (FilterFolderName)
                     string[] filterComma1 = string.IsNullOrEmpty(FilterFolderName) ? Array.Empty<string>() : FilterFolderName.Split(',');
 
@@ -735,6 +819,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     // 1), 2)가 아닐 때,
                     if (!folderMatches2)
                     {
+                        processedDirs++;
+                        progress.Report((double)processedDirs / totalDirs * 100);
                         continue;
                     }
 
@@ -763,18 +849,27 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     // 2) [FilterExtensions]가 null이거나 string.Empty 문자열인 경우: 파일 확장자를 콤마(',')로 구분 반환
                     if (!string.IsNullOrEmpty(FilterExtensions))
                     {
-                        IEnumerable<FileInfo> filesInfo = dirInfo.EnumerateFiles("*", SearchOption.AllDirectories);
-                        matchingFileInfoOrNot = true; // [파일]로 구분
-                        foreach (FileInfo files in filesInfo)
+                        IEnumerable<FileInfo> lstEnumerateFilesInfo = await Task.Run(() => dirInfo.EnumerateFiles("*", SearchOption.AllDirectories));
+                        matchingFileInfoOrNot = true; // [파일]로 구분됨!
+                        foreach (FileInfo files in lstEnumerateFilesInfo)
                         {
+                            // 작업 취소 요청 (약 90초) 후, 작업 취소 수행
+                            if (cancellationToken.IsCancellationRequested)
+                            {
+                                return;
+                            }
+
                             // 이미 처리가 된 파일 경로는 무시! (중복 제거)
                             if (uniqueFilePathSet.Contains(files.FullName))
                             {
                                 continue;
                             }
+
                             // 2) 콤마(',')로 구분된 [FilterExtensions]이 파일의 확장명 부분의 문자열과 일치하는 경우 (확장자 비교)
                             if (Array.Exists(filterComma2, comma2 => files.Extension.Equals(comma2.Trim(), StringComparison.OrdinalIgnoreCase)))
                             {
+                                processedDirs++;
+                                progress.Report((double)processedDirs / totalDirs * 100);
                                 matchingFileName = files.Name;
                                 matchingFileCreationTime = files.CreationTime.ToString();
                                 Dictionary<string, string> extensionCategoryMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -806,7 +901,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                                 matchingFileModifiedTime = files.LastWriteTime.ToString();
                                 matchingFileSize = files.Length;
                                 matchingFilePath = files.FullName;
-                                _ = uniqueFilePathSet.Add(matchingFilePath); // 중복 제거!
+                                _ = uniqueFilePathSet.Add(matchingFilePath); // [중복] 제거
 
                                 // 2. [FilterExtensions] => 해당 파일 및 정보를 리스트의 형태로 전시
                                 // 즉, 필터링 (X) => 필터링 없이 전시, 필터링 (O) => 필터링해서 전시
@@ -829,35 +924,47 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         }
 
                     }
-
+                    processedDirs++;
+                    double dirProgress = (double)processedDirs / totalDirs * 100;
+                    progress.Report(dirProgress);
                 }
 
             }
             catch (UnauthorizedAccessException ex)
             {
-                Console.WriteLine($"Access Denied To Directories: Exception: {ex.Message}"); // 경로에 대한 엑세스거부 오류.
+                _ = MessageBox.Show($"{ex.Message}", "엑세스 거부", MessageBoxButton.OK, MessageBoxImage.Error);
+                // 경로에 대한 엑세스 거부 오류.
+                Console.WriteLine($"Exception: Access Denied To Directories: {ex.Message}");
             }
             catch (DirectoryNotFoundException ex)
             {
-                Console.WriteLine($"Directories Not Found: {GetEneumerateFldrList()}. Exception: {ex.Message}"); // 경로를 찾을 수 없음.
+                _ = MessageBox.Show($"{ex.Message}", "경로 미존재", MessageBoxButton.OK, MessageBoxImage.Error);
+                // 경로를 찾을 수 없음.
+                Console.WriteLine($"Exception: Directories Not Found: {ex.Message}");
             }
             catch (PathTooLongException ex)
             {
-                Console.WriteLine($"Path Is Too Long: {DeleteFolderPath}. Exception: {ex.Message}"); // 경로가 너무 긴 경우.
+                _ = MessageBox.Show($"{ex.Message}", "경로 재설정", MessageBoxButton.OK, MessageBoxImage.Error);
+                // 경로가 너무 긴 경우.
+                Console.WriteLine($"Exception: Path Is Too Long: {ex.Message}");
+            }
+            finally
+            {
+                // DelMatchingInfo 정보 확인: 디버깅으로 확인 가능!!
+                //foreach (DelMatchingInfo item in DeleteFolderInfo)
+                //{
+                //    Console.WriteLine(item.DelMatchingName);
+                //    Console.WriteLine(item.DelMatchingCreationTime);
+                //    Console.WriteLine(item.DelMatchingCategory);
+                //    Console.WriteLine(item.DelMatchingModifiedTime);
+                //    Console.WriteLine(item.DelMatchingOfSize);
+                //    Console.WriteLine(item.DelMatchingPath);
+                //}
+                ActiveFolderInfo = DeleteFolderInfo; // [ActiveFolderInfo] 컬렉션에 [DeleteFolderInfo] 컬렉션을 할당
+                TotalNumbersInfo = ActiveFolderInfo.Count(); // 총 항목 개수 표시
+                progress.Report(100); // [진행률: 100] => 작업 완료
             }
 
-            // DelMatchingInfo 정보 확인: 디버깅으로 확인 가능!!
-            //foreach (DelMatchingInfo item in DeleteFolderInfo)
-            //{
-            //    Console.WriteLine(item.DelMatchingName);
-            //    Console.WriteLine(item.DelMatchingCreationTime);
-            //    Console.WriteLine(item.DelMatchingCategory);
-            //    Console.WriteLine(item.DelMatchingModifiedTime);
-            //    Console.WriteLine(item.DelMatchingOfSize);
-            //    Console.WriteLine(item.DelMatchingPath);
-            //}
-            ActiveFolderInfo = DeleteFolderInfo; // [ActiveFolderInfo] 컬렉션에 [DeleteFolderInfo] 컬렉션을 할당
-            TotalNumbersInfo = ActiveFolderInfo.Count(); // 총 항목 개수 표시
         }
 
         /// <summary>
@@ -1061,10 +1168,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     TotalNumbersInfo = 0; // 총 항목 개수 초기화
                     DelBtnEnabledOrNot = false;
                     VisibleLoading = true;
-                    await Task.Delay(1000);
                     await Task.Run(() =>
                     {
-                        EnumerateFolders(cancellationToken); // [Filter 01] 초기화
+                        return EnumerateFolders(cancellationToken, ProgressBar); // [Filter 01] 초기화
                     });
                     DelBtnEnabledOrNot = true;
                     VisibleLoading = false;
@@ -1103,10 +1209,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     TotalNumbersInfo = 0; // 총 항목 개수 초기화
                     DelBtnEnabledOrNot = false;
                     VisibleLoading = true;
-                    await Task.Delay(1000);
                     await Task.Run(() =>
                     {
-                        EnumerateFolders(cancellationToken); // [Filter 02] 초기화
+                        return EnumerateFolders(cancellationToken, ProgressBar); // [Filter 02] 초기화
                     });
                     DelBtnEnabledOrNot = true;
                     VisibleLoading = false;

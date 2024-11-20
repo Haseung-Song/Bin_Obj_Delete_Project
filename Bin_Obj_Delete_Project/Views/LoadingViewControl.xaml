@@ -33,13 +33,23 @@
                 </Style>
             </Image.Style>
         </Image>
-        <TextBlock Text="로딩중....."
-                   FontSize="20"
-                   Foreground="OrangeRed"
-                   FontWeight="Bold"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Bottom"
-                   TextAlignment="Center"
-                   Visibility="{Binding VisibleLoading, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    Margin="0,0,0,-5">
+            <TextBlock Text="로딩중....."
+                       FontSize="20"
+                       Foreground="OrangeRed"
+                       FontWeight="Bold"
+                       TextAlignment="Center"
+                       Margin="0,0,5,0"
+                       Visibility="{Binding VisibleLoading, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <TextBlock Text="{Binding ProgressValue, StringFormat=' {0:F0}%'}"
+                       FontSize="20"
+                       Foreground="RoyalBlue"
+                       FontWeight="Bold"
+                       TextAlignment="Center"
+                       Visibility="{Binding VisibleLoading, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        </StackPanel>
     </Grid>
 </UserControl>
