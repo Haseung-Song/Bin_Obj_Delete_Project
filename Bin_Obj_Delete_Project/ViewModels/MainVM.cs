@@ -35,6 +35,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private bool _aVisibleLoadingOrNot;
 
         /// <summary>
+        /// [_aVisibleDestroyOrNot]
+        /// </summary>
+        private bool _aVisibleDestroyOrNot;
+
+        /// <summary>
         /// [_progressValue]
         /// </summary>
         private double _progressValue;
@@ -53,6 +58,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// [loadingControl]
         /// </summary>
         private UserControl loadingControl;
+
+        /// <summary>
+        /// [destroyControl]
+        /// </summary>
+        private UserControl destroyControl;
 
         /// <summary>
         /// [_deleteFolderPath]
@@ -334,6 +344,24 @@ namespace Bin_Obj_Delete_Project.ViewModels
         }
 
         /// <summary>
+        /// [VisibleDestroy]
+        /// </summary>
+        public bool VisibleDestroy
+        {
+            get => _aVisibleDestroyOrNot;
+            set
+            {
+                if (_aVisibleDestroyOrNot != value)
+                {
+                    _aVisibleDestroyOrNot = value;
+                    OnPropertyChanged();
+                }
+
+            }
+
+        }
+
+        /// <summary>
         /// [ProgressValue]
         /// </summary>
         public double ProgressValue
@@ -398,6 +426,24 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 if (loadingControl != value)
                 {
                     loadingControl = value;
+                    OnPropertyChanged();
+                }
+
+            }
+
+        }
+
+        /// <summary>
+        /// [DestroyControl]
+        /// </summary>
+        public UserControl DestroyControl
+        {
+            get => destroyControl;
+            set
+            {
+                if (destroyControl != value)
+                {
+                    destroyControl = value;
                     OnPropertyChanged();
                 }
 
@@ -567,12 +613,14 @@ namespace Bin_Obj_Delete_Project.ViewModels
         {
             DelBtnEnabledOrNot = true;
             VisibleLoading = false;
+            VisibleDestroy = false;
             ProgressBar = new Progress<double>(value =>
             {
                 ProgressValue = value;
                 ProgressStyle = $"{value:F0}%"; // [정수 포맷] 형태
             });
             LoadingControl = new LoadingView();
+            DestroyControl = new DestroyView();
             SelectedCntsInfo = 0;
             LoadingFolderCommand = new RelayCommand(LoadingFolder);
             EnterLoadPathCommand = new RelayCommand(EnterLoadPath);
@@ -602,10 +650,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
             matchingFldrPath = string.Empty;
             matchingFilePath = string.Empty;
             mouseHook = new GlobalMouseHook();
-            DelSelMatchesCommand = new RelayCommand(DelSelMatches);
-            DelAllMatchesCommand = new RelayCommand(DelAllMatches);
-            FilterResetFNCommand = new RelayCommand(FilterResetFN);
-            FilterResetFECommand = new RelayCommand(FilterResetFE);
+            DelSelMatchesCommand = new AsyncRelayCommand(DelSelMatches);
+            DelAllMatchesCommand = new AsyncRelayCommand(DelAllMatches);
+            FilterResetFNCommand = new AsyncRelayCommand(FilterResetFN);
+            FilterResetFECommand = new AsyncRelayCommand(FilterResetFE);
             GoOrderByNameCommand = new RelayCommand(GoOrderByName);
             OrderByCrTimeCommand = new RelayCommand(OrderByCrTime);
             GoOrderByTypeCommand = new RelayCommand(GoOrderByType);
@@ -664,13 +712,13 @@ namespace Bin_Obj_Delete_Project.ViewModels
             VisibleLoading = true;
             Task enumerateTask = Task.Run(() =>
             {
-                return EnumerateFolders(cancellationToken, ProgressBar); // 비동기 호출 반환
+                return EnumerateFolders(cancellationToken, ProgressBar, ProgressBar); // 비동기 호출 반환
             }, cancellationToken);
             try
             {
-                Task cancelingTask = Task.Delay(90000); // 90초 후 작업 취소!
+                Task cancelingTask = Task.Delay(120000); // 120초 후 작업 취소!
                 Task completedTask = await Task.WhenAny(enumerateTask, cancelingTask);
-                // 90초가 지나도 작업이 끝나지 않을 때, 작업 취소 요청!
+                // 120초가 지나도 작업이 끝나지 않을 때, 작업 취소 요청!
                 if (completedTask == cancelingTask)
                 {
                     cancellationTokenSource.Cancel();
@@ -772,17 +820,18 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// <param name="cancellationToken">작업 취소</param>
         /// <param name="progress">작업 진행률</param>
         /// <returns>작업 완료 후, Task 반환</returns>
-        protected async Task EnumerateFolders(CancellationToken cancellationToken, IProgress<double> progress)
+        protected async Task EnumerateFolders(CancellationToken cancellationToken, IProgress<double> fldrProgress, IProgress<double> fileProgress)
         {
-            progress.Report(0); // [진행률: 0]으로 초기화
+            fldrProgress.Report(0); // [폴더 진행률: 0]으로 초기화
+            fileProgress.Report(0); // [파일 진행률: 0]으로 초기화
             try
             {
                 IEnumerable<string> lstEneumerateFldr = await Task.Run(() => GetEneumerateFldrList());
-                int processedDirs = 0;
-                int totalDirs = lstEneumerateFldr.Count();
+                int totalFldrs = lstEneumerateFldr.Count();
+                int processedFldrs = 0;
                 foreach (string dir in lstEneumerateFldr)
                 {
-                    // 작업 취소 요청 (약 90초) 후, 작업 취소 수행
+                    // 작업 취소 요청 (약 120초) 후 작업 취소 수행
                     if (cancellationToken.IsCancellationRequested)
                     {
                         return;
@@ -795,7 +844,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     matchingFldrSize = await Task.Run(() => GetDirectorySize(dir));
                     matchingFldrPath = dir;
                     matchingFileInfoOrNot = false; // [폴더]로 구분
-
                     // 1. 필터 키워드를 콤마(',')로 구분 후, 배열로 생성 (FilterFolderName)
                     string[] filterComma1 = string.IsNullOrEmpty(FilterFolderName) ? Array.Empty<string>() : FilterFolderName.Split(',');
 
@@ -819,8 +867,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     // 1), 2)가 아닐 때,
                     if (!folderMatches2)
                     {
-                        processedDirs++;
-                        progress.Report((double)processedDirs / totalDirs * 100);
+                        processedFldrs++;
+                        fldrProgress.Report((double)processedFldrs / totalFldrs * 100);
                         continue;
                     }
 
@@ -850,8 +898,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     if (!string.IsNullOrEmpty(FilterExtensions))
                     {
                         IEnumerable<FileInfo> lstEnumerateFilesInfo = await Task.Run(() => dirInfo.EnumerateFiles("*", SearchOption.AllDirectories));
-                        matchingFileInfoOrNot = true; // [파일]로 구분됨!
+                        int totalFiles = lstEnumerateFilesInfo.Count();
                         int processedFiles = 0;
+                        matchingFileInfoOrNot = true; // [파일]로 구분됨!
                         foreach (FileInfo files in lstEnumerateFilesInfo)
                         {
                             // 작업 취소 요청 (약 90초) 후, 작업 취소 수행
@@ -917,17 +966,17 @@ namespace Bin_Obj_Delete_Project.ViewModels
                                     });
 
                                 }
-                                processedFiles++;
-                                progress.Report((double)processedFiles / totalDirs * 100);
+
                             }
 
                         }
-
+                        processedFiles++;
+                        fileProgress.Report((double)processedFiles / totalFiles * 100);
                     }
-                    processedDirs++;
-                    progress.Report((double)processedDirs / totalDirs * 100);
+                    processedFldrs++;
+                    fldrProgress.Report((double)processedFldrs / totalFldrs * 100);
                 }
-
+                await Task.Delay(10);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -947,8 +996,14 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 // 경로가 너무 긴 경우.
                 Console.WriteLine($"Exception: Path Is Too Long: {ex.Message}");
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception: : {ex.Message}");
+            }
             finally
             {
+                fldrProgress.Report(100); // [진행률: 100] 작업 완료
+                fileProgress.Report(100); // [진행률: 100] 작업 완료
                 // DelMatchingInfo 정보 확인: 디버깅으로 확인 가능!!
                 //foreach (DelMatchingInfo item in DeleteFolderInfo)
                 //{
@@ -959,10 +1014,12 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 //    Console.WriteLine(item.DelMatchingOfSize);
                 //    Console.WriteLine(item.DelMatchingPath);
                 //}
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    ActiveFolderInfo = DeleteFolderInfo; // [ActiveFolderInfo] 컬렉션에 [DeleteFolderInfo] 컬렉션을 할당
+                    TotalNumbersInfo = ActiveFolderInfo.Count(); // 총 항목 개수 표시
+                });
 
-                ActiveFolderInfo = DeleteFolderInfo; // [ActiveFolderInfo] 컬렉션에 [DeleteFolderInfo] 컬렉션을 할당
-                TotalNumbersInfo = ActiveFolderInfo.Count(); // 총 항목 개수 표시
-                progress.Report(100); // [진행률: 100] => 작업 완료
             }
 
         }
@@ -972,46 +1029,64 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// 1) 휴지통에서 삭제
         /// 2) 영구적으로 삭제
         /// </summary>
-        private void DelSelConfirm()
+        private async Task DelSelConfirm(IProgress<double> progress)
         {
-            foreach (DelMatchingInfo match in selectToDelete)
+            progress.Report(0);
+            try
             {
-                string dir = match.DelMatchingPath;
-                try
+                DelBtnEnabledOrNot = false;
+                VisibleDestroy = true;
+                int totalSelMatch = selectToDelete.Count();
+                int processedSelMatch = 0;
+                foreach (DelMatchingInfo match in selectToDelete)
                 {
-                    // 해당 디렉토리의 경로가 존재할 때,
-                    if (FileSystem.DirectoryExists(dir))
+                    string dir = match.DelMatchingPath;
+                    await Task.Run(async () =>
                     {
-                        // 1) 지정한 디렉토리 및 해당 디렉토리의 하위 디렉토리 및 폴더 휴지통에서 삭제
-                        FileSystem.DeleteDirectory(dir, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                        // 해당 디렉토리의 경로가 존재할 때,
+                        if (FileSystem.DirectoryExists(dir))
+                        {
+                            // 1) 지정한 디렉토리 및 해당 디렉토리의 하위 디렉토리 및 폴더 휴지통에서 삭제
+                            FileSystem.DeleteDirectory(dir, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
 
-                        // 2) 지정한 디렉토리 및 해당 디렉토리의 하위 디렉토리 및 폴더 영구적으로 삭제
-                        //FileSystem.DeleteDirectory(dir, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
+                            // 2) 지정한 디렉토리 및 해당 디렉토리의 하위 디렉토리 및 폴더 영구적으로 삭제
+                            //FileSystem.DeleteDirectory(dir, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
+                        }
+                        // 해당 파일 경로 존재 시,
+                        else if (FileSystem.FileExists(dir))
+                        {
+                            // 1) 지정한 파일 휴지통에서 삭제
+                            FileSystem.DeleteFile(dir, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
 
-                        _ = ActiveFolderInfo.Remove(match); // UI 클리어!
-                    }
-                    // 해당 파일 경로 존재 시,
-                    else if (FileSystem.FileExists(dir))
-                    {
-                        // 1) 지정한 파일 휴지통에서 삭제
-                        FileSystem.DeleteFile(dir, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                            // 2) 지정한 파일 영구적으로 삭제
+                            //FileSystem.DeleteFile(dir, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
+                        }
+                        else
+                        {
+                            return;
+                        }
+                        await Application.Current.Dispatcher.InvokeAsync(() =>
+                        {
+                            _ = ActiveFolderInfo.Remove(match); // [UI 초기화]
+                        });
 
-                        // 2) 지정한 파일 영구적으로 삭제
-                        //FileSystem.DeleteFile(dir, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
-
-                        _ = ActiveFolderInfo.Remove(match); // UI 클리어!
-                    }
-                    else
-                    {
-                        return;
-                    }
-
+                    });
+                    // [폴더, 파일] 선택 삭제하기 후, [진행률 업데이트] 작업!
+                    processedSelMatch++;
+                    progress.Report((double)processedSelMatch / totalSelMatch * 100);
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error Deleting Folder... FolderPath: {dir} : {ex.Message}");
-                }
 
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception: Error Deleting Folder... FolderPath: {ex.Message}");
+            }
+            finally
+            {
+                await Task.Delay(50); // [작업 딜레이] => 추가 완료!
+                progress.Report(100); // [진행률: 100] => 작업 완료!
+                DelBtnEnabledOrNot = true;
+                VisibleDestroy = false;
             }
 
         }
@@ -1019,7 +1094,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// <summary>
         /// 3. [선택 삭제하기] 기능 (버튼)
         /// </summary>
-        private void DelSelMatches()
+        private async Task DelSelMatches()
         {
             if (!string.IsNullOrEmpty(DeleteFolderPath))
             {
@@ -1034,7 +1109,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             MessageBoxResult messageBox = MessageBox.Show("선택한 폴더를 정말 삭제하시겠습니까?", "폴더 삭제", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                             if (messageBox == MessageBoxResult.OK)
                             {
-                                DelSelConfirm();
+                                await DelSelConfirm(ProgressBar);
                             }
                             else
                             {
@@ -1048,7 +1123,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             MessageBoxResult messageBox = MessageBox.Show("선택한 파일을 정말 삭제하시겠습니까?", "파일 삭제", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                             if (messageBox == MessageBoxResult.OK)
                             {
-                                DelSelConfirm();
+                                await DelSelConfirm(ProgressBar);
                             }
                             else
                             {
@@ -1060,9 +1135,15 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     }
                     else
                     {
-                        DelSelConfirm();
+                        await DelSelConfirm(ProgressBar);
                     }
-                    TotalNumbersInfo = ActiveFolderInfo.Count(); // UI Update (총 항목 개수)
+
+                    // UI Update (총 항목 개수)
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        TotalNumbersInfo = ActiveFolderInfo.Count();
+                    });
+
                 }
 
             }
@@ -1074,50 +1155,68 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// 1) 휴지통에서 삭제
         /// 2) 영구적으로 삭제
         /// </summary>
-        private void DelAllConfirm()
+        private async Task DelAllConfirm(IProgress<double> progress)
         {
-            foreach (DelMatchingInfo match in DeleteFolderInfo)
+            progress.Report(0);
+            try
             {
-                string dir = match.DelMatchingPath;
-                try
+                DelBtnEnabledOrNot = false;
+                VisibleDestroy = true;
+                int totalAllMatch = DeleteFolderInfo.Count();
+                int processedAllMatch = 0;
+                foreach (DelMatchingInfo match in DeleteFolderInfo)
                 {
-                    // 해당 디렉토리의 경로가 존재할 때,
-                    if (FileSystem.DirectoryExists(dir))
+                    string dir = match.DelMatchingPath;
+                    await Task.Run(() =>
                     {
-                        // 1) 지정한 디렉토리 및 해당 디렉토리의 하위 디렉토리 및 폴더 휴지통에서 삭제
-                        FileSystem.DeleteDirectory(dir, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                        // 해당 디렉토리의 경로가 존재할 때,
+                        if (FileSystem.DirectoryExists(dir))
+                        {
+                            // 1) 지정한 디렉토리 및 해당 디렉토리의 하위 디렉토리 및 폴더 휴지통에서 삭제
+                            FileSystem.DeleteDirectory(dir, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
 
-                        // 2) 지정한 디렉토리 및 해당 디렉토리의 하위 디렉토리 및 폴더 영구적으로 삭제
-                        //FileSystem.DeleteDirectory(dir, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
-                    }
-                    // 해당 파일 경로 존재 시,
-                    else if (FileSystem.FileExists(dir))
-                    {
-                        // 1) 지정한 파일 휴지통에서 삭제
-                        FileSystem.DeleteFile(dir, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                            // 2) 지정한 디렉토리 및 해당 디렉토리의 하위 디렉토리 및 폴더 영구적으로 삭제
+                            //FileSystem.DeleteDirectory(dir, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
+                        }
+                        // 해당 파일 경로 존재 시,
+                        else if (FileSystem.FileExists(dir))
+                        {
+                            // 1) 지정한 파일 휴지통에서 삭제
+                            FileSystem.DeleteFile(dir, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
 
-                        // 2) 지정한 파일 영구적으로 삭제
-                        //FileSystem.DeleteFile(dir, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
-                    }
-                    else
-                    {
-                        return;
-                    }
+                            // 2) 지정한 파일 영구적으로 삭제
+                            //FileSystem.DeleteFile(dir, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
+                        }
+                        else
+                        {
+                            return;
+                        }
 
+                    });
+                    // [폴더, 파일] 일괄 삭제하기 후, [진행률 업데이트] 작업!
+                    processedAllMatch++;
+                    progress.Report((double)processedAllMatch / totalAllMatch * 100);
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error Deleting Folder... FolderPath: {dir} : {ex.Message}");
-                }
-
+                DeleteFolderInfo?.Clear(); // [UI 초기화]
             }
-            DeleteFolderInfo?.Clear(); // UI 클리어!
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception: Error Deleting Folder... FolderPath: {ex.Message}");
+            }
+            finally
+            {
+                await Task.Delay(50); // [작업 딜레이] => 추가 완료!
+                progress.Report(100); // [진행률: 100] => 작업 완료!
+                DelBtnEnabledOrNot = true;
+                VisibleDestroy = false;
+            }
+
         }
 
         /// <summary>
         /// 4. [일괄 삭제하기] 기능 (버튼)
         /// </summary>
-        private void DelAllMatches()
+        private async Task DelAllMatches()
         {
             if (!string.IsNullOrEmpty(DeleteFolderPath))
             {
@@ -1129,7 +1228,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         MessageBoxResult messageBox = MessageBox.Show("전체 삭제하시겠습니까?", "일괄 삭제", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                         if (messageBox == MessageBoxResult.OK)
                         {
-                            DelAllConfirm();
+                            await DelAllConfirm(ProgressBar);
                         }
                         else
                         {
@@ -1139,9 +1238,15 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     }
                     else
                     {
-                        DelAllConfirm();
+                        await DelAllConfirm(ProgressBar);
                     }
-                    TotalNumbersInfo = ActiveFolderInfo.Count(); // UI Update (총 항목 개수)
+
+                    // UI Update (총 항목 개수)
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        TotalNumbersInfo = ActiveFolderInfo.Count();
+                    });
+
                 }
 
             }
@@ -1151,7 +1256,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// <summary>
         /// 5-1. [검색 필터리셋] 기능 (FilterFolderName)
         /// </summary>
-        public async void FilterResetFN()
+        public async Task FilterResetFN()
         {
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
             CancellationToken cancellationToken = cancellationTokenSource.Token;
@@ -1170,7 +1275,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     VisibleLoading = true;
                     await Task.Run(() =>
                     {
-                        return EnumerateFolders(cancellationToken, ProgressBar); // [Filter 01] 초기화
+                        return EnumerateFolders(cancellationToken, ProgressBar, ProgressBar); // [Filter 01] 초기화
                     });
                     DelBtnEnabledOrNot = true;
                     VisibleLoading = false;
@@ -1192,7 +1297,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// <summary>
         /// 5-2. [검색 필터리셋] 기능 (FilterExtensions)
         /// </summary>
-        public async void FilterResetFE()
+        public async Task FilterResetFE()
         {
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
             CancellationToken cancellationToken = cancellationTokenSource.Token;
@@ -1211,7 +1316,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     VisibleLoading = true;
                     await Task.Run(() =>
                     {
-                        return EnumerateFolders(cancellationToken, ProgressBar); // [Filter 02] 초기화
+                        return EnumerateFolders(cancellationToken, ProgressBar, ProgressBar); // [Filter 02] 초기화
                     });
                     DelBtnEnabledOrNot = true;
                     VisibleLoading = false;

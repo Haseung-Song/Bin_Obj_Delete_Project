@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Bin_Obj_Delete_Project.Views.LoadingView"
+﻿<UserControl x:Class="Bin_Obj_Delete_Project.Views.DestroyView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:gif="http://wpfanimatedgif.codeplex.com"
@@ -22,10 +22,10 @@
             <Image.Style>
                 <Style TargetType="{x:Type Image}">
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding VisibleLoading}" Value="True">
+                        <DataTrigger Binding="{Binding VisibleDestroy}" Value="True">
                             <Setter Property="Visibility" Value="Visible"/>
                         </DataTrigger>
-                        <DataTrigger Binding="{Binding VisibleLoading}" Value="False">
+                        <DataTrigger Binding="{Binding VisibleDestroy}" Value="False">
                             <Setter Property="Visibility" Value="Collapsed"/>
                         </DataTrigger>
                     </Style.Triggers>
@@ -33,23 +33,23 @@
             </Image.Style>
         </Image>
 
-        <StackPanel Orientation="Horizontal"
+        <StackPanel Orientation="Vertical"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Bottom"
-                    Margin="0,0,0,-5">
-            <TextBlock Text="로딩중....."
+                    Margin="0,0,0,-30">
+            <TextBlock Text="삭제중....."
                        FontSize="20"
-                       Foreground="OrangeRed"
-                       FontWeight="Bold"
+                       Foreground="Crimson"
+                       FontWeight="ExtraBold"
                        TextAlignment="Center"
-                       Margin="0,0,5,0"
-                       Visibility="{Binding VisibleLoading, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                       Visibility="{Binding VisibleDestroy, Converter={StaticResource BooleanToVisibilityConverter}}"/>
             <TextBlock Text="{Binding ProgressValue, StringFormat=' {0:F0}%'}"
                        FontSize="20"
-                       Foreground="DodgerBlue"
+                       Foreground="SteelBlue"
                        FontWeight="Bold"
                        TextAlignment="Center"
-                       Visibility="{Binding VisibleLoading, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                       Margin="0,0,15,0"
+                       Visibility="{Binding VisibleDestroy, Converter={StaticResource BooleanToVisibilityConverter}}"/>
         </StackPanel>
     </Grid>
 </UserControl>

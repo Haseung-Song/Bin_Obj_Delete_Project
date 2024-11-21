@@ -196,7 +196,10 @@
 
         <Border Grid.Row="1" Grid.Column="1">
             <Grid>
+                <!-- LoadingControl -->
                 <ContentControl Content="{Binding LoadingControl}" />
+                <!-- DestroyControl -->
+                <ContentControl Content="{Binding DestroyControl}" />
             </Grid>
         </Border>
 
@@ -206,12 +209,14 @@
                        VerticalAlignment="Center"
                        Foreground="PaleVioletRed" FontWeight="Bold" FontSize="14"/>
         </Grid>
+
         <Grid Grid.Row="2" Margin="100, 0, 0, 5">
             <TextBlock Text="{Binding SelectedCntsInfo, StringFormat='        {0}개 항목 선택함', UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Center"
                        Foreground="PaleVioletRed" FontWeight="Bold" FontSize="14"/>
         </Grid>
+
         <!--[ProgressBar] + [TextBlock] 바인딩 및 UI 도시 (코드)-->
         <!--<StackPanel Grid.Row="3"
                     Orientation="Vertical"
