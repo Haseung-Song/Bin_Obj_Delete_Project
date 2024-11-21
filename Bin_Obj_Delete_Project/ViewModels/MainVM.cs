@@ -770,8 +770,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// [비동기적] 폴더 열거(탐색) 및 작업의 진행률 업데이트 및 UI 도시 (기능)
         /// </summary>
         /// <param name="cancellationToken">작업 취소</param>
-        /// <param name="progress">진행률</param>
-        /// <returns></returns>
+        /// <param name="progress">작업 진행률</param>
+        /// <returns>작업 완료 후, Task 반환</returns>
         protected async Task EnumerateFolders(CancellationToken cancellationToken, IProgress<double> progress)
         {
             progress.Report(0); // [진행률: 0]으로 초기화
