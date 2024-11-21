@@ -45,10 +45,10 @@
                        Visibility="{Binding VisibleDestroy, Converter={StaticResource BooleanToVisibilityConverter}}"/>
             <TextBlock Text="{Binding ProgressValue, StringFormat=' {0:F0}%'}"
                        FontSize="20"
-                       Foreground="SteelBlue"
+                       Foreground="MediumSeaGreen"
                        FontWeight="Bold"
                        TextAlignment="Center"
-                       Margin="0,0,15,0"
+                       Margin="0,0,10,0"
                        Visibility="{Binding VisibleDestroy, Converter={StaticResource BooleanToVisibilityConverter}}"/>
         </StackPanel>
     </Grid>
