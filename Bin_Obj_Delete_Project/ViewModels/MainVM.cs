@@ -25,6 +25,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
         #region [프로퍼티]
 
         /// <summary>
+        /// [mainWindow]
+        /// </summary>
+        private Window mainWindow;
+
+        /// <summary>
         /// [_IsDelBtnEnabledOrNot]
         /// </summary>
         private bool _IsDelBtnEnabledOrNot;
@@ -611,6 +616,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
         public MainVM()
         {
+            mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
             DelBtnEnabledOrNot = true;
             VisibleLoading = false;
             VisibleDestroy = false;
@@ -726,7 +732,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     //mouseHook.UnhookMouse();
                     VisibleLoading = false;
                     DelBtnEnabledOrNot = true;
-                    _ = MessageBox.Show("로딩 시간이 초과되었습니다. 다른 작업을 수행하세요.", "작업 취소", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    _ = MessageBox.Show(mainWindow, "로딩 시간이 초과되었습니다. 다른 작업을 수행하세요.", "작업 취소", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                     return;
                 }
                 await enumerateTask; // 해당 작업 수행!
@@ -787,7 +793,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 FilterFolderName = string.Empty;
                 FilterExtensions = string.Empty;
-                _ = MessageBox.Show("불러올 폴더 경로가 없습니다.", "경로 미입력", MessageBoxButton.OK, MessageBoxImage.Error);
+                _ = MessageBox.Show(mainWindow, "불러올 폴더 경로가 없습니다.", "경로 미입력", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
         }
@@ -980,19 +986,19 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
             catch (UnauthorizedAccessException ex)
             {
-                _ = MessageBox.Show($"{ex.Message}", "엑세스 거부", MessageBoxButton.OK, MessageBoxImage.Error);
+                _ = MessageBox.Show(mainWindow, $"{ex.Message}", "엑세스 거부", MessageBoxButton.OK, MessageBoxImage.Error);
                 // 경로에 대한 엑세스 거부 오류.
                 Console.WriteLine($"Exception: Access Denied To Directories: {ex.Message}");
             }
             catch (DirectoryNotFoundException ex)
             {
-                _ = MessageBox.Show($"{ex.Message}", "경로 미존재", MessageBoxButton.OK, MessageBoxImage.Error);
+                _ = MessageBox.Show(mainWindow, $"{ex.Message}", "경로 미존재", MessageBoxButton.OK, MessageBoxImage.Error);
                 // 경로를 찾을 수 없음.
                 Console.WriteLine($"Exception: Directories Not Found: {ex.Message}");
             }
             catch (PathTooLongException ex)
             {
-                _ = MessageBox.Show($"{ex.Message}", "경로 재설정", MessageBoxButton.OK, MessageBoxImage.Error);
+                _ = MessageBox.Show(mainWindow, $"{ex.Message}", "경로 재설정", MessageBoxButton.OK, MessageBoxImage.Error);
                 // 경로가 너무 긴 경우.
                 Console.WriteLine($"Exception: Path Is Too Long: {ex.Message}");
             }
@@ -1106,7 +1112,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         // 선택된 [삭제할 폴더 유형]이 모두 "파일 폴더"인 경우에 해당 사항
                         if (selectToDelete.All(v => v.DelMatchingCategory == "파일 폴더"))
                         {
-                            MessageBoxResult messageBox = MessageBox.Show("선택한 폴더를 정말 삭제하시겠습니까?", "폴더 삭제", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                            MessageBoxResult messageBox = MessageBox.Show(mainWindow, "선택한 폴더를 정말 삭제하시겠습니까?", "폴더 삭제", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                             if (messageBox == MessageBoxResult.OK)
                             {
                                 await DelSelConfirm(ProgressBar);
@@ -1120,7 +1126,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         // 그 외의 경우("파일")에 해당 사항!
                         else
                         {
-                            MessageBoxResult messageBox = MessageBox.Show("선택한 파일을 정말 삭제하시겠습니까?", "파일 삭제", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                            MessageBoxResult messageBox = MessageBox.Show(mainWindow, "선택한 파일을 정말 삭제하시겠습니까?", "파일 삭제", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                             if (messageBox == MessageBoxResult.OK)
                             {
                                 await DelSelConfirm(ProgressBar);
@@ -1225,7 +1231,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     entireToDelete = new List<DelMatchingInfo>(DeleteFolderInfo);
                     if (!entireToDelete.Any(v => v.DelMatchingName.Equals("bin", StringComparison.OrdinalIgnoreCase) || v.DelMatchingName.Equals("obj", StringComparison.OrdinalIgnoreCase)))
                     {
-                        MessageBoxResult messageBox = MessageBox.Show("전체 삭제하시겠습니까?", "일괄 삭제", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                        MessageBoxResult messageBox = MessageBox.Show(mainWindow, "전체 삭제하시겠습니까?", "일괄 삭제", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                         if (messageBox == MessageBoxResult.OK)
                         {
                             await DelAllConfirm(ProgressBar);
@@ -1282,14 +1288,14 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 }
                 else
                 {
-                    _ = MessageBox.Show("초기화 할 내용이 없습니다.", "재입력 필요", MessageBoxButton.OK, MessageBoxImage.Information);
+                    _ = MessageBox.Show(mainWindow, "초기화 할 내용이 없습니다.", "재입력 필요", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
 
             }
             else
             {
                 FilterFolderName = string.Empty;
-                _ = MessageBox.Show("초기화 할 경로가 없습니다.", "경로 미입력", MessageBoxButton.OK, MessageBoxImage.Error);
+                _ = MessageBox.Show(mainWindow, "초기화 할 경로가 없습니다.", "경로 미입력", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
         }
@@ -1323,14 +1329,14 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 }
                 else
                 {
-                    _ = MessageBox.Show("초기화 할 내용이 없습니다.", "재입력 필요", MessageBoxButton.OK, MessageBoxImage.Information);
+                    _ = MessageBox.Show(mainWindow, "초기화 할 내용이 없습니다.", "재입력 필요", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
 
             }
             else
             {
                 FilterExtensions = string.Empty;
-                _ = MessageBox.Show("초기화 할 경로가 없습니다.", "경로 미입력", MessageBoxButton.OK, MessageBoxImage.Error);
+                _ = MessageBox.Show(mainWindow, "초기화 할 경로가 없습니다.", "경로 미입력", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
         }
