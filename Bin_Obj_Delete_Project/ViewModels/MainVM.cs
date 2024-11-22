@@ -718,7 +718,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 Task cancelingTask = Task.Delay(120000); // 120초 후 작업 취소!
                 Task completedTask = await Task.WhenAny(enumerateTask, cancelingTask);
-                // 120초가 지나도 작업이 끝나지 않을 때, 작업 취소 요청!
+                // 약 120초가 지나도 작업이 끝나지 않을 때, 작업 취소 요청!
                 if (completedTask == cancelingTask)
                 {
                     cancellationTokenSource.Cancel();
@@ -909,7 +909,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             {
                                 return;
                             }
-
                             // 이미 처리가 된 파일 경로는 무시! (중복 제거)
                             if (uniqueFilePathSet.Contains(files.FullName))
                             {
