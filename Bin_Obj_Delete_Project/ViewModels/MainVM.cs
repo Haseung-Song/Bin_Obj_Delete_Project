@@ -903,7 +903,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         matchingFileInfoOrNot = true; // [파일]로 구분됨!
                         foreach (FileInfo files in lstEnumerateFilesInfo)
                         {
-                            // 작업 취소 요청 (약 90초) 후, 작업 취소 수행
+                            // 작업 취소 요청 (약 120초) 후 작업 취소 수행
                             if (cancellationToken.IsCancellationRequested)
                             {
                                 return;
