@@ -839,9 +839,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     }
                     DirectoryInfo dirInfo = new DirectoryInfo(dir);
                     matchingFldrName = dirInfo.Name;
-                    matchingFldrCreationTime = dirInfo.CreationTime.ToString();
+                    matchingFldrCreationTime = dirInfo.CreationTime.ToString("yyyy-MM-dd tt HH:mm:ss");
                     matchingFldrCategory = "파일 폴더";
-                    matchingFldrModifiedTime = dirInfo.LastWriteTime.ToString();
+                    matchingFldrModifiedTime = dirInfo.LastWriteTime.ToString("yyyy-MM-dd tt HH:mm:ss");
                     matchingFldrSize = await Task.Run(() => GetDirectorySize(dir));
                     matchingFldrPath = dir;
                     matchingFileInfoOrNot = false; // [폴더]로 구분
@@ -919,7 +919,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             if (Array.Exists(filterComma2, comma2 => files.Extension.Equals(comma2.Trim(), StringComparison.OrdinalIgnoreCase)))
                             {
                                 matchingFileName = files.Name;
-                                matchingFileCreationTime = files.CreationTime.ToString();
+                                matchingFileCreationTime = files.CreationTime.ToString("yyyy-MM-dd tt HH:mm:ss");
                                 Dictionary<string, string> extensionCategoryMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                                 {
                                      { ".pdb", "Program Debug Database" },
@@ -946,7 +946,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                                      { ".suo", "Visual Studio Solution User Options" }
                                 };
                                 matchingFileCategory = extensionCategoryMap.TryGetValue(files.Extension, out string category) ? category : "기타 파일";
-                                matchingFileModifiedTime = files.LastWriteTime.ToString();
+                                matchingFileModifiedTime = files.LastWriteTime.ToString("yyyy-MM-dd tt HH:mm:ss");
                                 matchingFileSize = files.Length;
                                 matchingFilePath = files.FullName;
                                 _ = uniqueFilePathSet.Add(matchingFilePath); // [중복] 제거
