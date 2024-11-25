@@ -714,7 +714,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 return EnumerateFolders(cancellationToken, ProgressBar, ProgressBar); // 비동기 호출 반환
             }, cancellationToken);
-
             try
             {
                 Task cancelingTask = Task.Delay(3000000); // [약 300초] 후, 작업 취소!
@@ -727,8 +726,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     //mouseHook.UnhookMouse();
                     VisibleLoading = false;
                     DelBtnEnabledOrNot = true;
-                    Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
-                    _ = MessageBox.Show(mainWindow, "로딩 시간이 초과되었습니다. 다른 작업을 수행하세요.", "작업 취소", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
+                        _ = MessageBox.Show(mainWindow, "로딩 시간이 초과되었습니다. 다른 작업을 수행하세요.", "작업 취소", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    });
                     return;
                 }
                 await enumerateTask; // 해당 작업 수행!
@@ -841,7 +843,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     {
                         return;
                     }
-
                     DirectoryInfo dirInfo = new DirectoryInfo(dir);
                     matchingFldrName = dirInfo.Name;
                     matchingFldrCreationTime = dirInfo.CreationTime.ToString("yyyy-MM-dd tt HH:mm:ss");
@@ -915,6 +916,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             {
                                 return;
                             }
+
                             // 이미 처리가 된 파일 경로는 무시! (중복 제거)
                             if (uniqueFilePathSet.Contains(files.FullName))
                             {
@@ -986,24 +988,43 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
             catch (UnauthorizedAccessException ex)
             {
-                Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
-                _ = MessageBox.Show(mainWindow, $"{ex.Message}", "엑세스 거부", MessageBoxButton.OK, MessageBoxImage.Error);
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
+                    _ = MessageBox.Show(mainWindow, $"{ex.Message}", "액세스 거부", MessageBoxButton.OK, MessageBoxImage.Error);
+                });
                 // 경로에 대한 엑세스 거부 오류.
-                Console.WriteLine($"Exception: Access Denied To Directories: {ex.Message}");
+                Console.WriteLine($"Exception: Access Denied to Directories: {ex.Message}");
             }
             catch (DirectoryNotFoundException ex)
             {
-                Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
-                _ = MessageBox.Show(mainWindow, $"{ex.Message}", "경로 미존재", MessageBoxButton.OK, MessageBoxImage.Error);
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
+                    _ = MessageBox.Show(mainWindow, $"{ex.Message}", "경로 미존재", MessageBoxButton.OK, MessageBoxImage.Error);
+                });
                 // 경로를 찾을 수 없음.
                 Console.WriteLine($"Exception: Directories Not Found: {ex.Message}");
             }
+            catch (InvalidOperationException ex)
+            {
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
+                    _ = MessageBox.Show(mainWindow, $"{ex.Message}", "액세스 거부", MessageBoxButton.OK, MessageBoxImage.Error);
+                });
+                // 특정 객체에 대한 엑세스 거부 오류.
+                Console.WriteLine($"Exception: Access Denied to the Object: {ex.Message}");
+            }
             catch (PathTooLongException ex)
             {
-                Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
-                _ = MessageBox.Show(mainWindow, $"{ex.Message}", "경로 재설정", MessageBoxButton.OK, MessageBoxImage.Error);
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
+                    _ = MessageBox.Show(mainWindow, $"{ex.Message}", "경로 재설정", MessageBoxButton.OK, MessageBoxImage.Error);
+                });
                 // 경로가 너무 긴 경우.
-                Console.WriteLine($"Exception: Path Is Too Long: {ex.Message}");
+                Console.WriteLine($"Exception: Path is Too Long: {ex.Message}");
             }
             catch (Exception ex)
             {
@@ -1152,7 +1173,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     {
                         await DelSelConfirm(ProgressBar);
                     }
-
                     // UI Update (총 항목 개수)
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
@@ -1256,7 +1276,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     {
                         await DelAllConfirm(ProgressBar);
                     }
-
                     // UI Update (총 항목 개수)
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
@@ -1298,16 +1317,24 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 }
                 else
                 {
-                    Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
-                    _ = MessageBox.Show(mainWindow, "초기화 할 내용이 없습니다.", "재입력 필요", MessageBoxButton.OK, MessageBoxImage.Information);
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
+                        _ = MessageBox.Show(mainWindow, "초기화 할 내용이 없습니다.", "재입력 필요", MessageBoxButton.OK, MessageBoxImage.Information);
+                    });
+
                 }
 
             }
             else
             {
                 FilterFolderName = string.Empty;
-                Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
-                _ = MessageBox.Show(mainWindow, "초기화 할 경로가 없습니다.", "경로 미입력", MessageBoxButton.OK, MessageBoxImage.Error);
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
+                    _ = MessageBox.Show(mainWindow, "초기화 할 경로가 없습니다.", "경로 미입력", MessageBoxButton.OK, MessageBoxImage.Error);
+                });
+
             }
 
         }
@@ -1341,16 +1368,24 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 }
                 else
                 {
-                    Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
-                    _ = MessageBox.Show(mainWindow, "초기화 할 내용이 없습니다.", "재입력 필요", MessageBoxButton.OK, MessageBoxImage.Information);
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
+                        _ = MessageBox.Show(mainWindow, "초기화 할 내용이 없습니다.", "재입력 필요", MessageBoxButton.OK, MessageBoxImage.Information);
+                    });
+
                 }
 
             }
             else
             {
                 FilterExtensions = string.Empty;
-                Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
-                _ = MessageBox.Show(mainWindow, "초기화 할 경로가 없습니다.", "경로 미입력", MessageBoxButton.OK, MessageBoxImage.Error);
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
+                    _ = MessageBox.Show(mainWindow, "초기화 할 경로가 없습니다.", "경로 미입력", MessageBoxButton.OK, MessageBoxImage.Error);
+                });
+
             }
 
         }
