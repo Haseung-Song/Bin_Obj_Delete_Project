@@ -714,6 +714,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 return EnumerateFolders(cancellationToken, ProgressBar, ProgressBar); // 비동기 호출 반환
             }, cancellationToken);
+
             try
             {
                 Task cancelingTask = Task.Delay(120000); // 120초 후 작업 취소!
@@ -735,11 +736,14 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 VisibleLoading = false;
                 DelBtnEnabledOrNot = true;
                 TotalNumbersInfo = ActiveFolderInfo.Count(); // 총 항목 개수
-                enumerateTask.Dispose();
             }
             catch (OperationCanceledException)
             {
                 Console.WriteLine("The task has been canceled.");
+            }
+            finally
+            {
+                enumerateTask.Dispose();
             }
 
         }
@@ -837,6 +841,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     {
                         return;
                     }
+
                     DirectoryInfo dirInfo = new DirectoryInfo(dir);
                     matchingFldrName = dirInfo.Name;
                     matchingFldrCreationTime = dirInfo.CreationTime.ToString("yyyy-MM-dd tt HH:mm:ss");
@@ -845,6 +850,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     matchingFldrSize = await Task.Run(() => GetDirectorySize(dir));
                     matchingFldrPath = dir;
                     matchingFileInfoOrNot = false; // [폴더]로 구분
+
                     // 1. 필터 키워드를 콤마(',')로 구분 후, 배열로 생성 (FilterFolderName)
                     string[] filterComma1 = string.IsNullOrEmpty(FilterFolderName) ? Array.Empty<string>() : FilterFolderName.Split(',');
 
@@ -1005,23 +1011,27 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
             finally
             {
-                fldrProgress.Report(100); // [진행률: 100] 작업 완료
-                fileProgress.Report(100); // [진행률: 100] 작업 완료
-                // DelMatchingInfo 정보 확인: 디버깅으로 확인 가능!!
-                //foreach (DelMatchingInfo item in DeleteFolderInfo)
-                //{
-                //    Console.WriteLine(item.DelMatchingName);
-                //    Console.WriteLine(item.DelMatchingCreationTime);
-                //    Console.WriteLine(item.DelMatchingCategory);
-                //    Console.WriteLine(item.DelMatchingModifiedTime);
-                //    Console.WriteLine(item.DelMatchingOfSize);
-                //    Console.WriteLine(item.DelMatchingPath);
-                //}
-                await Application.Current.Dispatcher.InvokeAsync(() =>
+                if (!cancellationToken.IsCancellationRequested)
                 {
-                    ActiveFolderInfo = DeleteFolderInfo; // [ActiveFolderInfo] 컬렉션에 [DeleteFolderInfo] 컬렉션을 할당
-                    TotalNumbersInfo = ActiveFolderInfo.Count(); // 총 항목 개수 표시
-                });
+                    // DelMatchingInfo 정보 확인: 디버깅으로 확인 가능!!
+                    //foreach (DelMatchingInfo item in DeleteFolderInfo)
+                    //{
+                    //    Console.WriteLine(item.DelMatchingName);
+                    //    Console.WriteLine(item.DelMatchingCreationTime);
+                    //    Console.WriteLine(item.DelMatchingCategory);
+                    //    Console.WriteLine(item.DelMatchingModifiedTime);
+                    //    Console.WriteLine(item.DelMatchingOfSize);
+                    //    Console.WriteLine(item.DelMatchingPath);
+                    //}
+                    fldrProgress.Report(100); // [진행률: 100] 작업 완료
+                    fileProgress.Report(100); // [진행률: 100] 작업 완료
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        ActiveFolderInfo = DeleteFolderInfo; // [ActiveFolderInfo] 컬렉션에 [DeleteFolderInfo] 컬렉션을 할당
+                        TotalNumbersInfo = ActiveFolderInfo.Count(); // 총 항목 개수 표시
+                    });
+
+                }
 
             }
 
