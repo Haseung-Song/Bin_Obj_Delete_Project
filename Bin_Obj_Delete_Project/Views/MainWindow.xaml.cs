@@ -13,6 +13,7 @@ namespace Bin_Obj_Delete_Project
     public partial class MainWindow : Window
     {
         private readonly MainVM vm = new MainVM();
+
         public MainWindow()
         {
             InitializeComponent();
