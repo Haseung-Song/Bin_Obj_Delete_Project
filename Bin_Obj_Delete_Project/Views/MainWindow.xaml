@@ -30,7 +30,7 @@
     <Border CornerRadius="12"
             BorderThickness="1"
             Opacity="0.95"
-            Margin="5">
+            Margin="12">
         <Border.BorderBrush>
             <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                 <GradientStop Color="#462AD8" Offset="0"/>
@@ -333,7 +333,7 @@
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
 
-                                    <GridViewColumn Width="Auto">
+                                    <GridViewColumn Width="1200">
                                         <GridViewColumn.Header>
                                             <GridViewColumnHeader Content="경로"
                                                                   Background="#FFFDF8"
