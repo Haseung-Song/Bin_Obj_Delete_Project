@@ -1046,6 +1046,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     //    Console.WriteLine(item.DelMatchingOfSize);
                     //    Console.WriteLine(item.DelMatchingPath);
                     //}
+
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
                         ActiveFolderInfo = DeleteFolderInfo; // [ActiveFolderInfo] 컬렉션에 [DeleteFolderInfo] 컬렉션을 할당
