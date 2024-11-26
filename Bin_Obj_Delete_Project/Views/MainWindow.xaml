@@ -21,7 +21,6 @@
             GlassFrameThickness="0"
             UseAeroCaptionButtons="False" />
     </WindowChrome.WindowChrome>
-
     <Window.Resources>
         <converter:TypeConverter x:Key="FormatConverter"/>
         <converter:BooleanToVisibilityConverter x:Key="VisibilityConverter"/>
@@ -58,6 +57,7 @@
                                Foreground="DimGray"
                                FontSize="14"
                                FontFamily="Montserrat"
+                               FontWeight="DemiBold"
                                VerticalAlignment="Center"
                                Margin="12,10,0,0"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,5,10,0">
