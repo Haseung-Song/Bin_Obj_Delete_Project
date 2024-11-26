@@ -252,7 +252,7 @@
                             </ListView.ItemContainerStyle>
                             <ListView.View>
                                 <GridView>
-                                    <GridViewColumn Width="320">
+                                    <GridViewColumn Width="280">
                                         <GridViewColumn.Header>
                                             <GridViewColumnHeader Content="이름"
                                                                   Background="#FFFDF8"
@@ -333,7 +333,7 @@
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
 
-                                    <GridViewColumn Width="1160">
+                                    <GridViewColumn Width="1100">
                                         <GridViewColumn.Header>
                                             <GridViewColumnHeader Content="경로"
                                                                   Background="#FFFDF8"
