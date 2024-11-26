@@ -8,142 +8,167 @@
       Width="680"
       Height="400"
       WindowStartupLocation="CenterScreen">
+    <Border CornerRadius="12"
+            BorderThickness="1"
+            Opacity="0.95">
+        <Border.Background>
+            <LinearGradientBrush StartPoint="0,1" EndPoint="1,0">
+                <GradientStop Color="#FAFDF5CC" Offset="0"/>
+                <GradientStop Color="#F4DAF7FF" Offset="0.5"/>
+                <GradientStop Color="#E8FFFFFF" Offset="1"/>
+            </LinearGradientBrush>
+        </Border.Background>
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <Border Grid.Row="0"
-                BorderBrush="DarkGray"
-                BorderThickness="2"
-                Margin="5">
-            <StackPanel Margin="5">
-                <TextBlock Text="검색 필터 설정"
-                           TextAlignment="Center"
-                           HorizontalAlignment="Stretch"
-                           FontSize="18"
-                           FontWeight="Bold"
-                           Margin="0,0,0,0"/>
-            </StackPanel>
-        </Border>
-        <Border Grid.Row="1"
-                BorderBrush="DarkGray"
-                BorderThickness="2"
-                Margin="5">
-            <StackPanel Margin="10">
-                <Grid Margin="5">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <!-- 필터 1 -->
-                    <TextBlock Grid.Column="0"
-                               Grid.Row="0"
-                               Text="Filter 01: 폴더 이름으로 검색"
-                               TextAlignment="Left"
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0"
+                    BorderBrush="DarkGray"
+                    BorderThickness="2"
+                    Margin="5"
+                    CornerRadius="10"
+                    Opacity="0.95">
+                <StackPanel Margin="5">
+                    <TextBlock Text="검색 필터 설정"
+                               TextAlignment="Center"
                                HorizontalAlignment="Stretch"
-                               FontSize="16"
+                               FontSize="18"
                                FontWeight="Bold"
-                               Margin="0,0,0,10"/>
-                    <TextBox   Grid.Column="0"
-                               Grid.Row="1"
-                               Text="{Binding FilterFolderName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                               Height="40"
-                               TextWrapping="Wrap"
-                               AcceptsReturn="True"
-                               TextAlignment="Left"
-                               HorizontalAlignment="Stretch"
-                               VerticalAlignment="Stretch"
-                               FontSize="14"
-                               FontWeight="Normal"
-                               Margin="0,5,0,10">
-                        <TextBox.InputBindings>
-                            <KeyBinding Gesture="Enter" 
-                                        Command="{Binding EnterLoadPathCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
-                        </TextBox.InputBindings>
-                    </TextBox>
-                    <StackPanel Grid.Column="0"
-                                Grid.Row="2"
-                                Orientation="Horizontal"
-                                HorizontalAlignment="Center">
-                        <Button Content="적용(새로고침)"
-                                Click="ApplyButton_Click"
-                                Margin="0,0,25,0"
-                                Height="28"
-                                Width="100"/>
-                        <Button Content="초기화"
-                                Click="F01ResetButton_Click"
-                                Margin="0,0,10,0"
-                                Height="28"
-                                Width="100"/>
-                    </StackPanel>
-                </Grid>
-            </StackPanel>
-        </Border>
-        <Border Grid.Row="2"
-                BorderBrush="DarkGray"
-                BorderThickness="2"
-                Margin="5">
-            <StackPanel Margin="10">
-                <Grid Margin="5">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <!-- 필터 2 -->
-                    <TextBlock Grid.Column="0"
-                               Grid.Row="0"
-                               Text="Filter 02: 파일 확장자로 검색"
-                               TextAlignment="Left"
-                               HorizontalAlignment="Stretch"
-                               FontSize="16"
-                               FontWeight="Bold"
-                               Margin="0,0,0,10"/>
-                    <TextBox   Grid.Column="0"
-                               Grid.Row="1"
-                               Text="{Binding FilterExtensions, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                               Height="40"
-                               TextWrapping="Wrap"
-                               AcceptsReturn="True"
-                               TextAlignment="Left"
-                               HorizontalAlignment="Stretch"
-                               VerticalAlignment="Stretch"
-                               FontSize="14"
-                               FontWeight="Normal"
-                               Margin="0,5,0,10">
-                        <TextBox.InputBindings>
-                            <KeyBinding Gesture="Enter" 
-                                        Command="{Binding EnterLoadPathCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
-                        </TextBox.InputBindings>
-                    </TextBox>
-                    <StackPanel Grid.Column="0"
-                                Grid.Row="2"
-                                Orientation="Horizontal"
-                                HorizontalAlignment="Center">
-                        <Button Content="적용(새로고침)"
-                                Click="ApplyButton_Click"
-                                Margin="0,0,25,0"
-                                Height="28"
-                                Width="100"/>
-                        <Button Content="초기화"
-                                Click="F02ResetButton_Click"
-                                Margin="0,0,10,0"
-                                Height="28"
-                                Width="100"/>
-                    </StackPanel>
-                </Grid>
-            </StackPanel>
-        </Border>
-    </Grid>
+                               Margin="0,0,0,0"/>
+                </StackPanel>
+            </Border>
 
+            <Border Grid.Row="1"
+                    BorderBrush="DarkGray"
+                    BorderThickness="2"
+                    Margin="5"
+                    CornerRadius="12"
+                    Opacity="0.95">
+                <StackPanel Margin="10">
+                    <Grid Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <!-- 필터 1 -->
+                        <TextBlock Grid.Column="0"
+                                   Grid.Row="0"
+                                   Text="Filter 01: 폴더 이름으로 검색"
+                                   TextAlignment="Left"
+                                   HorizontalAlignment="Stretch"
+                                   FontSize="16"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,10"/>
+                        <TextBox Grid.Column="0"
+                                 Grid.Row="1"
+                                 Text="{Binding FilterFolderName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                 Height="40"
+                                 TextWrapping="Wrap"
+                                 AcceptsReturn="True"
+                                 TextAlignment="Left"
+                                 HorizontalAlignment="Stretch"
+                                 VerticalAlignment="Stretch"
+                                 FontSize="14"
+                                 FontWeight="Normal"
+                                 Background="Transparent"
+                                 Margin="0,5,0,10">
+                            <TextBox.InputBindings>
+                                <KeyBinding Gesture="Enter" 
+                                            Command="{Binding EnterLoadPathCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                            </TextBox.InputBindings>
+                        </TextBox>
+                        <StackPanel Grid.Column="0"
+                                    Grid.Row="2"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Center">
+                            <Button Content="적용(새로고침)"
+                                    Click="ApplyButton_Click"
+                                    Background="AliceBlue"
+                                    Margin="0,0,25,0"
+                                    Height="28"
+                                    Width="100"/>
+                            <Button Content="초기화"
+                                    Click="F01ResetButton_Click"
+                                    Background="AliceBlue"
+                                    Margin="0,0,10,0"
+                                    Height="28"
+                                    Width="100"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Row="2"
+                    BorderBrush="DarkGray"
+                    BorderThickness="2"
+                    Margin="5"
+                    CornerRadius="12"
+                    Opacity="0.95">
+                <StackPanel Margin="10">
+                    <Grid Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <!-- 필터 2 -->
+                        <TextBlock Grid.Column="0"
+                                   Grid.Row="0"
+                                   Text="Filter 02: 파일 확장자로 검색"
+                                   TextAlignment="Left"
+                                   HorizontalAlignment="Stretch"
+                                   FontSize="16"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,10"/>
+                        <TextBox Grid.Column="0"
+                                 Grid.Row="1"
+                                 Text="{Binding FilterExtensions, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                 Height="40"
+                                 TextWrapping="Wrap"
+                                 AcceptsReturn="True"
+                                 TextAlignment="Left"
+                                 HorizontalAlignment="Stretch"
+                                 VerticalAlignment="Stretch"
+                                 FontSize="14"
+                                 FontWeight="Normal"
+                                 Background="Transparent"
+                                 Margin="0,5,0,10">
+                            <TextBox.InputBindings>
+                                <KeyBinding Gesture="Enter" 
+                                            Command="{Binding EnterLoadPathCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                            </TextBox.InputBindings>
+                        </TextBox>
+                        <StackPanel Grid.Column="0"
+                                    Grid.Row="2"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Center">
+                            <Button Content="적용(새로고침)"
+                                    Click="ApplyButton_Click"
+                                    Background="AliceBlue"
+                                    Margin="0,0,25,0"
+                                    Height="28"
+                                    Width="100"/>
+                            <Button Content="초기화"
+                                    Click="F02ResetButton_Click"
+                                    Background="AliceBlue"
+                                    Margin="0,0,10,0"
+                                    Height="28"
+                                    Width="100"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+        </Grid>
+    </Border>
 </Window>

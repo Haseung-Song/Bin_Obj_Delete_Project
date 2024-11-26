@@ -20,7 +20,51 @@ namespace Bin_Obj_Delete_Project
         }
 
         /// <summary>
-        /// [ListView_MouseDoubleClick]
+        /// [Window_Mouse_Down] 이벤트
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Window_Mouse_Down(object sender, MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                DragMove();
+            }
+
+        }
+
+        /// <summary>
+        /// [BtnMinimize_Click] 이벤트
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BtnMinimize_Click(object sender, RoutedEventArgs e)
+        {
+            WindowState = WindowState.Minimized;
+        }
+
+        /// <summary>
+        /// [BtnMaximize_Click] 이벤트
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BtnMaximize_Click(object sender, RoutedEventArgs e)
+        {
+            WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+        }
+
+        /// <summary>
+        /// [BtnClose_Click] 이벤트
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BtnClose_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
+        }
+
+        /// <summary>
+        /// [ListView_MouseDoubleClick] 이벤트
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -37,7 +81,7 @@ namespace Bin_Obj_Delete_Project
         private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // [SelectionChanged] 이벤트 발생!
-            // [SelectFolderInfo] + 선택된 항목의 목록 포함
+            // [SelectFolderInfo] + [선택 항목] 목록 포함
             foreach (DelMatchingInfo item in e.AddedItems)
             {
                 vm.SelectFolderInfo?.Add(item);
@@ -45,7 +89,7 @@ namespace Bin_Obj_Delete_Project
             }
 
             // [SelectionChanged] 이벤트 발생!
-            // [SelectFolderInfo] + 선택된 항목의 목록을 제거
+            // [SelectFolderInfo] + [선택 항목] 목록 제거
             foreach (DelMatchingInfo item in e.RemovedItems)
             {
                 if (vm.SelectFolderInfo?.Count > 0)

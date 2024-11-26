@@ -46,7 +46,7 @@
                        Visibility="{Binding VisibleLoading, Converter={StaticResource BooleanToVisibilityConverter}}"/>
             <TextBlock Text="{Binding ProgressValue, StringFormat=' {0:F0}%'}"
                        FontSize="20"
-                       Foreground="DodgerBlue"
+                       Foreground="SteelBlue"
                        FontWeight="Bold"
                        TextAlignment="Center"
                        Visibility="{Binding VisibleLoading, Converter={StaticResource BooleanToVisibilityConverter}}"/>

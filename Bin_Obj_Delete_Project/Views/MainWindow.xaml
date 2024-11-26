@@ -7,233 +7,403 @@
         d:DataContext="{d:DesignInstance Type=viewmodels:MainVM}"
         xmlns:converter="clr-namespace:Bin_Obj_Delete_Project.Converter"
         mc:Ignorable="d"
-        Title="MainWindow"
+        WindowStartupLocation="CenterScreen"
+        Background="Transparent"
+        AllowsTransparency="True"
+        MouseDown="Window_Mouse_Down"
+        WindowStyle="None"
         Width="1680"
         Height="800">
+    <WindowChrome.WindowChrome>
+        <WindowChrome 
+            CaptionHeight="0"
+            CornerRadius="16"
+            GlassFrameThickness="0"
+            UseAeroCaptionButtons="False" />
+    </WindowChrome.WindowChrome>
+
     <Window.Resources>
         <converter:TypeConverter x:Key="FormatConverter"/>
         <converter:BooleanToVisibilityConverter x:Key="VisibilityConverter"/>
     </Window.Resources>
-    <Grid x:Name="LoadingOverlay">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Orientation="Horizontal">
-            <Border BorderBrush ="DarkGray" 
-                    BorderThickness="0" 
-                    Margin="8,20,4,4" 
-                    Width="1065" 
-                    Height="35">
-                <TextBox Text="{Binding DeleteFolderPath, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                         IsHitTestVisible="{Binding DelBtnEnabledOrNot}"
-                         TextAlignment="Left" 
-                         Margin="2,2,2,2" 
-                         FontSize="20"
-                         FontStyle="Normal"
-                         Background="AliceBlue">
-                    <TextBox.InputBindings>
-                        <KeyBinding Gesture="Enter" 
-                                    Command="{Binding EnterLoadPathCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
-                    </TextBox.InputBindings>
-                </TextBox>
+    <Border CornerRadius="12"
+            BorderThickness="1"
+            Opacity="0.95"
+            Margin="10">
+        <Border.BorderBrush>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#462AD8" Offset="0"/>
+                <GradientStop Color="#DA34AE" Offset="0.75"/>
+                <GradientStop Color="#8A16C1" Offset="1"/>
+            </LinearGradientBrush>
+        </Border.BorderBrush>
+
+        <Border.Background>
+            <LinearGradientBrush StartPoint="0,1" EndPoint="1,0">
+                <GradientStop Color="#FAFDF5CC" Offset="0"/>
+                <GradientStop Color="#F4DAF7FF" Offset="0.5"/>
+                <GradientStop Color="#E8FFFFFF" Offset="1"/>
+            </LinearGradientBrush>
+        </Border.Background>
+
+        <Grid>
+            <Border Background="Transparent"
+                    Height="Auto"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Top">
+                <DockPanel LastChildFill="True">
+                    <TextBlock x:Name="txtblkUserInfo"
+                               Text="[ Bin_Obj_Delete Project ]"
+                               Foreground="DimGray"
+                               FontSize="14"
+                               FontFamily="Montserrat"
+                               VerticalAlignment="Center"
+                               Margin="12,10,0,0"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,5,10,0">
+                        <Button x:Name="btnMinimize"
+                                BorderThickness="0"
+                                Content="-"
+                                Foreground="White"
+                                FontSize="16"
+                                FontFamily="Montserrat"
+                                Cursor="Hand"
+                                Margin="0,0,5,0"
+                                Click="BtnMinimize_Click">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="#4CAF50"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="true">
+                                            <Setter Property="Background" Value="#388E3C"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Width="20" Height="20"
+                                            CornerRadius="12"
+                                            Background="{TemplateBinding Background}">
+                                        <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+
+                        <Button x:Name="btnMaximize"
+                                BorderThickness="0"
+                                Content="ㅁ"
+                                Foreground="White"
+                                FontSize="16"
+                                FontFamily="Montserrat"
+                                Cursor="Hand"
+                                Margin="0,0,5,0"
+                                Click="BtnMaximize_Click">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="#FFC107"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="true">
+                                            <Setter Property="Background" Value="#FFB300"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Width="20" Height="20"
+                                            CornerRadius="12"
+                                            Background="{TemplateBinding Background}">
+                                        <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+
+                        <Button x:Name="btnClose"
+                                BorderThickness="0"
+                                Content="X"
+                                Foreground="White"
+                                FontSize="12"
+                                FontFamily="Montserrat"
+                                Cursor="Hand"
+                                Click="BtnClose_Click">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="#F44336"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="true">
+                                            <Setter Property="Background" Value="#D32F2F"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Width="20" Height="20"
+                                            CornerRadius="12"
+                                            Background="{TemplateBinding Background}">
+                                        <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </StackPanel>
+                </DockPanel>
             </Border>
-            <Button Content="폴더 불러오기"
-                    Command="{Binding LoadingFolderCommand}"
-                    IsEnabled="{Binding DelBtnEnabledOrNot}"
-                    Margin="5,15,0,0"
-                    Height="30"
-                    Width="135"
-                    FontSize="15"/>
 
-            <Button Content="검색 필터"
-                    Click="OpenFilterWindow"
-                    IsEnabled="{Binding DelBtnEnabledOrNot}"
-                    Margin="10,15,0,0"
-                    Height="30"
-                    Width="135"
-                    FontSize="15"/>
-
-            <Button Content="선택 삭제하기"
-                    Command="{Binding DelSelMatchesCommand}"
-                    IsEnabled="{Binding DelBtnEnabledOrNot}"
-                    Margin="10,15,0,0"
-                    Height="30"
-                    Width="135"
-                    FontSize="15"/>
-
-            <Button Content="일괄 삭제하기"
-                    Command="{Binding DelAllMatchesCommand}"
-                    IsEnabled="{Binding DelBtnEnabledOrNot}"
-                    Margin="10,15,0,0" 
-                    Height="30" 
-                    Width="135" 
-                    FontSize="15"/>
-        </StackPanel>
-        <Border Grid.Row="1"
-                Grid.Column="1"
-                BorderBrush ="Black"
-                BorderThickness="2"
-                Margin="5, 10, 5, 5">
-            <Grid>
+            <Grid x:Name="LoadingOverlay">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <ListView ItemsSource="{Binding ActiveFolderInfo}"
-                          SelectedItem="{Binding SelectedCrFolder}"
-                          SelectionMode="Extended"
-                          SelectionChanged="ListView_SelectionChanged"
-                          Margin="5"
-                          x:Name="listView">
-                    <ListView.ItemContainerStyle>
-                        <Style TargetType="ListViewItem">
-                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                            <EventSetter Event="MouseDoubleClick" Handler="ListView_MouseDoubleClick"/>
-                        </Style>
-                    </ListView.ItemContainerStyle>
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn Width="320">
-                                <GridViewColumn.Header>
-                                    <GridViewColumnHeader Content="이름"
-                                                          Command="{Binding GoOrderByNameCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
-                                </GridViewColumn.Header>
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding DelMatchingName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                   TextAlignment="Left"
-                                                   TextDecorations="Underline"
-                                                   Foreground="DarkGreen"
-                                                   Cursor="Hand"/>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
+                <Grid Grid.Row="0" Margin="10,30,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border BorderBrush="DarkGray" 
+                            BorderThickness="0"
+                            Width="1065"
+                            Height="35"
+                            Grid.Column="0">
+                        <TextBox Text="{Binding DeleteFolderPath, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                 IsHitTestVisible="{Binding DelBtnEnabledOrNot}"
+                                 TextAlignment="Left"
+                                 Margin="2"
+                                 FontSize="20"
+                                 FontStyle="Normal"
+                                 Background="Transparent">
+                            <TextBox.InputBindings>
+                                <KeyBinding Gesture="Enter"
+                                            Command="{Binding EnterLoadPathCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                            </TextBox.InputBindings>
+                        </TextBox>
+                    </Border>
 
-                            <GridViewColumn Width="160">
-                                <GridViewColumn.Header>
-                                    <GridViewColumnHeader Content="생성한 날짜"
-                                                          Command="{Binding OrderByCrTimeCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
-                                </GridViewColumn.Header>
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding DelMatchingCreationTime, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                   TextAlignment="Center"
-                                                   Foreground="DarkRed"
-                                                   Cursor="Hand"/>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
+                    <Button Content="폴더 불러오기"
+                            Command="{Binding LoadingFolderCommand}"
+                            IsEnabled="{Binding DelBtnEnabledOrNot}"
+                            Margin="10,0,0,0"
+                            Height="33"
+                            Background="AliceBlue"
+                            FontSize="15"
+                            Grid.Column="1"/>
 
-                            <GridViewColumn Width="Auto">
-                                <GridViewColumn.Header>
-                                    <GridViewColumnHeader Content="유형"
-                                                          Command="{Binding GoOrderByTypeCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
-                                </GridViewColumn.Header>
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding DelMatchingCategory, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                   TextAlignment="Center"
-                                                   Foreground="Black"
-                                                   Cursor="Hand"/>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
+                    <Button Content="검색 필터"
+                            Click="OpenFilterWindow"
+                            IsEnabled="{Binding DelBtnEnabledOrNot}"
+                            Margin="10,0,0,0"
+                            Height="33"
+                            Background="AliceBlue"
+                            FontSize="15"
+                            Grid.Column="2"/>
 
-                            <GridViewColumn Width="160">
-                                <GridViewColumn.Header>
-                                    <GridViewColumnHeader Content="수정한 날짜"
-                                                          Command="{Binding OrderByMdTimeCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
-                                </GridViewColumn.Header>
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding DelMatchingModifiedTime, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                   TextAlignment="Center"
-                                                   Foreground="DarkRed"
-                                                   Cursor="Hand"/>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
+                    <Button Content="선택 삭제하기"
+                            Command="{Binding DelSelMatchesCommand}"
+                            IsEnabled="{Binding DelBtnEnabledOrNot}"
+                            Margin="10,0,0,0"
+                            Height="33"
+                            Background="AliceBlue"
+                            FontSize="15"
+                            Grid.Column="3"/>
 
-                            <GridViewColumn Width="120">
-                                <GridViewColumn.Header>
-                                    <GridViewColumnHeader Content="크기"
-                                                          Command="{Binding GoOrderBySizeCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
-                                </GridViewColumn.Header>
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding DelMatchingOfSize, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FormatConverter}, Mode=TwoWay}"
-                                                   TextAlignment="Center"
-                                                   Foreground="Black"
-                                                   Cursor="Hand"/>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
+                    <Button Content="일괄 삭제하기"
+                            Command="{Binding DelAllMatchesCommand}"
+                            IsEnabled="{Binding DelBtnEnabledOrNot}"
+                            Margin="10,0,6,0"
+                            Height="33"
+                            Background="AliceBlue"
+                            FontSize="15"
+                            Grid.Column="4"/>
+                </Grid>
 
-                            <GridViewColumn Width="950">
-                                <GridViewColumn.Header>
-                                    <GridViewColumnHeader Content="경로"
-                                                          Command="{Binding GoOrderByPathCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
-                                </GridViewColumn.Header>
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding DelMatchingPath, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                   TextAlignment="Left"
-                                                   TextDecorations="Underline"
-                                                   Foreground="DarkBlue"
-                                                   Cursor="Hand"/>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
-                        </GridView>
-                    </ListView.View>
-                </ListView>
+                <Border Grid.Row="1"
+                        Grid.Column="1"
+                        BorderBrush ="Black"
+                        BorderThickness="2"
+                        Margin="5,10,5,5">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <ListView ItemsSource="{Binding ActiveFolderInfo}"
+                                  SelectedItem="{Binding SelectedCrFolder}"
+                                  SelectionMode="Extended"
+                                  SelectionChanged="ListView_SelectionChanged"
+                                  Background="Transparent"
+                                  Margin="5"
+                                  x:Name="listView">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    <EventSetter Event="MouseDoubleClick" Handler="ListView_MouseDoubleClick"/>
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn Width="280">
+                                        <GridViewColumn.Header>
+                                            <GridViewColumnHeader Content="이름"
+                                                                  Background="#FFFDF8"
+                                                                  Command="{Binding GoOrderByNameCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                        </GridViewColumn.Header>
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding DelMatchingName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                           TextAlignment="Left"
+                                                           TextDecorations="Underline"
+                                                           Foreground="#333333"
+                                                           Cursor="Hand"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Width="160">
+                                        <GridViewColumn.Header>
+                                            <GridViewColumnHeader Content="생성한 날짜"
+                                                                  Background="#FFFDF8"
+                                                                  Command="{Binding OrderByCrTimeCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                        </GridViewColumn.Header>
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding DelMatchingCreationTime, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                           TextAlignment="Center"
+                                                           Foreground="#C0392B"
+                                                           Cursor="Hand"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Width="100">
+                                        <GridViewColumn.Header>
+                                            <GridViewColumnHeader Content="유형"
+                                                                  Background="#FFFDF8"
+                                                                  Command="{Binding GoOrderByTypeCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                        </GridViewColumn.Header>
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding DelMatchingCategory, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                           TextAlignment="Center"
+                                                           Foreground="Black"
+                                                           Cursor="Hand"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Width="160">
+                                        <GridViewColumn.Header>
+                                            <GridViewColumnHeader Content="수정한 날짜"
+                                                                  Background="#FFFDF8"
+                                                                  Command="{Binding OrderByMdTimeCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                        </GridViewColumn.Header>
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding DelMatchingModifiedTime, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                           TextAlignment="Center"
+                                                           Foreground="#C0392B"
+                                                           Cursor="Hand"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Width="100">
+                                        <GridViewColumn.Header>
+                                            <GridViewColumnHeader Content="크기"
+                                                                  Background="#FFFDF8"
+                                                                  Command="{Binding GoOrderBySizeCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                        </GridViewColumn.Header>
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding DelMatchingOfSize, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FormatConverter}, Mode=TwoWay}"
+                                                           TextAlignment="Center"
+                                                           Foreground="Black"
+                                                           Cursor="Hand"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Width="860">
+                                        <GridViewColumn.Header>
+                                            <GridViewColumnHeader Content="경로"
+                                                                  Background="#FFFDF8"
+                                                                  Command="{Binding GoOrderByPathCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                        </GridViewColumn.Header>
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding DelMatchingPath, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                           TextAlignment="Left"
+                                                           TextDecorations="Underline"
+                                                           Foreground="DarkSlateBlue"
+                                                           Cursor="Hand"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="1" Grid.Column="1">
+                    <Grid>
+                        <!-- LoadingControl -->
+                        <ContentControl Content="{Binding LoadingControl}" />
+                        <!-- DestroyControl -->
+                        <ContentControl Content="{Binding DestroyControl}" />
+                    </Grid>
+                </Border>
+                
+                <Grid Grid.Row="2" Margin="10, 0, 0, 5">
+                    <TextBlock Text="{Binding TotalNumbersInfo, StringFormat=' {0}개 항목', UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                               HorizontalAlignment="Left"
+                               VerticalAlignment="Center"
+                               Foreground="PaleVioletRed"
+                               FontWeight="Bold"
+                               FontSize="14"/>
+                </Grid>
+                
+                <Grid Grid.Row="2" Margin="100, 0, 0, 5">
+                    <TextBlock Text="{Binding SelectedCntsInfo, StringFormat='        {0}개 항목 선택함', UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                               HorizontalAlignment="Left"
+                               VerticalAlignment="Center"
+                               Foreground="PaleVioletRed"
+                               FontWeight="Bold"
+                               FontSize="14"/>
+                </Grid>
+                
+                <!--[ProgressBar] + [TextBlock] 바인딩 및 UI 도시 (코드)-->
+                <!--<StackPanel Grid.Row="3"
+                        Orientation="Vertical"
+                        HorizontalAlignment="Center">
+                    <ProgressBar Value="{Binding ProgressValue}"
+                                 Minimum="0"
+                                 Maximum="100"
+                                 Visibility="{Binding VisibleLoading, Converter={StaticResource VisibilityConverter}}"
+                                 Width="400"
+                                 Height="20"/>
+                    <TextBlock Text="{Binding ProgressText}"
+                               HorizontalAlignment="Center"
+                               Margin="0,5,0,0"
+                               Visibility="{Binding VisibleLoading, Converter={StaticResource VisibilityConverter}}"
+                               FontSize="14"
+                               FontWeight="Bold"/>
+                </StackPanel>-->
+                
             </Grid>
-        </Border>
 
-        <Border Grid.Row="1" Grid.Column="1">
-            <Grid>
-                <!-- LoadingControl -->
-                <ContentControl Content="{Binding LoadingControl}" />
-                <!-- DestroyControl -->
-                <ContentControl Content="{Binding DestroyControl}" />
-            </Grid>
-        </Border>
-
-        <Grid Grid.Row="2" Margin="10, 0, 0, 5">
-            <TextBlock Text="{Binding TotalNumbersInfo, StringFormat=' {0}개 항목', UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                       HorizontalAlignment="Left"
-                       VerticalAlignment="Center"
-                       Foreground="PaleVioletRed" FontWeight="Bold" FontSize="14"/>
         </Grid>
 
-        <Grid Grid.Row="2" Margin="100, 0, 0, 5">
-            <TextBlock Text="{Binding SelectedCntsInfo, StringFormat='        {0}개 항목 선택함', UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                       HorizontalAlignment="Left"
-                       VerticalAlignment="Center"
-                       Foreground="PaleVioletRed" FontWeight="Bold" FontSize="14"/>
-        </Grid>
+    </Border>
 
-        <!--[ProgressBar] + [TextBlock] 바인딩 및 UI 도시 (코드)-->
-        <!--<StackPanel Grid.Row="3"
-                    Orientation="Vertical"
-                    HorizontalAlignment="Center">
-            <ProgressBar Value="{Binding ProgressValue}"
-                         Minimum="0"
-                         Maximum="100"
-                         Visibility="{Binding VisibleLoading, Converter={StaticResource VisibilityConverter}}"
-                         Width="400"
-                         Height="20"/>
-            <TextBlock Text="{Binding ProgressText}"
-                       HorizontalAlignment="Center"
-                       Margin="0,5,0,0"
-                       Visibility="{Binding VisibleLoading, Converter={StaticResource VisibilityConverter}}"
-                       FontSize="14"
-                       FontWeight="Bold"/>
-        </StackPanel>-->
-
-    </Grid>
 </Window>

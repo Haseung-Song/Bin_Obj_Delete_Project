@@ -45,7 +45,7 @@
                        Visibility="{Binding VisibleDestroy, Converter={StaticResource BooleanToVisibilityConverter}}"/>
             <TextBlock Text="{Binding ProgressValue, StringFormat=' {0:F0}%'}"
                        FontSize="20"
-                       Foreground="MediumSeaGreen"
+                       Foreground="#1E90FF"
                        FontWeight="Bold"
                        TextAlignment="Center"
                        Margin="0,0,10,0"
