@@ -985,7 +985,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     processedFldrs++;
                     fldrProgress.Report((double)processedFldrs / totalFldrs * 100);
                 }
-                await Task.Delay(20); // [작업 딜레이] => 추가 완료!
+                await Task.Delay(5); // [작업 딜레이] => 추가 완료!
             }
             catch (UnauthorizedAccessException ex)
             {
