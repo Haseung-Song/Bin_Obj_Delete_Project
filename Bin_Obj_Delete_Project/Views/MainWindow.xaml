@@ -333,7 +333,7 @@
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
 
-                                    <GridViewColumn Width="860">
+                                    <GridViewColumn Width="Auto">
                                         <GridViewColumn.Header>
                                             <GridViewColumnHeader Content="경로"
                                                                   Background="#FFFDF8"
