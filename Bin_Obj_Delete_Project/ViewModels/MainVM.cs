@@ -985,7 +985,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     processedFldrs++;
                     fldrProgress.Report((double)processedFldrs / totalFldrs * 100);
                 }
-                await Task.Delay(5); // [작업 딜레이] => 추가 완료!
+                fldrProgress.Report(100); // [진행률: 100] 작업 완료
+                fileProgress.Report(100); // [진행률: 100] 작업 완료
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -1045,8 +1046,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     //    Console.WriteLine(item.DelMatchingOfSize);
                     //    Console.WriteLine(item.DelMatchingPath);
                     //}
-                    fldrProgress.Report(100); // [진행률: 100] 작업 완료
-                    fileProgress.Report(100); // [진행률: 100] 작업 완료
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
                         ActiveFolderInfo = DeleteFolderInfo; // [ActiveFolderInfo] 컬렉션에 [DeleteFolderInfo] 컬렉션을 할당
@@ -1110,7 +1109,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     processedSelMatch++;
                     progress.Report((double)processedSelMatch / totalSelMatch * 100);
                 }
-                await Task.Delay(50); // [작업 딜레이] => 추가 완료!
+                await Task.Delay(30); // [작업 딜레이] => 추가 완료!
             }
             catch (Exception ex)
             {
@@ -1240,7 +1239,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
             finally
             {
-                await Task.Delay(50); // [작업 딜레이] => 추가 완료!
+                await Task.Delay(30); // [작업 딜레이] => 추가 완료!
                 progress.Report(100); // [진행률: 100] => 작업 완료!
                 DelBtnEnabledOrNot = true;
                 VisibleDestroy = false;
