@@ -239,6 +239,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private ObservableCollection<DelMatchingInfo> _activeFolderInfo;
 
+        private int _currentPage;
+        private int _pageRecords;
+        private List<DelMatchingInfo> _lstAllData;
+
         #endregion
 
         #region [Action]
@@ -560,6 +564,72 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
         }
 
+        /// <summary>
+        /// [현재 페이지가 변경 시마다 함수 호출]
+        /// </summary>
+        public int CurrentPage
+        {
+            get => _currentPage;
+            set
+            {
+                if (_currentPage != value)
+                {
+                    _currentPage = value;
+                    OnPropertyChanged();
+                    LoadPageData();
+                }
+
+            }
+
+        }
+
+        public List<DelMatchingInfo> LstAllData
+        {
+            get => _lstAllData;
+            set
+            {
+                if (_lstAllData != value)
+                {
+                    _lstAllData = value;
+                    OnPropertyChanged();
+                    LoadPageData();
+                }
+
+            }
+
+        }
+
+
+        private void LoadPageData()
+        {
+            if (LstAllData != null)
+            {
+                List<DelMatchingInfo> lstAllData = LstAllData.Skip((CurrentPage - 1) * PageRecords).Take(PageRecords).ToList();
+                ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>(lstAllData);
+                Console.WriteLine(ActiveFolderInfo.Count);
+            }
+
+        }
+
+        /// <summary>
+        /// [1 페이지 당 데이터 개수]
+        /// </summary>
+        public int PageRecords
+        {
+            get => _pageRecords;
+            set
+            {
+                if (_pageRecords != value)
+                {
+                    _pageRecords = value;
+                    OnPropertyChanged();
+                    LoadPageData();
+                }
+
+            }
+
+        }
+
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -649,6 +719,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
             matchingFileSize = 0;
             matchingFldrPath = string.Empty;
             matchingFilePath = string.Empty;
+            CurrentPage = 0;
+            PageRecords = 20;
+            LstAllData = new List<DelMatchingInfo>();
             mouseHook = new GlobalMouseHook();
             DelSelMatchesCommand = new AsyncRelayCommand(DelSelMatches);
             DelAllMatchesCommand = new AsyncRelayCommand(DelAllMatches);

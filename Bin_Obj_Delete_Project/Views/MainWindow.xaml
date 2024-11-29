@@ -352,6 +352,16 @@
                                 </GridView>
                             </ListView.View>
                         </ListView>
+
+                        <StackPanel Grid.Row="1"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Center"
+                                    Margin="5">
+                            <Button Content="Previous" Command="{Binding }"/>
+                            <TextBlock Text="{Binding CurrentPage}" Margin="10"/>
+                            <Button Content="Next" Command="{Binding }"/>
+                        </StackPanel>
+
                     </Grid>
                 </Border>
 
@@ -363,7 +373,7 @@
                         <ContentControl Content="{Binding DestroyControl}" />
                     </Grid>
                 </Border>
-                
+
                 <Grid Grid.Row="2" Margin="10, 0, 0, 5">
                     <TextBlock Text="{Binding TotalNumbersInfo, StringFormat=' {0}개 항목', UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                HorizontalAlignment="Left"
@@ -372,7 +382,7 @@
                                FontWeight="Bold"
                                FontSize="14"/>
                 </Grid>
-                
+
                 <Grid Grid.Row="2" Margin="100, 0, 0, 5">
                     <TextBlock Text="{Binding SelectedCntsInfo, StringFormat='        {0}개 항목 선택함', UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                HorizontalAlignment="Left"
@@ -381,7 +391,7 @@
                                FontWeight="Bold"
                                FontSize="14"/>
                 </Grid>
-                
+
                 <!--[ProgressBar] + [TextBlock] 바인딩 및 UI 도시 (코드)-->
                 <!--<StackPanel Grid.Row="3"
                         Orientation="Vertical"
@@ -399,7 +409,7 @@
                                FontSize="14"
                                FontWeight="Bold"/>
                 </StackPanel>-->
-                
+
             </Grid>
 
         </Grid>
