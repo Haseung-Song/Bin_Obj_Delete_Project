@@ -1125,7 +1125,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         ActiveFolderInfo = DeleteFolderInfo; // [ActiveFolderInfo] 컬렉션에 [DeleteFolderInfo] 컬렉션을 할당
                         TotalNumbersInfo = ActiveFolderInfo.Count(); // 총 항목 개수 표시
                     });
-
+                    LstAllData = ActiveFolderInfo.ToList(); // [LstAllData] 페이징 (20개)
                 }
 
             }
