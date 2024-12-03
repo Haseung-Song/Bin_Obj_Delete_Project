@@ -488,6 +488,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 }
 
             }
+
         }
 
         /// <summary>
@@ -576,7 +577,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 {
                     _currentPage = value;
                     OnPropertyChanged();
-                    LoadPageData();
                 }
 
             }
@@ -606,7 +606,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 List<DelMatchingInfo> lstAllData = LstAllData.Skip((CurrentPage - 1) * PageRecords).Take(PageRecords).ToList();
                 ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>(lstAllData);
-                Console.WriteLine(ActiveFolderInfo.Count);
             }
 
         }
@@ -623,7 +622,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 {
                     _pageRecords = value;
                     OnPropertyChanged();
-                    LoadPageData();
                 }
 
             }
@@ -675,6 +673,12 @@ namespace Bin_Obj_Delete_Project.ViewModels
         // 6-6. 정렬 (경로 순)
         public ICommand GoOrderByPathCommand { get; set; }
 
+        // 7-1. 다음 페이지로 이동
+        public ICommand GoToNextPageCommand { get; set; }
+
+        // 7-2. 이전 페이지로 이동
+        public ICommand GoToPreviousPageCommand { get; set; }
+
         #endregion
 
         #region 생성자 (Initialize)
@@ -719,8 +723,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             matchingFileSize = 0;
             matchingFldrPath = string.Empty;
             matchingFilePath = string.Empty;
-            CurrentPage = 0;
-            PageRecords = 20;
+            PageRecords = 100;
             LstAllData = new List<DelMatchingInfo>();
             mouseHook = new GlobalMouseHook();
             DelSelMatchesCommand = new AsyncRelayCommand(DelSelMatches);
@@ -733,6 +736,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
             OrderByMdTimeCommand = new RelayCommand(OrderByMdTime);
             GoOrderBySizeCommand = new RelayCommand(GoOrderBySize);
             GoOrderByPathCommand = new RelayCommand(GoOrderByPath);
+            GoToNextPageCommand = new RelayCommand(GoToNextPage);
+            GoToPreviousPageCommand = new RelayCommand(GoToPreviousPage);
         }
 
         #endregion
@@ -810,7 +815,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 //mouseHook.UnhookMouse();
                 VisibleLoading = false;
                 DelBtnEnabledOrNot = true;
-                TotalNumbersInfo = ActiveFolderInfo.Count(); // 총 항목 개수
+                TotalNumbersInfo = LstAllData.Count(); // 전체 데이터 개수!
             }
             catch (OperationCanceledException)
             {
@@ -1122,10 +1127,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     fileProgress.Report(100); // [진행률: 100] 작업 완료
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        ActiveFolderInfo = DeleteFolderInfo; // [ActiveFolderInfo] 컬렉션에 [DeleteFolderInfo] 컬렉션을 할당
-                        TotalNumbersInfo = ActiveFolderInfo.Count(); // 총 항목 개수 표시
+                        LstAllData = DeleteFolderInfo.ToList(); // [DeleteFolderInfo] 컬렉션 데이터 리스트화 (완료)
+                        ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>(LstAllData.Take(PageRecords)); // 페이지 데이터 로드
+                        CurrentPage = 1;
                     });
-                    LstAllData = ActiveFolderInfo.ToList(); // [LstAllData] 페이징 (20개)
+
                 }
 
             }
@@ -1576,6 +1582,38 @@ namespace Bin_Obj_Delete_Project.ViewModels
             // 2) 플래그(flag) 값, 반전시키기
             orderByAscendingOrNot = !orderByAscendingOrNot;
         }
+
+        /// <summary>
+        /// 7-1. 다음 페이지로 이동
+        /// </summary>
+        private void GoToNextPage()
+        {
+            if (LstAllData?.Count > 0)
+            {
+                int totalPages = (int)Math.Ceiling((double)LstAllData.Count / PageRecords);
+                if (CurrentPage < totalPages)
+                {
+                    CurrentPage++;
+                    LoadPageData();
+                }
+
+            }
+
+        }
+
+        /// <summary>
+        /// 7-2. 이전 페이지로 이동
+        /// </summary>
+        private void GoToPreviousPage()
+        {
+            if (CurrentPage > 1)
+            {
+                CurrentPage--;
+                LoadPageData();
+            }
+
+        }
+
         #endregion
 
         #region [캐싱 처리]

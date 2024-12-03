@@ -357,9 +357,9 @@
                                     Orientation="Horizontal"
                                     HorizontalAlignment="Center"
                                     Margin="5">
-                            <Button Content="Previous" Command="{Binding }"/>
+                            <Button Content="Previous" Command="{Binding GoToPreviousPageCommand}"/>
                             <TextBlock Text="{Binding CurrentPage}" Margin="10"/>
-                            <Button Content="Next" Command="{Binding }"/>
+                            <Button Content="Next" Command="{Binding GoToNextPageCommand}"/>
                         </StackPanel>
 
                     </Grid>
