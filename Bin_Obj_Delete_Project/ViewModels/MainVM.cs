@@ -225,6 +225,21 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private DelMatchingInfo _selectedCrFolder;
 
         /// <summary>
+        /// [_lstAllData]
+        /// </summary>
+        private List<DelMatchingInfo> _lstAllData;
+
+        /// <summary>
+        /// [_currentPage]
+        /// </summary>
+        private int _currentPage;
+
+        /// <summary>
+        /// [_pageRecords]
+        /// </summary>
+        private int _pageRecords;
+
+        /// <summary>
         /// [_selectFolderInfo]
         /// </summary>
         private ObservableCollection<DelMatchingInfo> _selectFolderInfo;
@@ -238,10 +253,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// [_activeFolderInfo]
         /// </summary>
         private ObservableCollection<DelMatchingInfo> _activeFolderInfo;
-
-        private int _currentPage;
-        private int _pageRecords;
-        private List<DelMatchingInfo> _lstAllData;
 
         #endregion
 
@@ -528,6 +539,64 @@ namespace Bin_Obj_Delete_Project.ViewModels
         }
 
         /// <summary>
+        /// [LstAllData]
+        /// [전체 데이터 개수] (List 형태)
+        /// </summary>
+        public List<DelMatchingInfo> LstAllData
+        {
+            get => _lstAllData;
+            set
+            {
+                if (_lstAllData != value)
+                {
+                    _lstAllData = value;
+                    OnPropertyChanged();
+                    LoadPageData();
+                }
+
+            }
+
+        }
+
+        /// <summary>
+        /// [CurrentPage]
+        /// [현재 페이지]
+        /// </summary>
+        public int CurrentPage
+        {
+            get => _currentPage;
+            set
+            {
+                if (_currentPage != value)
+                {
+                    _currentPage = value;
+                    OnPropertyChanged();
+                }
+
+            }
+
+        }
+
+        /// <summary>
+        /// [PageRecords]
+        /// [페이지 당 데이터 개수]
+        /// </summary>
+        public int PageRecords
+        {
+            get => _pageRecords = 100;
+            set
+            {
+                if (_pageRecords != value)
+                {
+                    _pageRecords = value;
+                    OnPropertyChanged();
+                }
+
+            }
+
+        }
+
+        /// <summary>
         /// [SelectFolderInfo]
         /// </summary>
         public ObservableCollection<DelMatchingInfo> SelectFolderInfo
@@ -558,69 +627,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 if (_activeFolderInfo != value)
                 {
                     _activeFolderInfo = value;
-                    OnPropertyChanged();
-                }
-
-            }
-
-        }
-
-        /// <summary>
-        /// [현재 페이지가 변경 시마다 함수 호출]
-        /// </summary>
-        public int CurrentPage
-        {
-            get => _currentPage;
-            set
-            {
-                if (_currentPage != value)
-                {
-                    _currentPage = value;
-                    OnPropertyChanged();
-                }
-
-            }
-
-        }
-
-        public List<DelMatchingInfo> LstAllData
-        {
-            get => _lstAllData;
-            set
-            {
-                if (_lstAllData != value)
-                {
-                    _lstAllData = value;
-                    OnPropertyChanged();
-                    LoadPageData();
-                }
-
-            }
-
-        }
-
-
-        private void LoadPageData()
-        {
-            if (LstAllData != null)
-            {
-                List<DelMatchingInfo> lstAllData = LstAllData.Skip((CurrentPage - 1) * PageRecords).Take(PageRecords).ToList();
-                ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>(lstAllData);
-            }
-
-        }
-
-        /// <summary>
-        /// [1 페이지 당 데이터 개수]
-        /// </summary>
-        public int PageRecords
-        {
-            get => _pageRecords;
-            set
-            {
-                if (_pageRecords != value)
-                {
-                    _pageRecords = value;
                     OnPropertyChanged();
                 }
 
@@ -698,10 +704,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
             SelectedCntsInfo = 0;
             LoadingFolderCommand = new RelayCommand(LoadingFolder);
             EnterLoadPathCommand = new RelayCommand(EnterLoadPath);
-            _selectedCrFolder = new DelMatchingInfo();
-            _selectFolderInfo = new ObservableCollection<DelMatchingInfo>();
-            _deleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
-            _activeFolderInfo = new ObservableCollection<DelMatchingInfo>();
+            SelectedCrFolder = new DelMatchingInfo();
+            LstAllData = new List<DelMatchingInfo>();
+            SelectFolderInfo = new ObservableCollection<DelMatchingInfo>();
+            DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
+            ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>();
             uniqueFilePathSet = new HashSet<string>();
             enumerateFldrCache = new Dictionary<string, IEnumerable<string>>();
             lstOrderByName = new List<DelMatchingInfo>();
@@ -723,8 +730,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
             matchingFileSize = 0;
             matchingFldrPath = string.Empty;
             matchingFilePath = string.Empty;
-            PageRecords = 100;
-            LstAllData = new List<DelMatchingInfo>();
             mouseHook = new GlobalMouseHook();
             DelSelMatchesCommand = new AsyncRelayCommand(DelSelMatches);
             DelAllMatchesCommand = new AsyncRelayCommand(DelAllMatches);
@@ -815,7 +820,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 //mouseHook.UnhookMouse();
                 VisibleLoading = false;
                 DelBtnEnabledOrNot = true;
-                TotalNumbersInfo = LstAllData.Count(); // 전체 데이터 개수!
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    TotalNumbersInfo = LstAllData.Count(); // 전체 데이터 개수!
+                });
+
             }
             catch (OperationCanceledException)
             {
@@ -886,7 +895,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private static long GetDirectorySize(string dir)
         {
             DirectoryInfo dirInfo = new DirectoryInfo(dir); // DirectoryInfo 객체 생성
-
             long sizeofDir = 0; // [총량] 초기화
 
             // [현재 디렉토리] 및 [모든 하위 디렉토리]를 포함한 파일 목록 배열을 반환!
@@ -1255,7 +1263,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     // UI Update (총 항목 개수)
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        TotalNumbersInfo = ActiveFolderInfo.Count();
+                        TotalNumbersInfo = LstAllData.Count();
                     });
 
                 }
@@ -1358,7 +1366,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     // UI Update (총 항목 개수)
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        TotalNumbersInfo = ActiveFolderInfo.Count();
+                        TotalNumbersInfo = LstAllData.Count();
                     });
 
                 }
@@ -1584,7 +1592,20 @@ namespace Bin_Obj_Delete_Project.ViewModels
         }
 
         /// <summary>
-        /// 7-1. 다음 페이지로 이동
+        /// [페이징 처리] 기능
+        /// </summary>
+        private void LoadPageData()
+        {
+            if (LstAllData?.Count > 0)
+            {
+                List<DelMatchingInfo> lstAllData = LstAllData.Skip((CurrentPage - 1) * PageRecords).Take(PageRecords).ToList();
+                ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>(lstAllData); // [현재 페이지] 해당 데이터로 초기화
+            }
+
+        }
+
+        /// <summary>
+        /// 7-1. 다음 페이지로 이동 (버튼)
         /// </summary>
         private void GoToNextPage()
         {
@@ -1602,14 +1623,18 @@ namespace Bin_Obj_Delete_Project.ViewModels
         }
 
         /// <summary>
-        /// 7-2. 이전 페이지로 이동
+        /// 7-2. 이전 페이지로 이동 (버튼)
         /// </summary>
         private void GoToPreviousPage()
         {
-            if (CurrentPage > 1)
+            if (LstAllData?.Count > 0)
             {
-                CurrentPage--;
-                LoadPageData();
+                if (CurrentPage > 1)
+                {
+                    CurrentPage--;
+                    LoadPageData();
+                }
+
             }
 
         }
