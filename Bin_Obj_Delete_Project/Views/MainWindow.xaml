@@ -177,7 +177,7 @@
                             Height="35"
                             Grid.Column="0">
                         <TextBox Text="{Binding DeleteFolderPath, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                 IsHitTestVisible="{Binding DelBtnEnabledOrNot}"
+                                 IsHitTestVisible="{Binding TheBtnEnabledOrNot}"
                                  TextAlignment="Left"
                                  Margin="2"
                                  FontSize="20"
@@ -192,7 +192,7 @@
 
                     <Button Content="폴더 불러오기"
                             Command="{Binding LoadingFolderCommand}"
-                            IsEnabled="{Binding DelBtnEnabledOrNot}"
+                            IsEnabled="{Binding TheBtnEnabledOrNot}"
                             Margin="10,0,0,0"
                             Height="33"
                             Background="AliceBlue"
@@ -201,7 +201,7 @@
 
                     <Button Content="검색 필터"
                             Click="OpenFilterWindow"
-                            IsEnabled="{Binding DelBtnEnabledOrNot}"
+                            IsEnabled="{Binding TheBtnEnabledOrNot}"
                             Margin="10,0,0,0"
                             Height="33"
                             Background="AliceBlue"
@@ -210,7 +210,7 @@
 
                     <Button Content="선택 삭제하기"
                             Command="{Binding DelSelMatchesCommand}"
-                            IsEnabled="{Binding DelBtnEnabledOrNot}"
+                            IsEnabled="{Binding TheBtnEnabledOrNot}"
                             Margin="10,0,0,0"
                             Height="33"
                             Background="AliceBlue"
@@ -219,7 +219,7 @@
 
                     <Button Content="일괄 삭제하기"
                             Command="{Binding DelAllMatchesCommand}"
-                            IsEnabled="{Binding DelBtnEnabledOrNot}"
+                            IsEnabled="{Binding TheBtnEnabledOrNot}"
                             Margin="10,0,6,0"
                             Height="33"
                             Background="AliceBlue"
@@ -357,11 +357,76 @@
                                     Orientation="Horizontal"
                                     HorizontalAlignment="Center"
                                     Margin="5">
-                            <Button Content="Previous" Command="{Binding GoToPreviousPageCommand}"/>
-                            <TextBlock Text="{Binding CurrentPage}" Margin="10"/>
-                            <Button Content="Next" Command="{Binding GoToNextPageCommand}"/>
+                            <Button Content="Previous"
+                                    Command="{Binding GoToPreviousPageCommand, UpdateSourceTrigger=PropertyChanged}"
+                                    IsEnabled="{Binding TheBtnEnabledOrNot}"
+                                    BorderThickness="0"
+                                    Foreground="White"
+                                    FontSize="14"
+                                    FontFamily="Montserrat"
+                                    Cursor="Hand">
+                                
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Background" Value="LightCoral"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="true">
+                                                <Setter Property="Background" Value="#FF6F8E"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Width="110"
+                                                Height="40"
+                                                CornerRadius="20"
+                                                Background="{TemplateBinding Background}">
+                                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                            
+                            <TextBlock Text="{Binding CurrentPage}"
+                                       FontSize="14"
+                                       FontWeight="Bold"
+                                       Margin="20,10,20,0"/>
+                            
+                            <Button Content="Next"
+                                    Command="{Binding GoToNextPageCommand, UpdateSourceTrigger=PropertyChanged}"
+                                    IsEnabled="{Binding TheBtnEnabledOrNot}"
+                                    BorderThickness="0"
+                                    Foreground="White"
+                                    FontSize="14"
+                                    FontFamily="Montserrat"
+                                    Cursor="Hand">
+                                
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Background" Value="LightSalmon"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="true">
+                                                <Setter Property="Background" Value="#FF8C69"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Width="110"
+                                                Height="40"
+                                                CornerRadius="20"
+                                                Background="{TemplateBinding Background}">
+                                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
                         </StackPanel>
-
+                        
                     </Grid>
                 </Border>
 

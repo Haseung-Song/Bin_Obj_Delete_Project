@@ -25,9 +25,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
         #region [프로퍼티]
 
         /// <summary>
-        /// [_IsDelBtnEnabledOrNot]
+        /// [_IssTheBtnEnabledOrNot]
         /// </summary>
-        private bool _IsDelBtnEnabledOrNot;
+        private bool _IsTheBtnEnabledOrNot;
 
         /// <summary>
         /// [_aVisibleLoadingOrNot]
@@ -267,16 +267,16 @@ namespace Bin_Obj_Delete_Project.ViewModels
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
-        /// [IsDelBtnEnabledOrNot]
+        /// [TheBtnEnabledOrNot]
         /// </summary>
-        public bool DelBtnEnabledOrNot
+        public bool TheBtnEnabledOrNot
         {
-            get => _IsDelBtnEnabledOrNot;
+            get => _IsTheBtnEnabledOrNot;
             private set
             {
-                if (_IsDelBtnEnabledOrNot != value)
+                if (_IsTheBtnEnabledOrNot != value)
                 {
-                    _IsDelBtnEnabledOrNot = value;
+                    _IsTheBtnEnabledOrNot = value;
                     OnPropertyChanged();
                 }
 
@@ -691,7 +691,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
         public MainVM()
         {
-            DelBtnEnabledOrNot = true;
+            TheBtnEnabledOrNot = true;
             VisibleLoading = false;
             VisibleDestroy = false;
             ProgressBar = new Progress<double>(value =>
@@ -791,7 +791,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             CancellationToken cancellationToken = cancellationTokenSource.Token;
             TotalNumbersInfo = 0; // 총 항목 개수 초기화
             //mouseHook.HookMouse();
-            DelBtnEnabledOrNot = false;
+            TheBtnEnabledOrNot = false;
             VisibleLoading = true;
             Task enumerateTask = Task.Run(() =>
             {
@@ -808,7 +808,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     Console.WriteLine("Task has been canceled. Please perform another task.");
                     //mouseHook.UnhookMouse();
                     VisibleLoading = false;
-                    DelBtnEnabledOrNot = true;
+                    TheBtnEnabledOrNot = true;
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
                         Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
@@ -819,7 +819,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 await enumerateTask; // 해당 작업 수행!
                 //mouseHook.UnhookMouse();
                 VisibleLoading = false;
-                DelBtnEnabledOrNot = true;
+                TheBtnEnabledOrNot = true;
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     TotalNumbersInfo = LstAllData.Count(); // 전체 데이터 개수!
@@ -1156,7 +1156,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             progress.Report(0);
             try
             {
-                DelBtnEnabledOrNot = false;
+                TheBtnEnabledOrNot = false;
                 VisibleDestroy = true;
                 int totalSelMatch = selectToDelete.Count();
                 int processedSelMatch = 0;
@@ -1206,7 +1206,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             finally
             {
                 progress.Report(100); // [진행률: 100] => 작업 완료!
-                DelBtnEnabledOrNot = true;
+                TheBtnEnabledOrNot = true;
                 VisibleDestroy = false;
             }
 
@@ -1282,7 +1282,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             progress.Report(0);
             try
             {
-                DelBtnEnabledOrNot = false;
+                TheBtnEnabledOrNot = false;
                 VisibleDestroy = true;
                 int totalAllMatch = DeleteFolderInfo.Count();
                 int processedAllMatch = 0;
@@ -1329,7 +1329,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 await Task.Delay(30); // [작업 딜레이] => 추가 완료!
                 progress.Report(100); // [진행률: 100] => 작업 완료!
-                DelBtnEnabledOrNot = true;
+                TheBtnEnabledOrNot = true;
                 VisibleDestroy = false;
             }
 
@@ -1393,13 +1393,13 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     FilterFolderName = string.Empty; // TextBox 초기화
                     CloseWindowAction?.Invoke(); // 창 닫기 동작 호출!
                     TotalNumbersInfo = 0; // 총 항목 개수 초기화
-                    DelBtnEnabledOrNot = false;
+                    TheBtnEnabledOrNot = false;
                     VisibleLoading = true;
                     await Task.Run(() =>
                     {
                         return EnumerateFolders(cancellationToken, ProgressBar, ProgressBar); // [Filter 01] 초기화
                     });
-                    DelBtnEnabledOrNot = true;
+                    TheBtnEnabledOrNot = true;
                     VisibleLoading = false;
                 }
                 else
@@ -1444,13 +1444,13 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     FilterExtensions = string.Empty; // TextBox 초기화
                     CloseWindowAction?.Invoke(); // 창 닫기 동작 호출!
                     TotalNumbersInfo = 0; // 총 항목 개수 초기화
-                    DelBtnEnabledOrNot = false;
+                    TheBtnEnabledOrNot = false;
                     VisibleLoading = true;
                     await Task.Run(() =>
                     {
                         return EnumerateFolders(cancellationToken, ProgressBar, ProgressBar); // [Filter 02] 초기화
                     });
-                    DelBtnEnabledOrNot = true;
+                    TheBtnEnabledOrNot = true;
                     VisibleLoading = false;
                 }
                 else
@@ -1630,7 +1630,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     LoadPageData();
                 }
 
-                // # [방법 1: 내 방식]
+                // # [방법 1: MyOwner 방식]
                 //if (selectToDelete?.Count > 0)
                 //{
                 //    int totalPages = (int)Math.Ceiling((double)(LstAllData.Count - selectToDelete.Count) / PageRecords);
