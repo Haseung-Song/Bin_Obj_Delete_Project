@@ -1263,7 +1263,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     // UI Update (총 항목 개수)
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        TotalNumbersInfo = LstAllData.Count();
+                        TotalNumbersInfo = ActiveFolderInfo.Count();
                     });
 
                 }
@@ -1319,7 +1319,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     processedAllMatch++;
                     progress.Report((double)processedAllMatch / totalAllMatch * 100);
                 }
-                DeleteFolderInfo?.Clear(); // [UI 초기화]
+                ActiveFolderInfo?.Clear();
             }
             catch (Exception ex)
             {
@@ -1366,7 +1366,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     // UI Update (총 항목 개수)
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        TotalNumbersInfo = LstAllData.Count();
+                        TotalNumbersInfo = ActiveFolderInfo.Count();
                     });
 
                 }
@@ -1598,8 +1598,13 @@ namespace Bin_Obj_Delete_Project.ViewModels
         {
             if (LstAllData?.Count > 0)
             {
-                List<DelMatchingInfo> lstAllData = LstAllData.Skip((CurrentPage - 1) * PageRecords).Take(PageRecords).ToList();
-                ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>(lstAllData); // [현재 페이지] 해당 데이터로 초기화
+                List<DelMatchingInfo> deletedItems = selectToDelete?.Count > 0 ? selectToDelete : entireToDelete?.Count > 0 ? entireToDelete : null;
+                // 데이터 필터링
+                List<DelMatchingInfo> filteredData = deletedItems != null
+                    ? LstAllData.Where(item => !deletedItems.Any(which => which.DelMatchingPath == item.DelMatchingPath))
+                                .Skip((CurrentPage - 1) * PageRecords).Take(PageRecords).ToList()
+                    : LstAllData.Skip((CurrentPage - 1) * PageRecords).Take(PageRecords).ToList();
+                ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>(filteredData); // [현재 페이지] => 해당 데이터로 초기화 및 갱신
             }
 
         }
@@ -1611,12 +1616,51 @@ namespace Bin_Obj_Delete_Project.ViewModels
         {
             if (LstAllData?.Count > 0)
             {
-                int totalPages = (int)Math.Ceiling((double)LstAllData.Count / PageRecords);
+                // # [방법 2: ChatGPT 방식]
+                // 삭제된 항목 수를 계산
+                int deleteCount = (selectToDelete?.Count ?? 0) + (entireToDelete?.Count ?? 0);
+
+                // 총 페이지 수 계산
+                int totalPages = (int)Math.Ceiling((double)(LstAllData.Count - deleteCount) / PageRecords);
+
+                // [페이지 변경]
                 if (CurrentPage < totalPages)
                 {
                     CurrentPage++;
                     LoadPageData();
                 }
+
+                // # [방법 1: 내 방식]
+                //if (selectToDelete?.Count > 0)
+                //{
+                //    int totalPages = (int)Math.Ceiling((double)(LstAllData.Count - selectToDelete.Count) / PageRecords);
+                //    if (CurrentPage < totalPages)
+                //    {
+                //        CurrentPage++;
+                //        LoadPageData();
+                //    }
+
+                //}
+                //else if (entireToDelete?.Count > 0)
+                //{
+                //    int totalPages = (int)Math.Ceiling((double)(LstAllData.Count - entireToDelete.Count) / PageRecords);
+                //    if (CurrentPage < totalPages)
+                //    {
+                //        CurrentPage++;
+                //        LoadPageData();
+                //    }
+
+                //}
+                //else
+                //{
+                //    int totalPages = (int)Math.Ceiling((double)LstAllData.Count / PageRecords);
+                //    if (CurrentPage < totalPages)
+                //    {
+                //        CurrentPage++;
+                //        LoadPageData();
+                //    }
+
+                //}
 
             }
 
