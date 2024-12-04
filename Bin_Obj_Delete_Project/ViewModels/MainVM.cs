@@ -820,11 +820,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 //mouseHook.UnhookMouse();
                 VisibleLoading = false;
                 TheBtnEnabledOrNot = true;
-                await Application.Current.Dispatcher.InvokeAsync(() =>
-                {
-                    TotalNumbersInfo = LstAllData.Count(); // 전체 데이터 개수!
-                });
-
             }
             catch (OperationCanceledException)
             {
@@ -832,6 +827,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
             finally
             {
+                TotalNumbersInfo = LstAllData.Count(); // 전체 데이터 개수!
                 enumerateTask.Dispose();
             }
 
@@ -1003,7 +999,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             {
                                 return;
                             }
-
                             // 이미 처리가 된 파일 경로는 무시! (중복 제거)
                             if (uniqueFilePathSet.Contains(files.FullName))
                             {
