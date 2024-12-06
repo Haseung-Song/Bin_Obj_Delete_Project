@@ -894,7 +894,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private static long GetDirectorySize(string dir)
         {
             DirectoryInfo dirInfo = new DirectoryInfo(dir); // DirectoryInfo 객체 생성
-
             long sizeofDir = 0; // [총량] 초기화
 
             // [현재 디렉토리] 및 [모든 하위 디렉토리]를 포함한 파일 목록 배열을 반환!
@@ -1070,7 +1069,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     processedFldrs++;
                     fldrProgress?.Report((double)processedFldrs / totalFldrs * 100);
                 }
-
+                await Task.Delay(20);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -1155,6 +1154,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private async Task DelSelConfirm(IProgress<double> progress)
         {
+            if (ActiveFolderInfo?.Count == 0)
+            {
+                VisibleDestroy = false;
+                return;
+            }
             progress?.Report(0);
             try
             {
@@ -1209,6 +1213,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 if (ProgressValue < 100)
                 {
+                    await Task.Delay(100); // [딜레이 추가]
                     progress?.Report(100); // [진행률: 100]: 작업 완료
                 }
                 TheBtnEnabledOrNot = true;
@@ -1221,6 +1226,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     {
                         LstAllData = LstAllData.Where(item => !selectToDelete.Any(deleted => deleted.DelMatchingPath == item.DelMatchingPath)).ToList();
                         selectToDelete.Clear();
+                    }
+                    else
+                    {
+                        ActiveFolderInfo?.Clear();
                     }
                     LoadPageData();
                 });
@@ -1298,6 +1307,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private async Task DelAllConfirm(IProgress<double> progress)
         {
+            if (ActiveFolderInfo?.Count == 0)
+            {
+                VisibleDestroy = false;
+                return;
+            }
             progress?.Report(0);
             try
             {
@@ -1348,6 +1362,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 if (ProgressValue < 100)
                 {
+                    await Task.Delay(100); // [딜레이 추가]
                     progress?.Report(100); // [진행률: 100]: 작업 완료
                 }
                 TheBtnEnabledOrNot = true;
