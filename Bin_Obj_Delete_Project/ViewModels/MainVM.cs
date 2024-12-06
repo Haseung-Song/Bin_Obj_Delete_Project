@@ -799,9 +799,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }, cancellationToken);
             try
             {
-                Task cancelingTask = Task.Delay(300000); // [약 300초] 후, 작업 취소!!
+                Task cancelingTask = Task.Delay(120000); // [약 120초] 후, 작업 취소!!
                 Task completedTask = await Task.WhenAny(enumerateTask, cancelingTask);
-                // [약 5분]이 지나도 작업이 끝나지 않을 때, 작업 취소 요청!
+                // [약 2분]이 지나도 작업이 끝나지 않을 때, 작업 취소 요청!
                 if (completedTask == cancelingTask)
                 {
                     cancellationTokenSource.Cancel();
@@ -827,8 +827,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
             finally
             {
+                if (enumerateTask.IsCompleted || enumerateTask.IsCanceled || enumerateTask.IsFaulted)
+                {
+                    enumerateTask.Dispose();
+                }
                 TotalNumbersInfo = LstAllData.Count(); // 전체 데이터 개수!
-                enumerateTask.Dispose();
             }
 
         }
@@ -921,7 +924,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 int processedFldrs = 0;
                 foreach (string dir in lstEneumerateFldr)
                 {
-                    // 작업 취소 요청 (약 300초) 후 작업 취소 수행
+                    // 작업 취소 요청 (약 120초) 후 작업 취소 수행
                     if (cancellationToken.IsCancellationRequested)
                     {
                         return;
@@ -994,7 +997,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         matchingFileInfoOrNot = true; // [파일]로 구분됨!
                         foreach (FileInfo files in lstEnumerateFilesInfo)
                         {
-                            // 작업 취소 요청 (약 300초) 후 작업 취소 수행
+                            // 작업 취소 요청 (약 120초) 후 작업 취소 수행
                             if (cancellationToken.IsCancellationRequested)
                             {
                                 return;
