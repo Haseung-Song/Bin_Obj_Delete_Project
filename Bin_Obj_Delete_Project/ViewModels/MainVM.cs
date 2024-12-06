@@ -1129,11 +1129,13 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     //    Console.WriteLine(item.DelMatchingOfSize);
                     //    Console.WriteLine(item.DelMatchingPath);
                     //}
+
                     if (ProgressValue < 100)
                     {
                         fldrProgress?.Report(100); // [진행률: 100] 작업 완료
                         fileProgress?.Report(100); // [진행률: 100] 작업 완료
                     }
+
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
                         LstAllData = DeleteFolderInfo.ToList(); // [DeleteFolderInfo] 컬렉션 데이터 리스트화 (완료)
@@ -1159,6 +1161,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 VisibleDestroy = false;
                 return;
             }
+
             progress?.Report(0);
             try
             {
@@ -1311,6 +1314,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 VisibleDestroy = false;
                 return;
             }
+
             progress?.Report(0);
             try
             {
