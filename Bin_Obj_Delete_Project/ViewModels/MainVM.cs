@@ -894,6 +894,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private static long GetDirectorySize(string dir)
         {
             DirectoryInfo dirInfo = new DirectoryInfo(dir); // DirectoryInfo 객체 생성
+
             long sizeofDir = 0; // [총량] 초기화
 
             // [현재 디렉토리] 및 [모든 하위 디렉토리]를 포함한 파일 목록 배열을 반환!
@@ -915,8 +916,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// <returns>작업 완료 후, Task 반환</returns>
         protected async Task EnumerateFolders(CancellationToken cancellationToken, IProgress<double> fldrProgress, IProgress<double> fileProgress)
         {
-            fldrProgress.Report(0); // [폴더 진행률: 0]으로 초기화
-            fileProgress.Report(0); // [파일 진행률: 0]으로 초기화
+            fldrProgress?.Report(0); // [폴더 진행률: 0]으로 초기화
+            fileProgress?.Report(0); // [파일 진행률: 0]으로 초기화
             try
             {
                 IEnumerable<string> lstEneumerateFldr = await Task.Run(() => GetEneumerateFldrList());
@@ -1064,10 +1065,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
                         }
                         processedFiles++;
-                        fileProgress.Report((double)processedFiles / totalFiles * 100);
+                        fileProgress?.Report((double)processedFiles / totalFiles * 100);
                     }
                     processedFldrs++;
-                    fldrProgress.Report((double)processedFldrs / totalFldrs * 100);
+                    fldrProgress?.Report((double)processedFldrs / totalFldrs * 100);
                 }
 
             }
@@ -1129,8 +1130,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     //    Console.WriteLine(item.DelMatchingOfSize);
                     //    Console.WriteLine(item.DelMatchingPath);
                     //}
-                    fldrProgress.Report(100); // [진행률: 100] 작업 완료
-                    fileProgress.Report(100); // [진행률: 100] 작업 완료
+                    if (ProgressValue < 100)
+                    {
+                        fldrProgress?.Report(100); // [진행률: 100] 작업 완료
+                        fileProgress?.Report(100); // [진행률: 100] 작업 완료
+                    }
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
                         LstAllData = DeleteFolderInfo.ToList(); // [DeleteFolderInfo] 컬렉션 데이터 리스트화 (완료)
@@ -1151,7 +1155,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private async Task DelSelConfirm(IProgress<double> progress)
         {
-            progress.Report(0);
+            progress?.Report(0);
             try
             {
                 TheBtnEnabledOrNot = false;
@@ -1193,7 +1197,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     });
                     // [폴더, 파일] 선택 삭제하기 후, [진행률 업데이트] 작업!
                     processedSelMatch++;
-                    progress.Report((double)processedSelMatch / totalSelMatch * 100);
+                    progress?.Report((double)processedSelMatch / totalSelMatch * 100);
                 }
 
             }
@@ -1203,7 +1207,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
             finally
             {
-                progress.Report(100); // [진행률: 100] => 작업 완료!
+                if (ProgressValue < 100)
+                {
+                    progress?.Report(100); // [진행률: 100]: 작업 완료
+                }
                 TheBtnEnabledOrNot = true;
                 VisibleDestroy = false;
                 // 삭제 후 데이터 업데이트
@@ -1291,7 +1298,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private async Task DelAllConfirm(IProgress<double> progress)
         {
-            progress.Report(0);
+            progress?.Report(0);
             try
             {
                 TheBtnEnabledOrNot = false;
@@ -1329,7 +1336,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     });
                     // [폴더, 파일] 일괄 삭제하기 후, [진행률 업데이트] 작업!
                     processedAllMatch++;
-                    progress.Report((double)processedAllMatch / totalAllMatch * 100);
+                    progress?.Report((double)processedAllMatch / totalAllMatch * 100);
                 }
                 ActiveFolderInfo?.Clear();
             }
@@ -1339,7 +1346,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
             finally
             {
-                progress.Report(100); // [진행률: 100] => 작업 완료!
+                if (ProgressValue < 100)
+                {
+                    progress?.Report(100); // [진행률: 100]: 작업 완료
+                }
                 TheBtnEnabledOrNot = true;
                 VisibleDestroy = false;
                 // 삭제 후 데이터 업데이트
