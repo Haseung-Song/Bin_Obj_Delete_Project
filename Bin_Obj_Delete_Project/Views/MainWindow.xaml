@@ -13,7 +13,7 @@
         MouseDown="Window_Mouse_Down"
         WindowStyle="None"
         Width="1680"
-        Height="800">
+        Height="815">
     <WindowChrome.WindowChrome>
         <WindowChrome 
             CaptionHeight="0"
@@ -241,7 +241,7 @@
                                   SelectionMode="Extended"
                                   SelectionChanged="ListView_SelectionChanged"
                                   Background="Transparent"
-                                  Margin="5"
+                                  Margin="3"
                                   x:Name="listView">
                             <ListView.ItemContainerStyle>
                                 <Style TargetType="ListViewItem">
