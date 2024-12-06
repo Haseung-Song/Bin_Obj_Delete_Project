@@ -1209,9 +1209,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 // 삭제 후 데이터 업데이트
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
+                    // 삭제된 항목 제거
                     if (selectToDelete?.Count > 0)
                     {
-                        // 삭제된 항목 제거
                         LstAllData = LstAllData.Where(item => !selectToDelete.Any(deleted => deleted.DelMatchingPath == item.DelMatchingPath)).ToList();
                         selectToDelete.Clear();
                     }
@@ -1270,10 +1270,12 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     {
                         await DelSelConfirm(ProgressBar);
                     }
+
                     // UI Update (총 항목 개수)
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        TotalNumbersInfo = ActiveFolderInfo.Count();
+                        int deleteCount = selectToDelete?.Count ?? 0;
+                        TotalNumbersInfo = LstAllData.Count() - deleteCount;
                     });
 
                 }
@@ -1343,14 +1345,15 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 // 삭제 후 데이터 업데이트
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
+                    // 삭제된 항목 제거
                     if (entireToDelete?.Count > 0)
                     {
-                        // 삭제된 항목 제거
                         LstAllData = LstAllData.Where(item => !entireToDelete.Any(deleted => deleted.DelMatchingPath == item.DelMatchingPath)).ToList();
                         entireToDelete.Clear();
                     }
                     LoadPageData();
                 });
+
             }
 
         }
@@ -1383,10 +1386,12 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     {
                         await DelAllConfirm(ProgressBar);
                     }
+
                     // UI Update (총 항목 개수)
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        TotalNumbersInfo = LstAllData.Count();
+                        int deleteCount = entireToDelete?.Count ?? 0;
+                        TotalNumbersInfo = LstAllData.Count() - deleteCount;
                     });
 
                 }
@@ -1618,20 +1623,12 @@ namespace Bin_Obj_Delete_Project.ViewModels
         {
             if (LstAllData?.Count > 0)
             {
-                // 현재 페이지가 유효 범위 이내인지 확인
                 if (CurrentPage < 1)
                 {
                     CurrentPage = 1;
                 }
-
-                // 데이터 필터링
-                List<DelMatchingInfo> filteredData = LstAllData
-                    .Skip((CurrentPage - 1) * PageRecords)
-                    .Take(PageRecords)
-                    .ToList();
-
-                // ActiveFolderInfo 업데이트
-                ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>(filteredData);
+                List<DelMatchingInfo> filteredData = LstAllData.Skip((CurrentPage - 1) * PageRecords).Take(PageRecords).ToList();
+                ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>(filteredData); // [현재 페이지] 초기화 및 갱신
             }
             else
             {
@@ -1639,6 +1636,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 ActiveFolderInfo?.Clear();
                 CurrentPage = 1;
             }
+
         }
 
         /// <summary>
@@ -1648,21 +1646,20 @@ namespace Bin_Obj_Delete_Project.ViewModels
         {
             if (LstAllData?.Count > 0)
             {
-                // # [방법 2: ChatGPT 방식]
-                // 삭제된 항목 수를 계산
+                // [방법 2: ChatGPT 방식]
+                // [삭제된 항목 수] 계산
                 int deleteCount = (selectToDelete?.Count ?? 0) + (entireToDelete?.Count ?? 0);
 
-                // 총 페이지 수 계산
+                // [총 페이지 수] 계산
                 int totalPages = (int)Math.Ceiling((double)(LstAllData.Count - deleteCount) / PageRecords);
 
-                // [페이지 변경]
                 if (CurrentPage < totalPages)
                 {
                     CurrentPage++;
                     LoadPageData();
                 }
 
-                // # [방법 1: MyOwner 방식]
+                // [방법 1: MyOwner 방식]
                 //if (selectToDelete?.Count > 0)
                 //{
                 //    int totalPages = (int)Math.Ceiling((double)(LstAllData.Count - selectToDelete.Count) / PageRecords);
