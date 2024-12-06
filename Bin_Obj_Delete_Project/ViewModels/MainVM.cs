@@ -1290,8 +1290,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     // UI Update (총 항목 개수)
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        int deleteCount = selectToDelete?.Count ?? 0;
-                        TotalNumbersInfo = LstAllData.Count() - deleteCount;
+                        TotalNumbersInfo = LstAllData.Count();
                     });
 
                 }
@@ -1415,8 +1414,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     // UI Update (총 항목 개수)
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        int deleteCount = entireToDelete?.Count ?? 0;
-                        TotalNumbersInfo = LstAllData.Count() - deleteCount;
+                        TotalNumbersInfo = LstAllData.Count();
                     });
 
                 }
@@ -1451,6 +1449,12 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     });
                     TheBtnEnabledOrNot = true;
                     VisibleLoading = false;
+                    // UI Update (총 항목 개수)
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        TotalNumbersInfo = LstAllData.Count();
+                    });
+
                 }
                 else
                 {
@@ -1502,6 +1506,12 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     });
                     TheBtnEnabledOrNot = true;
                     VisibleLoading = false;
+                    // UI Update (총 항목 개수)
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        TotalNumbersInfo = LstAllData.Count();
+                    });
+
                 }
                 else
                 {
