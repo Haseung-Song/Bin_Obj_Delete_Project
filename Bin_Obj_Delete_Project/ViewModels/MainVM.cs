@@ -1195,7 +1195,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     processedSelMatch++;
                     progress.Report((double)processedSelMatch / totalSelMatch * 100);
                 }
-                await Task.Delay(30); // [작업 딜레이] => 추가 완료!
+
             }
             catch (Exception ex)
             {
@@ -1206,6 +1206,18 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 progress.Report(100); // [진행률: 100] => 작업 완료!
                 TheBtnEnabledOrNot = true;
                 VisibleDestroy = false;
+                // 삭제 후 데이터 업데이트
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    if (selectToDelete?.Count > 0)
+                    {
+                        // 삭제된 항목 제거
+                        LstAllData = LstAllData.Where(item => !selectToDelete.Any(deleted => deleted.DelMatchingPath == item.DelMatchingPath)).ToList();
+                        selectToDelete.Clear();
+                    }
+                    LoadPageData();
+                });
+
             }
 
         }
@@ -1325,10 +1337,20 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
             finally
             {
-                await Task.Delay(30); // [작업 딜레이] => 추가 완료!
                 progress.Report(100); // [진행률: 100] => 작업 완료!
                 TheBtnEnabledOrNot = true;
                 VisibleDestroy = false;
+                // 삭제 후 데이터 업데이트
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    if (entireToDelete?.Count > 0)
+                    {
+                        // 삭제된 항목 제거
+                        LstAllData = LstAllData.Where(item => !entireToDelete.Any(deleted => deleted.DelMatchingPath == item.DelMatchingPath)).ToList();
+                        entireToDelete.Clear();
+                    }
+                    LoadPageData();
+                });
             }
 
         }
@@ -1364,7 +1386,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     // UI Update (총 항목 개수)
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        TotalNumbersInfo = ActiveFolderInfo.Count();
+                        TotalNumbersInfo = LstAllData.Count();
                     });
 
                 }
@@ -1596,15 +1618,27 @@ namespace Bin_Obj_Delete_Project.ViewModels
         {
             if (LstAllData?.Count > 0)
             {
-                List<DelMatchingInfo> deletedItems = selectToDelete?.Count > 0 ? selectToDelete : entireToDelete?.Count > 0 ? entireToDelete : null;
-                // 데이터 필터링
-                List<DelMatchingInfo> filteredData = deletedItems != null
-                    ? LstAllData.Where(item => !deletedItems.Any(which => which.DelMatchingPath == item.DelMatchingPath))
-                                .Skip((CurrentPage - 1) * PageRecords).Take(PageRecords).ToList()
-                    : LstAllData.Skip((CurrentPage - 1) * PageRecords).Take(PageRecords).ToList();
-                ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>(filteredData); // [현재 페이지] => 해당 데이터로 초기화 및 갱신
-            }
+                // 현재 페이지가 유효 범위 이내인지 확인
+                if (CurrentPage < 1)
+                {
+                    CurrentPage = 1;
+                }
 
+                // 데이터 필터링
+                List<DelMatchingInfo> filteredData = LstAllData
+                    .Skip((CurrentPage - 1) * PageRecords)
+                    .Take(PageRecords)
+                    .ToList();
+
+                // ActiveFolderInfo 업데이트
+                ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>(filteredData);
+            }
+            else
+            {
+                // 데이터가 없을 때 초기화
+                ActiveFolderInfo?.Clear();
+                CurrentPage = 1;
+            }
         }
 
         /// <summary>
@@ -1669,14 +1703,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private void GoToPreviousPage()
         {
-            if (LstAllData?.Count > 0)
+            if (LstAllData?.Count > 0 && CurrentPage > 1)
             {
-                if (CurrentPage > 1)
-                {
-                    CurrentPage--;
-                    LoadPageData();
-                }
-
+                CurrentPage--;
+                LoadPageData();
             }
 
         }

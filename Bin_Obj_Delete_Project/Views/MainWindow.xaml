@@ -236,7 +236,7 @@
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <ListView ItemsSource="{Binding ActiveFolderInfo}"
+                        <ListView ItemsSource="{Binding ActiveFolderInfo, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                   SelectedItem="{Binding SelectedCrFolder}"
                                   SelectionMode="Extended"
                                   SelectionChanged="ListView_SelectionChanged"
