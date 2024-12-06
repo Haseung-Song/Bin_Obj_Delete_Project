@@ -285,7 +285,7 @@
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
 
-                                    <GridViewColumn Width="100">
+                                    <GridViewColumn Width="200">
                                         <GridViewColumn.Header>
                                             <GridViewColumnHeader Content="유형"
                                                                   Background="#FFFDF8"
