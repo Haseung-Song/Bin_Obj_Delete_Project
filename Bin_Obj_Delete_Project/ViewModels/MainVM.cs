@@ -1069,7 +1069,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     processedFldrs++;
                     fldrProgress?.Report((double)processedFldrs / totalFldrs * 100);
                 }
-                await Task.Delay(20);
+                await Task.Delay(10);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -1213,7 +1213,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 if (ProgressValue < 100)
                 {
-                    await Task.Delay(100); // [딜레이 추가]
+                    await Task.Delay(10);  // [딜레이 추가]
                     progress?.Report(100); // [진행률: 100]: 작업 완료
                 }
                 TheBtnEnabledOrNot = true;
@@ -1362,7 +1362,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 if (ProgressValue < 100)
                 {
-                    await Task.Delay(100); // [딜레이 추가]
+                    await Task.Delay(10);  // [딜레이 추가]
                     progress?.Report(100); // [진행률: 100]: 작업 완료
                 }
                 TheBtnEnabledOrNot = true;
