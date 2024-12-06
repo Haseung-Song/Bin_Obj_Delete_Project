@@ -37,7 +37,6 @@
                 <GradientStop Color="#8A16C1" Offset="1"/>
             </LinearGradientBrush>
         </Border.BorderBrush>
-
         <Border.Background>
             <LinearGradientBrush StartPoint="0,1" EndPoint="1,0">
                 <GradientStop Color="#FCFDF5CC" Offset="0"/>
@@ -261,6 +260,7 @@
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock Text="{Binding DelMatchingName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                           TextWrapping="Wrap"
                                                            TextAlignment="Left"
                                                            TextDecorations="Underline"
                                                            Foreground="#333333"
@@ -333,7 +333,7 @@
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
 
-                                    <GridViewColumn Width="1100">
+                                    <GridViewColumn Width="900">
                                         <GridViewColumn.Header>
                                             <GridViewColumnHeader Content="경로"
                                                                   Background="#FFFDF8"
@@ -342,6 +342,7 @@
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock Text="{Binding DelMatchingPath, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                           TextWrapping="Wrap"
                                                            TextAlignment="Left"
                                                            TextDecorations="Underline"
                                                            Foreground="DarkSlateBlue"
@@ -447,7 +448,6 @@
                                FontWeight="Bold"
                                FontSize="14"/>
                 </Grid>
-
                 <Grid Grid.Row="2" Margin="100, 0, 0, 5">
                     <TextBlock Text="{Binding SelectedCntsInfo, StringFormat='        {0}개 항목 선택함', UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                HorizontalAlignment="Left"
