@@ -13,7 +13,7 @@
         MouseDown="Window_Mouse_Down"
         WindowStyle="None"
         Width="1680"
-        Height="815">
+        Height="810">
     <WindowChrome.WindowChrome>
         <WindowChrome 
             CaptionHeight="0"
