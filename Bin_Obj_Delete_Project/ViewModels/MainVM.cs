@@ -1549,12 +1549,12 @@ namespace Bin_Obj_Delete_Project.ViewModels
             // (n = 1, 2, 3...)
             // (2n - 1)번 클릭 후: [오름차순] 정렬!
             // (2n)번 클릭 후: [내림차순]으로 정렬!
-            lstOrderByName = orderByAscendingOrNot
-                ? ActiveFolderInfo.OrderBy(item => item.DelMatchingName).ToList()
-                : ActiveFolderInfo.OrderByDescending(item => item.DelMatchingName).ToList();
+            LstAllData = orderByAscendingOrNot
+                ? LstAllData.OrderBy(item => item.DelMatchingName).ToList()
+                : LstAllData.OrderByDescending(item => item.DelMatchingName).ToList();
 
-            // 1) 정렬 후, 컬렉션 초기화 작업
-            ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>(lstOrderByName);
+            // 1) 정렬 후, 페이지 초기화 작업 (갱신)
+            LoadPageData();
 
             // 2) 플래그(flag) 값, 반전시키기
             orderByAscendingOrNot = !orderByAscendingOrNot;
@@ -1568,12 +1568,12 @@ namespace Bin_Obj_Delete_Project.ViewModels
             // (n = 1, 2, 3...)
             // (2n - 1)번 클릭 후: [오름차순] 정렬!
             // (2n)번 클릭 후: [내림차순]으로 정렬!
-            lstOrderByCrTime = orderByAscendingOrNot
-                ? ActiveFolderInfo.OrderBy(item => item.DelMatchingCreationTime).ToList()
-                : ActiveFolderInfo.OrderByDescending(item => item.DelMatchingCreationTime).ToList();
+            LstAllData = orderByAscendingOrNot
+                ? LstAllData.OrderBy(item => item.DelMatchingCreationTime).ToList()
+                : LstAllData.OrderByDescending(item => item.DelMatchingCreationTime).ToList();
 
-            // 1) 정렬 후, 컬렉션 초기화 작업
-            ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>(lstOrderByCrTime);
+            // 1) 정렬 후, 페이지 초기화 작업 (갱신)
+            LoadPageData();
 
             // 2) 플래그(flag) 값, 반전시키기
             orderByAscendingOrNot = !orderByAscendingOrNot;
@@ -1587,12 +1587,12 @@ namespace Bin_Obj_Delete_Project.ViewModels
             // (n = 1, 2, 3...)
             // (2n - 1)번 클릭 후: [오름차순] 정렬!
             // (2n)번 클릭 후: [내림차순]으로 정렬!
-            lstOrderByType = orderByAscendingOrNot
-                ? ActiveFolderInfo.OrderBy(item => item.DelMatchingCategory).ToList()
-                : ActiveFolderInfo.OrderByDescending(item => item.DelMatchingCategory).ToList();
+            LstAllData = orderByAscendingOrNot
+                ? LstAllData.OrderBy(item => item.DelMatchingCategory).ToList()
+                : LstAllData.OrderByDescending(item => item.DelMatchingCategory).ToList();
 
-            // 1) 정렬 후, 컬렉션 초기화 작업
-            ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>(lstOrderByType);
+            // 1) 정렬 후, 페이지 초기화 작업 (갱신)
+            LoadPageData();
 
             // 2) 플래그(flag) 값, 반전시키기
             orderByAscendingOrNot = !orderByAscendingOrNot;
@@ -1606,12 +1606,12 @@ namespace Bin_Obj_Delete_Project.ViewModels
             // (n = 1, 2, 3...)
             // (2n - 1)번 클릭 후: [오름차순] 정렬!
             // (2n)번 클릭 후: [내림차순]으로 정렬!
-            lstOrderByMdTime = orderByAscendingOrNot
-                ? ActiveFolderInfo.OrderBy(item => item.DelMatchingModifiedTime).ToList()
-                : ActiveFolderInfo.OrderByDescending(item => item.DelMatchingModifiedTime).ToList();
+            LstAllData = orderByAscendingOrNot
+                ? LstAllData.OrderBy(item => item.DelMatchingModifiedTime).ToList()
+                : LstAllData.OrderByDescending(item => item.DelMatchingModifiedTime).ToList();
 
-            // 1) 정렬 후, 컬렉션 초기화 작업
-            ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>(lstOrderByMdTime);
+            // 1) 정렬 후, 페이지 초기화 작업 (갱신)
+            LoadPageData();
 
             // 2) 플래그(flag) 값, 반전시키기
             orderByAscendingOrNot = !orderByAscendingOrNot;
@@ -1625,12 +1625,12 @@ namespace Bin_Obj_Delete_Project.ViewModels
             // (n = 1, 2, 3...)
             // (2n - 1)번 클릭 후: [오름차순] 정렬!
             // (2n)번 클릭 후: [내림차순]으로 정렬!
-            lstOrderBySize = orderByAscendingOrNot
-                ? ActiveFolderInfo.OrderBy(item => item.DelMatchingOfSize).ToList()
-                : ActiveFolderInfo.OrderByDescending(item => item.DelMatchingOfSize).ToList();
+            LstAllData = orderByAscendingOrNot
+                ? LstAllData.OrderBy(item => item.DelMatchingOfSize).ToList()
+                : LstAllData.OrderByDescending(item => item.DelMatchingOfSize).ToList();
 
-            // 1) 정렬 후, 컬렉션 초기화 작업
-            ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>(lstOrderBySize);
+            // 1) 정렬 후, 페이지 초기화 작업 (갱신)
+            LoadPageData();
 
             // 2) 플래그(flag) 값, 반전시키기
             orderByAscendingOrNot = !orderByAscendingOrNot;
@@ -1644,12 +1644,12 @@ namespace Bin_Obj_Delete_Project.ViewModels
             // (n = 1, 2, 3...)
             // (2n - 1)번 클릭 후: [오름차순] 정렬!
             // (2n)번 클릭 후: [내림차순]으로 정렬!
-            lstOrderByPath = orderByAscendingOrNot
-                ? ActiveFolderInfo.OrderBy(item => item.DelMatchingPath).ToList()
-                : ActiveFolderInfo.OrderByDescending(item => item.DelMatchingPath).ToList();
+            LstAllData = orderByAscendingOrNot
+                ? LstAllData.OrderBy(item => item.DelMatchingPath).ToList()
+                : LstAllData.OrderByDescending(item => item.DelMatchingPath).ToList();
 
-            // 1) 정렬 후, 컬렉션 초기화 작업
-            ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>(lstOrderByPath);
+            // 1) 정렬 후, 페이지 초기화 작업 (갱신)
+            LoadPageData();
 
             // 2) 플래그(flag) 값, 반전시키기
             orderByAscendingOrNot = !orderByAscendingOrNot;
