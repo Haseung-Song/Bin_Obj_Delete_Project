@@ -799,7 +799,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }, cancellationToken);
             try
             {
-                Task cancelingTask = Task.Delay(120000); // [약 120초] 후, 작업 취소!!
+                Task cancelingTask = Task.Delay(150000); // [약 150초] 후, 작업 취소!!
                 Task completedTask = await Task.WhenAny(enumerateTask, cancelingTask);
                 // [약 2분]이 지나도 작업이 끝나지 않을 때, 작업 취소 요청!
                 if (completedTask == cancelingTask)
@@ -895,16 +895,31 @@ namespace Bin_Obj_Delete_Project.ViewModels
         {
             DirectoryInfo dirInfo = new DirectoryInfo(dir); // DirectoryInfo 객체 생성
             long sizeofDir = 0; // [총량] 초기화
-
-            // [현재 디렉토리] 및 [모든 하위 디렉토리]를 포함한 파일 목록 배열을 반환!
-            FileInfo[] arrayInfo = dirInfo.GetFiles("*", SearchOption.AllDirectories);
-
-            // 파일 목록을 돌며 파일의 총량 계산!
-            foreach (FileInfo files in arrayInfo)
+            try
             {
-                sizeofDir += files.Length;
-            };
-            return sizeofDir;
+                // 병렬 옵션 설정
+                var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+
+                // 병렬 루프 제공
+                Parallel.ForEach(dirInfo.GetFiles("*", SearchOption.AllDirectories), options, (files) =>
+                {
+                    try
+                    {
+                        Interlocked.Add(ref sizeofDir, files.Length); // 각 파일의 [크기 계산 및 누적]
+                    }
+                    catch
+                    {
+                        /* 파일 접근 오류 무시 */
+                    }
+
+                });
+
+            }
+            catch
+            {
+                /* 폴더 접근 오류 무시 */
+            }
+            return sizeofDir; // 누적된 파일 크기 총합(sizeofDir) 반환
         }
 
         /// <summary>
@@ -924,7 +939,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 int processedFldrs = 0;
                 foreach (string dir in lstEneumerateFldr)
                 {
-                    // 작업 취소 요청 (약 120초) 후 작업 취소 수행
+                    // 작업 취소 요청 (약 150초) 후 작업 취소 수행
                     if (cancellationToken.IsCancellationRequested)
                     {
                         return;
@@ -997,7 +1012,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         matchingFileInfoOrNot = true; // [파일]로 구분됨!
                         foreach (FileInfo files in lstEnumerateFilesInfo)
                         {
-                            // 작업 취소 요청 (약 120초) 후 작업 취소 수행
+                            // 작업 취소 요청 (약 150초) 후 작업 취소 수행
                             if (cancellationToken.IsCancellationRequested)
                             {
                                 return;
@@ -1068,7 +1083,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     }
                     processedFldrs++;
                     fldrProgress?.Report((double)processedFldrs / totalFldrs * 100);
-                } 
+                }
                 await Task.Delay(10);
             }
             catch (UnauthorizedAccessException ex)
