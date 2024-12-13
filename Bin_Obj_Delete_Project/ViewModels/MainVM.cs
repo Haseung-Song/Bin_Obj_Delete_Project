@@ -1068,7 +1068,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     }
                     processedFldrs++;
                     fldrProgress?.Report((double)processedFldrs / totalFldrs * 100);
-                }
+                } 
                 await Task.Delay(10);
             }
             catch (UnauthorizedAccessException ex)
@@ -1161,7 +1161,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 VisibleDestroy = false;
                 return;
             }
-
             progress?.Report(0);
             try
             {
@@ -1205,6 +1204,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     // [폴더, 파일] 선택 삭제하기 후, [진행률 업데이트] 작업!
                     processedSelMatch++;
                     progress?.Report((double)processedSelMatch / totalSelMatch * 100);
+                    await Task.Delay(10);
                 }
 
             }
@@ -1314,7 +1314,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 VisibleDestroy = false;
                 return;
             }
-
             progress?.Report(0);
             try
             {
@@ -1354,6 +1353,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     // [폴더, 파일] 일괄 삭제하기 후, [진행률 업데이트] 작업!
                     processedAllMatch++;
                     progress?.Report((double)processedAllMatch / totalAllMatch * 100);
+                    await Task.Delay(10);
                 }
                 ActiveFolderInfo?.Clear();
             }
