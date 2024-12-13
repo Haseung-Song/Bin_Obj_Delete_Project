@@ -874,6 +874,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>(); // [ObservableCollection] 초기화
                 DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
                 uniqueFilePathSet.Clear(); // (중복) 해시셋 초기화
+                ActiveFolderInfo?.Clear(); // (화면) 초기화
                 OperatingTask(); // 작업 수행 및 취소
                 CloseWindowAction?.Invoke(); // 창 닫기 동작 호출!
             }
@@ -881,8 +882,12 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 FilterFolderName = string.Empty;
                 FilterExtensions = string.Empty;
-                Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
-                _ = MessageBox.Show(mainWindow, "불러올 폴더 경로가 없습니다.", "경로 미입력", MessageBoxButton.OK, MessageBoxImage.Error);
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
+                    _ = MessageBox.Show(mainWindow, "불러올 폴더 경로가 없습니다.", "경로 미입력", MessageBoxButton.OK, MessageBoxImage.Error);
+                });
+
             }
 
         }
