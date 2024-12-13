@@ -799,7 +799,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }, cancellationToken);
             try
             {
-                Task cancelingTask = Task.Delay(150000); // [약 150초] 후, 작업 취소!!
+                Task cancelingTask = Task.Delay(120000); // [약 120초] 후, 작업 취소!!
                 Task completedTask = await Task.WhenAny(enumerateTask, cancelingTask);
                 // [약 2분]이 지나도 작업이 끝나지 않을 때, 작업 취소 요청!
                 if (completedTask == cancelingTask)
@@ -811,6 +811,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     TheBtnEnabledOrNot = true;
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
+                        DeleteFolderInfo?.Clear();
+                        LstAllData?.Clear();
                         Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
                         _ = MessageBox.Show(mainWindow, "로딩 시간이 초과되었습니다. 다른 작업을 수행하세요.", "작업 취소", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                     });
@@ -827,7 +829,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
             finally
             {
-                if (enumerateTask.IsCompleted || enumerateTask.IsCanceled || enumerateTask.IsFaulted)
+                if (!cancellationToken.IsCancellationRequested)
                 {
                     enumerateTask.Dispose();
                 }
@@ -872,7 +874,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>(); // [ObservableCollection] 초기화
                 DeleteFolderInfo?.Clear(); // (전체) 컬렉션 초기화
                 uniqueFilePathSet.Clear(); // (중복) 해시셋 초기화
-                ActiveFolderInfo?.Clear(); // (화면) 초기화
                 OperatingTask(); // 작업 수행 및 취소
                 CloseWindowAction?.Invoke(); // 창 닫기 동작 호출!
             }
@@ -898,21 +899,21 @@ namespace Bin_Obj_Delete_Project.ViewModels
             try
             {
                 // 병렬 옵션 설정
-                var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+                ParallelOptions options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
 
                 // 병렬 루프 제공
-                Parallel.ForEach(dirInfo.GetFiles("*", SearchOption.AllDirectories), options, (files) =>
-                {
-                    try
-                    {
-                        Interlocked.Add(ref sizeofDir, files.Length); // 각 파일의 [크기 계산 및 누적]
-                    }
-                    catch
-                    {
-                        /* 파일 접근 오류 무시 */
-                    }
+                _ = Parallel.ForEach(dirInfo.GetFiles("*", SearchOption.AllDirectories), options, (files) =>
+                  {
+                      try
+                      {
+                          _ = Interlocked.Add(ref sizeofDir, files.Length); // 각 파일의 [크기 계산 및 누적]
+                      }
+                      catch
+                      {
+                          /* 파일 접근 오류 무시 */
+                      }
 
-                });
+                  });
 
             }
             catch
@@ -939,7 +940,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 int processedFldrs = 0;
                 foreach (string dir in lstEneumerateFldr)
                 {
-                    // 작업 취소 요청 (약 150초) 후 작업 취소 수행
+                    // 작업 취소 요청 (약 120초) 후 작업 취소 수행
                     if (cancellationToken.IsCancellationRequested)
                     {
                         return;
@@ -1012,11 +1013,12 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         matchingFileInfoOrNot = true; // [파일]로 구분됨!
                         foreach (FileInfo files in lstEnumerateFilesInfo)
                         {
-                            // 작업 취소 요청 (약 150초) 후 작업 취소 수행
+                            // 작업 취소 요청 (약 120초) 후 작업 취소 수행
                             if (cancellationToken.IsCancellationRequested)
                             {
                                 return;
                             }
+
                             // 이미 처리가 된 파일 경로는 무시! (중복 제거)
                             if (uniqueFilePathSet.Contains(files.FullName))
                             {
@@ -1084,7 +1086,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     processedFldrs++;
                     fldrProgress?.Report((double)processedFldrs / totalFldrs * 100);
                 }
-                await Task.Delay(10);
+
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -1231,7 +1233,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 if (ProgressValue < 100)
                 {
-                    await Task.Delay(10);  // [딜레이 추가]
                     progress?.Report(100); // [진행률: 100]: 작업 완료
                 }
                 TheBtnEnabledOrNot = true;
@@ -1380,7 +1381,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 if (ProgressValue < 100)
                 {
-                    await Task.Delay(10);  // [딜레이 추가]
                     progress?.Report(100); // [진행률: 100]: 작업 완료
                 }
                 TheBtnEnabledOrNot = true;
