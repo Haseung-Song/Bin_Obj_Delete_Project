@@ -180,36 +180,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private List<DelMatchingInfo> entireToDelete;
 
         /// <summary>
-        /// [lstOrderByName]
-        /// </summary>
-        private List<DelMatchingInfo> lstOrderByName;
-
-        /// <summary>
-        /// [lstOrderByCrTime]
-        /// </summary>
-        private List<DelMatchingInfo> lstOrderByCrTime;
-
-        /// <summary>
-        /// [lstOrderByType]
-        /// </summary>
-        private List<DelMatchingInfo> lstOrderByType;
-
-        /// <summary>
-        /// [lstOrderByMdTime]
-        /// </summary>
-        private List<DelMatchingInfo> lstOrderByMdTime;
-
-        /// <summary>
-        /// [lstOrderBySize]
-        /// </summary>
-        private List<DelMatchingInfo> lstOrderBySize;
-
-        /// <summary>
-        /// [lstOrderByPath]
-        /// </summary>
-        private List<DelMatchingInfo> lstOrderByPath;
-
-        /// <summary>
         /// [totalNumbersInfo]
         /// </summary>
         private static int totalNumbersInfo;
@@ -711,12 +681,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
             ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>();
             uniqueFilePathSet = new HashSet<string>();
             enumerateFldrCache = new Dictionary<string, IEnumerable<string>>();
-            lstOrderByName = new List<DelMatchingInfo>();
-            lstOrderByCrTime = new List<DelMatchingInfo>();
-            lstOrderByType = new List<DelMatchingInfo>();
-            lstOrderByMdTime = new List<DelMatchingInfo>();
-            lstOrderBySize = new List<DelMatchingInfo>();
-            lstOrderByPath = new List<DelMatchingInfo>();
             orderByAscendingOrNot = true;
             matchingFldrName = string.Empty;
             matchingFileName = string.Empty;
@@ -950,6 +914,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     {
                         return;
                     }
+
                     DirectoryInfo dirInfo = new DirectoryInfo(dir);
                     matchingFldrName = dirInfo.Name;
                     matchingFldrCreationTime = dirInfo.CreationTime.ToString("yyyy-MM-dd tt HH:mm:ss");
