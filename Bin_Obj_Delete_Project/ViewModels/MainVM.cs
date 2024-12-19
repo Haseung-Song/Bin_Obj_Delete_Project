@@ -1157,6 +1157,18 @@ namespace Bin_Obj_Delete_Project.ViewModels
         }
 
         /// <summary>
+        /// ResetUIState()
+        /// 취소 후 UI 상태를 초기화
+        /// </summary>
+        private void ResetUIState()
+        {
+            TheBtnEnabledOrNot = true;
+            VisibleLoading = false;
+            ActiveFolderInfo?.Clear();
+            LoadPageData();
+        }
+
+        /// <summary>
         /// [폴더, 파일] 선택 삭제하기 (기능)
         /// 1) 휴지통에서 삭제
         /// 2) 영구적으로 삭제
@@ -1270,6 +1282,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             }
                             else
                             {
+                                ResetUIState(); // UI 상태 초기화
                                 return;
                             }
 
@@ -1285,6 +1298,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             }
                             else
                             {
+                                ResetUIState(); // UI 상태 초기화
                                 return;
                             }
 
@@ -1401,7 +1415,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 if (DeleteFolderInfo?.Count > 0)
                 {
                     entireToDelete = new List<DelMatchingInfo>(DeleteFolderInfo);
-                    if (!entireToDelete.Any(v => v.DelMatchingName.Equals("bin", StringComparison.OrdinalIgnoreCase) || v.DelMatchingName.Equals("obj", StringComparison.OrdinalIgnoreCase)))
+                    if (!entireToDelete.All(v => v.DelMatchingName.Equals("bin", StringComparison.OrdinalIgnoreCase) || v.DelMatchingName.Equals("obj", StringComparison.OrdinalIgnoreCase)))
                     {
                         Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
                         MessageBoxResult messageBox = MessageBox.Show(mainWindow, "전체 삭제하시겠습니까?", "일괄 삭제", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
@@ -1411,6 +1425,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         }
                         else
                         {
+                            ResetUIState(); // UI 상태 초기화
                             return;
                         }
 
