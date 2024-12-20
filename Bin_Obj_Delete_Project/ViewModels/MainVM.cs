@@ -1136,7 +1136,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     //    Console.WriteLine(item.DelMatchingOfSize);
                     //    Console.WriteLine(item.DelMatchingPath);
                     //}
-
                     if (ProgressValue < 100)
                     {
                         fldrProgress?.Report(100); // [진행률: 100] 작업 완료
@@ -1281,7 +1280,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             {
                                 Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
                                 MessageBoxResult messageBox = MessageBox.Show(mainWindow, "선택한 폴더를 정말 삭제하시겠습니까?", "폴더 삭제", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-                                if (selectToDelete?.Count > 0 && messageBox == MessageBoxResult.OK)
+                                if (messageBox == MessageBoxResult.OK)
                                 {
                                     shouldDelete = true;
                                 }
@@ -1296,7 +1295,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             {
                                 Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
                                 MessageBoxResult messageBox = MessageBox.Show(mainWindow, "선택한 파일을 정말 삭제하시겠습니까?", "파일 삭제", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-                                if (selectToDelete?.Count > 0 && messageBox == MessageBoxResult.OK)
+                                if (messageBox == MessageBoxResult.OK)
                                 {
                                     shouldDelete = true;
                                 }
@@ -1313,8 +1312,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
                     if (shouldDelete)
                     {
-                        await Task.Run(() => DelSelConfirm(ProgressBar));
-                        Application.Current.Dispatcher.Invoke(() =>
+                        await DelSelConfirm(ProgressBar);
+                        // UI Update (총 항목 개수)
+                        await Application.Current.Dispatcher.InvokeAsync(() =>
                         {
                             TotalNumbersInfo = LstAllData.Count();
                         });
@@ -1442,9 +1442,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
                     if (shouldDelete)
                     {
-                        await Task.Run(() => DelAllConfirm(ProgressBar));
+                        await DelAllConfirm(ProgressBar);
                         // UI Update (총 항목 개수)
-                        Application.Current.Dispatcher.Invoke(() =>
+                        await Application.Current.Dispatcher.InvokeAsync(() =>
                         {
                             TotalNumbersInfo = LstAllData.Count();
                         });
