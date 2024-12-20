@@ -210,11 +210,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private int _pageRecords;
 
         /// <summary>
-        /// [shouldDelete]
-        /// </summary>
-        private bool shouldDelete = false;
-
-        /// <summary>
         /// [_selectFolderInfo]
         /// </summary>
         private ObservableCollection<DelMatchingInfo> _selectFolderInfo;
@@ -1271,6 +1266,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private async Task DelSelMatches()
         {
+            bool shouldDelete = false;
             if (!string.IsNullOrEmpty(DeleteFolderPath) && SelectFolderInfo?.Count > 0)
             {
                 selectToDelete = new List<DelMatchingInfo>(SelectFolderInfo);
@@ -1418,6 +1414,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private async Task DelAllMatches()
         {
+            bool shouldDelete = false;
             if (!string.IsNullOrEmpty(DeleteFolderPath) && DeleteFolderInfo?.Count > 0)
             {
                 entireToDelete = new List<DelMatchingInfo>(LstAllData);
