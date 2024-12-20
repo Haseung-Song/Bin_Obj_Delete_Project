@@ -210,6 +210,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private int _pageRecords;
 
         /// <summary>
+        /// [shouldDelete]
+        /// </summary>
+        private bool shouldDelete = false;
+
+        /// <summary>
         /// [_selectFolderInfo]
         /// </summary>
         private ObservableCollection<DelMatchingInfo> _selectFolderInfo;
@@ -1136,6 +1141,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     //    Console.WriteLine(item.DelMatchingOfSize);
                     //    Console.WriteLine(item.DelMatchingPath);
                     //}
+
                     if (ProgressValue < 100)
                     {
                         fldrProgress?.Report(100); // [진행률: 100] 작업 완료
@@ -1163,7 +1169,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
         {
             TheBtnEnabledOrNot = true;
             VisibleLoading = false;
-            DeleteFolderInfo?.Clear();
             selectToDelete?.Clear();
             entireToDelete?.Clear();
             LoadPageData();
@@ -1247,6 +1252,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     if (selectToDelete?.Count > 0)
                     {
                         LstAllData = LstAllData.Where(item => !selectToDelete.Any(deleted => deleted.DelMatchingPath == item.DelMatchingPath)).ToList();
+                        DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>(LstAllData);
                         selectToDelete.Clear();
                     }
                     else
@@ -1265,64 +1271,60 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private async Task DelSelMatches()
         {
-            bool shouldDelete = false;
-            if (!string.IsNullOrEmpty(DeleteFolderPath))
+            if (!string.IsNullOrEmpty(DeleteFolderPath) && SelectFolderInfo?.Count > 0)
             {
-                if (SelectFolderInfo?.Count > 0)
+                selectToDelete = new List<DelMatchingInfo>(SelectFolderInfo);
+                if (selectToDelete?.Count > 0 &&
+                    !selectToDelete.Any(v => v.DelMatchingName.Equals("bin", StringComparison.OrdinalIgnoreCase) ||
+                    v.DelMatchingName.Equals("obj", StringComparison.OrdinalIgnoreCase)))
                 {
-                    selectToDelete = new List<DelMatchingInfo>(SelectFolderInfo);
-                    if (!selectToDelete.Any(v => v.DelMatchingName.Equals("bin", StringComparison.OrdinalIgnoreCase) || v.DelMatchingName.Equals("obj", StringComparison.OrdinalIgnoreCase)))
+                    // 선택된 [삭제할 폴더 유형]이 모두 "파일 폴더"인 경우에 해당 사항
+                    if (selectToDelete.All(v => v.DelMatchingCategory == "파일 폴더"))
                     {
-                        // 선택된 [삭제할 폴더 유형]이 모두 "파일 폴더"인 경우에 해당 사항
-                        if (selectToDelete.All(v => v.DelMatchingCategory == "파일 폴더"))
-                        {
-                            await Application.Current.Dispatcher.InvokeAsync(() =>
-                            {
-                                Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
-                                MessageBoxResult messageBox = MessageBox.Show(mainWindow, "선택한 폴더를 정말 삭제하시겠습니까?", "폴더 삭제", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-                                if (messageBox == MessageBoxResult.OK)
-                                {
-                                    shouldDelete = true;
-                                }
-
-                            });
-
-                        }
-                        // 그 외의 경우("파일")에 해당 사항!
-                        else
-                        {
-                            await Application.Current.Dispatcher.InvokeAsync(() =>
-                            {
-                                Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
-                                MessageBoxResult messageBox = MessageBox.Show(mainWindow, "선택한 파일을 정말 삭제하시겠습니까?", "파일 삭제", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-                                if (messageBox == MessageBoxResult.OK)
-                                {
-                                    shouldDelete = true;
-                                }
-
-                            });
-
-                        }
-
-                    }
-                    else
-                    {
-                        shouldDelete = true;
-                    }
-
-                    if (shouldDelete)
-                    {
-                        await DelSelConfirm(ProgressBar);
-                        // UI Update (총 항목 개수)
                         await Application.Current.Dispatcher.InvokeAsync(() =>
                         {
-                            TotalNumbersInfo = LstAllData.Count();
+                            Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
+                            MessageBoxResult messageBox = MessageBox.Show(mainWindow, "선택한 폴더를 정말 삭제하시겠습니까?", "폴더 삭제", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                            if (messageBox == MessageBoxResult.OK)
+                            {
+                                shouldDelete = true;
+                            }
+
                         });
 
                     }
-                    ResetUIState(); // UI 상태 초기화
-                }
+                    // 그 외의 경우("파일")에 해당 사항
+                    else
+                    {
+                        await Application.Current.Dispatcher.InvokeAsync(() =>
+                        {
+                            Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
+                            MessageBoxResult messageBox = MessageBox.Show(mainWindow, "선택한 파일을 정말 삭제하시겠습니까?", "파일 삭제", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                            if (messageBox == MessageBoxResult.OK)
+                            {
+                                shouldDelete = true;
+                            }
 
+                        });
+
+                    }
+
+                }
+                else
+                {
+                    shouldDelete = true;
+                }
+                if (shouldDelete)
+                {
+                    await DelSelConfirm(ProgressBar);
+                    // UI Update (총 항목 개수)
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        TotalNumbersInfo = LstAllData.Count();
+                    });
+
+                }
+                ResetUIState(); // UI 상태 초기화
             }
 
         }
@@ -1401,6 +1403,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     if (entireToDelete?.Count > 0)
                     {
                         LstAllData = LstAllData.Where(item => !entireToDelete.Any(deleted => deleted.DelMatchingPath == item.DelMatchingPath)).ToList();
+                        DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>(LstAllData);
                         entireToDelete.Clear();
                     }
                     LoadPageData();
@@ -1415,44 +1418,40 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private async Task DelAllMatches()
         {
-            bool shouldDelete = false;
-            if (!string.IsNullOrEmpty(DeleteFolderPath))
+            if (!string.IsNullOrEmpty(DeleteFolderPath) && DeleteFolderInfo?.Count > 0)
             {
-                if (DeleteFolderInfo?.Count > 0)
+                entireToDelete = new List<DelMatchingInfo>(LstAllData);
+                if (entireToDelete?.Count > 0 &&
+                    !entireToDelete.All(v => v.DelMatchingName.Equals("bin", StringComparison.OrdinalIgnoreCase) ||
+                    v.DelMatchingName.Equals("obj", StringComparison.OrdinalIgnoreCase)))
                 {
-                    entireToDelete = new List<DelMatchingInfo>(DeleteFolderInfo);
-                    if (!entireToDelete.All(v => v.DelMatchingName.Equals("bin", StringComparison.OrdinalIgnoreCase) || v.DelMatchingName.Equals("obj", StringComparison.OrdinalIgnoreCase)))
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        await Application.Current.Dispatcher.InvokeAsync(() =>
+                        Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
+                        MessageBoxResult messageBox = MessageBox.Show(mainWindow, "전체 삭제하시겠습니까?", "일괄 삭제", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                        if (messageBox == MessageBoxResult.OK)
                         {
-                            Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
-                            MessageBoxResult messageBox = MessageBox.Show(mainWindow, "전체 삭제하시겠습니까?", "일괄 삭제", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-                            if (messageBox == MessageBoxResult.OK)
-                            {
-                                shouldDelete = true;
-                            }
+                            shouldDelete = true;
+                        }
 
-                        });
+                    });
 
-                    }
-                    else
-                    {
-                        shouldDelete = true;
-                    }
-
-                    if (shouldDelete)
-                    {
-                        await DelAllConfirm(ProgressBar);
-                        // UI Update (총 항목 개수)
-                        await Application.Current.Dispatcher.InvokeAsync(() =>
-                        {
-                            TotalNumbersInfo = LstAllData.Count();
-                        });
-
-                    }
-                    ResetUIState(); // UI 상태 초기화
                 }
+                else
+                {
+                    shouldDelete = true;
+                }
+                if (shouldDelete)
+                {
+                    await DelAllConfirm(ProgressBar);
+                    // UI Update (총 항목 개수)
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        TotalNumbersInfo = LstAllData.Count();
+                    });
 
+                }
+                ResetUIState(); // UI 상태 초기화
             }
 
         }
@@ -1715,7 +1714,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         {
             if (LstAllData?.Count > 0)
             {
-                // [방법 2: ChatGPT 방식]
+                // 방법 2: [ChatGPT]방식
                 // [삭제된 항목 수] 계산
                 int deleteCount = (selectToDelete?.Count ?? 0) + (entireToDelete?.Count ?? 0);
 
@@ -1728,7 +1727,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     LoadPageData();
                 }
 
-                // [방법 1: MyOwner 방식]
+                // 방법 1: [MyOwner]방식
+                // [삭제된 항목 수] 계산
+                // [총 페이지 수] 계산
                 //if (selectToDelete?.Count > 0)
                 //{
                 //    int totalPages = (int)Math.Ceiling((double)(LstAllData.Count - selectToDelete.Count) / PageRecords);
@@ -1789,7 +1790,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
         {
             // 모든 하위 디렉토리를 검색하되, 접근이 거부된 디렉토리는 제외!
             IEnumerable<string> directories = Directory.EnumerateDirectories(DeleteFolderPath, "*", SearchOption.AllDirectories);
-            //.Where(dir => dir.EndsWith("bin") || dir.EndsWith("obj")); // 경로의 마지막 글자가 "bin"이거나 "obj"인 파일만 찾음!
             // 하위 디렉토리 중 요소가 하나라도 존재하면,
             if (directories != null && directories.Any())
             {
