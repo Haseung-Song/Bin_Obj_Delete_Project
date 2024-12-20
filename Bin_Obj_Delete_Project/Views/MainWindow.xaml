@@ -184,7 +184,7 @@
                                  Background="Transparent">
                             <TextBox.InputBindings>
                                 <KeyBinding Gesture="Enter"
-                                            Command="{Binding EnterLoadPathCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                            Command="{Binding EnterLoadPathCommand}"/>
                             </TextBox.InputBindings>
                         </TextBox>
                     </Border>
@@ -255,7 +255,7 @@
                                         <GridViewColumn.Header>
                                             <GridViewColumnHeader Content="이름"
                                                                   Background="#FFFDF8"
-                                                                  Command="{Binding GoOrderByNameCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                                                  Command="{Binding GoOrderByNameCommand}"/>
                                         </GridViewColumn.Header>
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
@@ -273,7 +273,7 @@
                                         <GridViewColumn.Header>
                                             <GridViewColumnHeader Content="생성한 날짜"
                                                                   Background="#FFFDF8"
-                                                                  Command="{Binding OrderByCrTimeCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                                                  Command="{Binding OrderByCrTimeCommand}"/>
                                         </GridViewColumn.Header>
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
@@ -289,7 +289,7 @@
                                         <GridViewColumn.Header>
                                             <GridViewColumnHeader Content="유형"
                                                                   Background="#FFFDF8"
-                                                                  Command="{Binding GoOrderByTypeCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                                                  Command="{Binding GoOrderByTypeCommand}"/>
                                         </GridViewColumn.Header>
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
@@ -305,7 +305,7 @@
                                         <GridViewColumn.Header>
                                             <GridViewColumnHeader Content="수정한 날짜"
                                                                   Background="#FFFDF8"
-                                                                  Command="{Binding OrderByMdTimeCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                                                  Command="{Binding OrderByMdTimeCommand}"/>
                                         </GridViewColumn.Header>
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
@@ -321,7 +321,7 @@
                                         <GridViewColumn.Header>
                                             <GridViewColumnHeader Content="크기"
                                                                   Background="#FFFDF8"
-                                                                  Command="{Binding GoOrderBySizeCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                                                  Command="{Binding GoOrderBySizeCommand}"/>
                                         </GridViewColumn.Header>
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
@@ -337,7 +337,7 @@
                                         <GridViewColumn.Header>
                                             <GridViewColumnHeader Content="경로"
                                                                   Background="#FFFDF8"
-                                                                  Command="{Binding GoOrderByPathCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                                                  Command="{Binding GoOrderByPathCommand}"/>
                                         </GridViewColumn.Header>
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
@@ -359,14 +359,14 @@
                                     HorizontalAlignment="Center"
                                     Margin="5">
                             <Button Content="Previous"
-                                    Command="{Binding GoToPreviousPageCommand, UpdateSourceTrigger=PropertyChanged}"
+                                    Command="{Binding GoToPreviousPageCommand}"
                                     IsEnabled="{Binding TheBtnEnabledOrNot}"
                                     BorderThickness="0"
                                     Foreground="White"
                                     FontSize="14"
                                     FontFamily="Montserrat"
                                     Cursor="Hand">
-                                
+
                                 <Button.Style>
                                     <Style TargetType="Button">
                                         <Setter Property="Background" Value="LightCoral"/>
@@ -377,7 +377,7 @@
                                         </Style.Triggers>
                                     </Style>
                                 </Button.Style>
-                                
+
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border Width="110"
@@ -389,21 +389,21 @@
                                     </ControlTemplate>
                                 </Button.Template>
                             </Button>
-                            
+
                             <TextBlock Text="{Binding CurrentPage}"
                                        FontSize="14"
                                        FontWeight="Bold"
                                        Margin="20,10,20,0"/>
-                            
+
                             <Button Content="Next"
-                                    Command="{Binding GoToNextPageCommand, UpdateSourceTrigger=PropertyChanged}"
+                                    Command="{Binding GoToNextPageCommand}"
                                     IsEnabled="{Binding TheBtnEnabledOrNot}"
                                     BorderThickness="0"
                                     Foreground="White"
                                     FontSize="14"
                                     FontFamily="Montserrat"
                                     Cursor="Hand">
-                                
+
                                 <Button.Style>
                                     <Style TargetType="Button">
                                         <Setter Property="Background" Value="LightSalmon"/>
@@ -414,7 +414,7 @@
                                         </Style.Triggers>
                                     </Style>
                                 </Button.Style>
-                                
+
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border Width="110"
@@ -427,7 +427,7 @@
                                 </Button.Template>
                             </Button>
                         </StackPanel>
-                        
+
                     </Grid>
                 </Border>
 
