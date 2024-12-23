@@ -81,7 +81,7 @@
                                  Margin="0,5,0,10">
                             <TextBox.InputBindings>
                                 <KeyBinding Gesture="Enter" 
-                                            Command="{Binding EnterLoadPathCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                            Command="{Binding EnterLoadPathCommand}"/>
                             </TextBox.InputBindings>
                         </TextBox>
                         <StackPanel Grid.Column="0"
@@ -145,7 +145,7 @@
                                  Margin="0,5,0,10">
                             <TextBox.InputBindings>
                                 <KeyBinding Gesture="Enter" 
-                                            Command="{Binding EnterLoadPathCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                            Command="{Binding EnterLoadPathCommand}"/>
                             </TextBox.InputBindings>
                         </TextBox>
                         <StackPanel Grid.Column="0"
