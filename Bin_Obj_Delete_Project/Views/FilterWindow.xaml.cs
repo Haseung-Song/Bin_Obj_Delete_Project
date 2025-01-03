@@ -9,9 +9,10 @@ namespace Bin_Obj_Delete_Project.Views
     /// </summary>
     public partial class FilterWindow : Window
     {
-        public FilterWindow()
+        public FilterWindow(MainVM mainVM)
         {
             InitializeComponent();
+            DataContext = new FilterWindowVM(mainVM);
             Loaded += FilterWindow_Closed;
         }
 
@@ -22,8 +23,10 @@ namespace Bin_Obj_Delete_Project.Views
         /// <param name="e"></param>
         private void FilterWindow_Closed(object sender, EventArgs e)
         {
-            MainVM vm = DataContext as MainVM;
-            vm.CloseWindowAction = new Action(() => Close());
+            if (DataContext is FilterWindowVM vm)
+            {
+                vm.CloseWindowAction = new Action(() => Close());
+            }
         }
 
         /// <summary>
@@ -33,30 +36,11 @@ namespace Bin_Obj_Delete_Project.Views
         /// <param name="e"></param>
         private void ApplyButton_Click(object sender, RoutedEventArgs e)
         {
-            MainVM vm = DataContext as MainVM;
-            vm?.EnterLoadPath();
-        }
+            if (DataContext is FilterWindowVM vm)
+            {
+                vm.EnterLoadPath(); // FilterWindowVM의 로직 호출
+            }
 
-        /// <summary>
-        /// (Filter 01) [초기화] 버튼 클릭 이벤트
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void F01ResetButton_Click(object sender, RoutedEventArgs e)
-        {
-            MainVM vm = DataContext as MainVM;
-            vm?.FilterResetFN();
-        }
-
-        /// <summary>
-        /// (Filter 02) [초기화] 버튼 클릭 이벤트
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void F02ResetButton_Click(object sender, RoutedEventArgs e)
-        {
-            MainVM vm = DataContext as MainVM;
-            vm?.FilterResetFE();
         }
 
     }
