@@ -70,10 +70,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Common\AsyncRelayCommand.cs" />
-    <Compile Include="Common\CommonProperty.cs" />
     <Compile Include="Converters\VisibilityConverter.cs" />
-    <Compile Include="Services\DeleteService.cs" />
-    <Compile Include="Services\EnumerateService.cs" />
     <Compile Include="Views\DestroyViewControl.xaml.cs">
       <DependentUpon>DestroyViewControl.xaml</DependentUpon>
     </Compile>
