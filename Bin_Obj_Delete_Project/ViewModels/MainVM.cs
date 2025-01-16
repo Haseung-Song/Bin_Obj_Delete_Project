@@ -1796,7 +1796,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 // [Cache]에 데이터가 없으면, 데이터를 새로 저장함!
                 enumerateFldrCache[DeleteFolderPath] = directories;
             }
-            return directories; ;
+            return directories;
         }
         #endregion
     }
