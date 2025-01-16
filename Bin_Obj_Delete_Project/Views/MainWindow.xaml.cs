@@ -105,13 +105,19 @@ namespace Bin_Obj_Delete_Project
 
         private void OpenFilterWindow(object sender, RoutedEventArgs e)
         {
-            FilterWindow filterWindow = new FilterWindow
+            // FilterWindowVM 생성 및 초기화
+            FilterWindow filterWindow = new FilterWindow(vm)
             {
-                DataContext = vm,
                 Owner = this, // MainWindow 동기화 (완료)
             };
+
             // [filterWindow] => MainWindow 창(접근 불가)
-            _ = filterWindow.ShowDialog();
+            if (filterWindow.ShowDialog() == true)
+            {
+                // 필터 적용 후 MainVM 데이터 갱신
+                vm.DeleteFolderPath = ((FilterWindowVM)filterWindow.DataContext).DeleteFolderPath;
+            }
+
         }
 
     }
