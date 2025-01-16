@@ -95,7 +95,7 @@
                                     Height="28"
                                     Width="100"/>
                             <Button Content="초기화"
-                                    Command="{Binding FilterResetFNCommand}"
+                                    Click="F01ResetButton_Click"
                                     Background="AliceBlue"
                                     Margin="0,0,10,0"
                                     Height="28"
@@ -159,7 +159,7 @@
                                     Height="28"
                                     Width="100"/>
                             <Button Content="초기화"
-                                    Command="{Binding FilterResetFECommand}"
+                                    Click="F02ResetButton_Click"
                                     Background="AliceBlue"
                                     Margin="0,0,10,0"
                                     Height="28"
