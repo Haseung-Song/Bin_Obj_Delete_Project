@@ -1,5 +1,6 @@
 ﻿using Bin_Obj_Delete_Project.Common;
 using Bin_Obj_Delete_Project.Models;
+using Bin_Obj_Delete_Project.Services;
 using Bin_Obj_Delete_Project.Views;
 using Microsoft.VisualBasic.FileIO;
 using Microsoft.WindowsAPICodePack.Dialogs;
@@ -23,6 +24,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
     public class MainVM : INotifyPropertyChanged
     {
         #region [프로퍼티]
+
+        private readonly IEnumerateService _enumerateService;
 
         /// <summary>
         /// [_IssTheBtnEnabledOrNot]
@@ -659,7 +662,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
         #region 생성자 (Initialize)
 
-        public MainVM()
+        public MainVM() : this(new EnumerateService())
         {
             TheBtnEnabledOrNot = true;
             VisibleLoading = false;
@@ -707,6 +710,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
             GoOrderByPathCommand = new RelayCommand(GoOrderByPath);
             GoToNextPageCommand = new RelayCommand(GoToNextPage);
             GoToPreviousPageCommand = new RelayCommand(GoToPreviousPage);
+        }
+
+        public MainVM(EnumerateService enumerateService)
+        {
+            _enumerateService = enumerateService;
         }
 
         #endregion
@@ -857,42 +865,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
         }
 
         /// <summary>
-        /// [하위 디렉토리] 파일의 총량 계산 (기능)
-        /// </summary>
-        /// <param name="directory"></param>
-        /// <returns></returns>
-        private static long GetDirectorySize(string dir)
-        {
-            DirectoryInfo dirInfo = new DirectoryInfo(dir); // DirectoryInfo 객체 생성
-            long sizeofDir = 0; // [총량] 초기화
-            try
-            {
-                // 병렬 옵션 설정
-                ParallelOptions options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
-
-                // 병렬 루프 제공
-                _ = Parallel.ForEach(dirInfo.GetFiles("*", SearchOption.AllDirectories), options, (files) =>
-                  {
-                      try
-                      {
-                          _ = Interlocked.Add(ref sizeofDir, files.Length); // 각 파일의 [크기 계산 및 누적]
-                      }
-                      catch
-                      {
-                          /* 파일 접근 오류 무시 */
-                      }
-
-                  });
-
-            }
-            catch
-            {
-                /* 폴더 접근 오류 무시 */
-            }
-            return sizeofDir; // 누적된 파일 크기 총합(sizeofDir) 반환
-        }
-
-        /// <summary>
         /// [비동기적] 폴더 열거(탐색) 및 작업의 진행률 업데이트 및 UI 도시 (기능)
         /// </summary>
         /// <param name="cancellationToken">작업 취소</param>
@@ -920,7 +892,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     matchingFldrCreationTime = dirInfo.CreationTime.ToString("yyyy-MM-dd tt HH:mm:ss");
                     matchingFldrCategory = "파일 폴더";
                     matchingFldrModifiedTime = dirInfo.LastWriteTime.ToString("yyyy-MM-dd tt HH:mm:ss");
-                    matchingFldrSize = await Task.Run(() => GetDirectorySize(dir));
+                    matchingFldrSize = await Task.Run(() => _enumerateService.GetDirectorySize(dir));
                     matchingFldrPath = dir;
                     matchingFileInfoOrNot = false; // [폴더]로 구분
 
@@ -977,7 +949,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     // 2) [FilterExtensions]가 null이거나 string.Empty 문자열인 경우: 파일 확장자를 콤마(',')로 구분 반환
                     if (!string.IsNullOrEmpty(FilterExtensions))
                     {
-                        IEnumerable<FileInfo> lstEnumerateFilesInfo = await Task.Run(() => dirInfo.EnumerateFiles("*", SearchOption.AllDirectories));
+                        IEnumerable<FileInfo> lstEnumerateFilesInfo = await Task.Run(() => _enumerateService.GetFiles(DeleteFolderPath));
                         int totalFiles = lstEnumerateFilesInfo.Count();
                         int processedFiles = 0;
                         matchingFileInfoOrNot = true; // [파일]로 구분됨!
@@ -1783,20 +1755,22 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// <returns></returns>
         public IEnumerable<string> GetEneumerateFldrList()
         {
-            // 모든 하위 디렉토리를 검색하되, 접근이 거부된 디렉토리는 제외!
-            IEnumerable<string> directories = Directory.EnumerateDirectories(DeleteFolderPath, "*", SearchOption.AllDirectories);
+            // [Cache]에 데이터 존재 여부 확인!
+            if (enumerateFldrCache.ContainsKey(DeleteFolderPath))
+            {
+                return enumerateFldrCache[DeleteFolderPath];
+            }
+
+            // EnumerateSerivce를 사용하여 디렉토리 가져오기
+            IEnumerable<string> directories = _enumerateService.GetDirectories(DeleteFolderPath);
+
             // 하위 디렉토리 중 요소가 하나라도 존재하면,
             if (directories != null && directories.Any())
             {
-                // [Cache]에 데이터 존재 여부 확인!
-                if (enumerateFldrCache.ContainsKey(DeleteFolderPath))
-                {
-                    return enumerateFldrCache[DeleteFolderPath];
-                }
                 // [Cache]에 데이터가 없으면, 데이터를 새로 저장함!
                 enumerateFldrCache[DeleteFolderPath] = directories;
             }
-            return directories;
+            return directories ?? Enumerable.Empty<string>();
         }
         #endregion
     }
