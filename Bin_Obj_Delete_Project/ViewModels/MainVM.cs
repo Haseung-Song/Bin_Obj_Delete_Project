@@ -949,7 +949,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     // 2) [FilterExtensions]가 null이거나 string.Empty 문자열인 경우: 파일 확장자를 콤마(',')로 구분 반환
                     if (!string.IsNullOrEmpty(FilterExtensions))
                     {
-                        IEnumerable<FileInfo> lstEnumerateFilesInfo = await Task.Run(() => _enumerateService.GetFiles(DeleteFolderPath));
+                        IEnumerable<FileInfo> lstEnumerateFilesInfo = await Task.Run(() => _enumerateService.GetFiles(dirInfo));
                         int totalFiles = lstEnumerateFilesInfo.Count();
                         int processedFiles = 0;
                         matchingFileInfoOrNot = true; // [파일]로 구분됨!

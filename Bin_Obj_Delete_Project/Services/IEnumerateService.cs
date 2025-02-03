@@ -11,7 +11,7 @@ namespace Bin_Obj_Delete_Project.Services
     {
         IEnumerable<string> GetDirectories(string path);
 
-        IEnumerable<FileInfo> GetFiles(string path);
+        IEnumerable<FileInfo> GetFiles(DirectoryInfo dirInfo);
 
         long GetDirectorySize(string dir);
     }
@@ -57,11 +57,10 @@ namespace Bin_Obj_Delete_Project.Services
 
         }
 
-        public IEnumerable<FileInfo> GetFiles(string path)
+        public IEnumerable<FileInfo> GetFiles(DirectoryInfo dirInfo)
         {
             try
             {
-                DirectoryInfo dirInfo = new DirectoryInfo(path);
                 return dirInfo.EnumerateFiles("*", SearchOption.AllDirectories);
             }
             catch (UnauthorizedAccessException ex)
