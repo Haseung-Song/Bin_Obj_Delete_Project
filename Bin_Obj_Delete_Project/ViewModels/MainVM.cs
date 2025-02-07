@@ -17,7 +17,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using SearchOption = System.IO.SearchOption;
 
 namespace Bin_Obj_Delete_Project.ViewModels
 {
@@ -26,6 +25,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
         #region [프로퍼티]
 
         private readonly IEnumerateService _enumerateService;
+
+        private readonly IFilteringService _filteringService;
 
         /// <summary>
         /// [_IssTheBtnEnabledOrNot]
@@ -662,7 +663,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
         #region 생성자 (Initialize)
 
-        public MainVM() : this(new EnumerateService())
+        public MainVM() : this(new EnumerateService(), new FilteringService())
         {
             TheBtnEnabledOrNot = true;
             VisibleLoading = false;
@@ -712,9 +713,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
             GoToPreviousPageCommand = new RelayCommand(GoToPreviousPage);
         }
 
-        public MainVM(EnumerateService enumerateService)
+        public MainVM(EnumerateService enumerateService, FilteringService filteringService)
         {
             _enumerateService = enumerateService;
+            _filteringService = filteringService;
         }
 
         #endregion
