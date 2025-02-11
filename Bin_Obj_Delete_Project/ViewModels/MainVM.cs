@@ -26,8 +26,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
         private readonly IEnumerateService _enumerateService;
 
-        private readonly IFilteringService _filteringService;
-
         /// <summary>
         /// [_IssTheBtnEnabledOrNot]
         /// </summary>
@@ -663,7 +661,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
         #region 생성자 (Initialize)
 
-        public MainVM() : this(new EnumerateService(), new FilteringService())
+        public MainVM() : this(new EnumerateService())
         {
             TheBtnEnabledOrNot = true;
             VisibleLoading = false;
@@ -713,10 +711,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
             GoToPreviousPageCommand = new RelayCommand(GoToPreviousPage);
         }
 
-        public MainVM(EnumerateService enumerateService, FilteringService filteringService)
+        public MainVM(EnumerateService enumerateService)
         {
             _enumerateService = enumerateService;
-            _filteringService = filteringService;
         }
 
         #endregion
