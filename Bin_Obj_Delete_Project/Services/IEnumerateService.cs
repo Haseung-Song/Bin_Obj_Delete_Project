@@ -25,33 +25,9 @@ namespace Bin_Obj_Delete_Project.Services
                 // 모든 하위 디렉토리를 검색하되, 접근이 거부된 디렉토리는 제외!
                 return Directory.EnumerateDirectories(path, "*", SearchOption.AllDirectories);
             }
-            catch (UnauthorizedAccessException ex)
-            {
-                // 경로에 대한 엑세스 거부 오류.
-                Console.WriteLine($"Exception: Access Denied to Directories: {ex.Message}");
-                return Enumerable.Empty<string>();
-            }
-            catch (DirectoryNotFoundException ex)
-            {
-                // 경로를 찾을 수 없음.
-                Console.WriteLine($"Exception: Directories Not Found: {ex.Message}");
-                return Enumerable.Empty<string>();
-            }
-            catch (InvalidOperationException ex)
-            {
-                // 특정 객체에 대한 엑세스 거부 오류.
-                Console.WriteLine($"Exception: Access Denied to the Object: {ex.Message}");
-                return Enumerable.Empty<string>();
-            }
-            catch (PathTooLongException ex)
-            {
-                // 경로가 너무 긴 경우.
-                Console.WriteLine($"Exception: Path is Too Long: {ex.Message}");
-                return Enumerable.Empty<string>();
-            }
             catch (Exception ex)
             {
-                Console.WriteLine($"Exception: : {ex.Message}");
+                Console.WriteLine($"Exception: {ex.Message}");
                 return Enumerable.Empty<string>();
             }
 
@@ -63,33 +39,9 @@ namespace Bin_Obj_Delete_Project.Services
             {
                 return dirInfo.EnumerateFiles("*", SearchOption.AllDirectories);
             }
-            catch (UnauthorizedAccessException ex)
-            {
-                // 경로에 대한 엑세스 거부 오류.
-                Console.WriteLine($"Exception: Access Denied to Directories: {ex.Message}");
-                return Enumerable.Empty<FileInfo>();
-            }
-            catch (DirectoryNotFoundException ex)
-            {
-                // 경로를 찾을 수 없음.
-                Console.WriteLine($"Exception: Directories Not Found: {ex.Message}");
-                return Enumerable.Empty<FileInfo>();
-            }
-            catch (InvalidOperationException ex)
-            {
-                // 특정 객체에 대한 엑세스 거부 오류.
-                Console.WriteLine($"Exception: Access Denied to the Object: {ex.Message}");
-                return Enumerable.Empty<FileInfo>();
-            }
-            catch (PathTooLongException ex)
-            {
-                // 경로가 너무 긴 경우.
-                Console.WriteLine($"Exception: Path is Too Long: {ex.Message}");
-                return Enumerable.Empty<FileInfo>();
-            }
             catch (Exception ex)
             {
-                Console.WriteLine($"Exception: : {ex.Message}");
+                Console.WriteLine($"Exception: {ex.Message}");
                 return Enumerable.Empty<FileInfo>();
             }
 
