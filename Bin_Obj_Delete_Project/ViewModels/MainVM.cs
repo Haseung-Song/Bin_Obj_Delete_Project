@@ -2,7 +2,6 @@
 using Bin_Obj_Delete_Project.Models;
 using Bin_Obj_Delete_Project.Services;
 using Bin_Obj_Delete_Project.Views;
-using Microsoft.VisualBasic.FileIO;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.Collections.Generic;
@@ -713,6 +712,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
             GoToPreviousPageCommand = new RelayCommand(GoToPreviousPage);
         }
 
+        /// <summary>
+        /// 의존성 주입 생성자 (Service 인터페이스)
+        /// </summary>
+        /// <param name="enumerateService"></param>
+        /// <param name="deleteService"></param>
         public MainVM(EnumerateService enumerateService, IDeleteService deleteService)
         {
             _enumerateService = enumerateService;
@@ -1149,6 +1153,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private async Task DelSelConfirm(IProgress<double> progress)
         {
+            bool isDeletedSel = false;
             if (ActiveFolderInfo?.Count == 0)
             {
                 VisibleDestroy = false;
@@ -1164,40 +1169,18 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 foreach (DelMatchingInfo match in selectToDelete)
                 {
                     string dir = match.DelMatchingPath;
-                    await Task.Run(async () =>
+                    isDeletedSel = await _deleteService.DeleteAsync(dir, true);
+                    if (isDeletedSel)
                     {
-                        // 해당 디렉토리의 경로가 존재할 때,
-                        if (FileSystem.DirectoryExists(dir))
-                        {
-                            // 1) 지정한 디렉토리 및 해당 디렉토리의 하위 디렉토리 및 폴더 휴지통에서 삭제
-                            FileSystem.DeleteDirectory(dir, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
-
-                            // 2) 지정한 디렉토리 및 해당 디렉토리의 하위 디렉토리 및 폴더 영구적으로 삭제
-                            //FileSystem.DeleteDirectory(dir, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
-                        }
-                        // 해당 파일 경로 존재 시,
-                        else if (FileSystem.FileExists(dir))
-                        {
-                            // 1) 지정한 파일 휴지통에서 삭제
-                            FileSystem.DeleteFile(dir, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
-
-                            // 2) 지정한 파일 영구적으로 삭제
-                            //FileSystem.DeleteFile(dir, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
-                        }
-                        else
-                        {
-                            return;
-                        }
                         await Application.Current.Dispatcher.InvokeAsync(() =>
                         {
                             _ = ActiveFolderInfo.Remove(match); // [UI 초기화]
                         });
 
-                    });
-                    // [폴더, 파일] 선택 삭제하기 후, [진행률 업데이트] 작업!
+                    }
+                    // [폴더, 파일] 선택 삭제하기 후, [진행률 업데이트] 작업!!
                     processedSelMatch++;
                     progress?.Report((double)processedSelMatch / totalSelMatch * 100);
-                    await Task.Delay(10);
                 }
 
             }
@@ -1213,22 +1196,26 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 }
                 TheBtnEnabledOrNot = true;
                 VisibleDestroy = false;
-                // 삭제 후 데이터 업데이트
-                await Application.Current.Dispatcher.InvokeAsync(() =>
+                if (isDeletedSel)
                 {
-                    // 삭제된 항목 제거
-                    if (selectToDelete?.Count > 0)
+                    // 삭제 후 데이터 업데이트
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        LstAllData = LstAllData.Where(item => !selectToDelete.Any(deleted => deleted.DelMatchingPath == item.DelMatchingPath)).ToList();
-                        DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>(LstAllData);
-                        selectToDelete.Clear();
-                    }
-                    else
-                    {
-                        ActiveFolderInfo?.Clear();
-                    }
-                    LoadPageData();
-                });
+                        // 삭제된 항목 제거
+                        if (selectToDelete?.Count > 0)
+                        {
+                            LstAllData = LstAllData.Where(item => !selectToDelete.Any(deleted => deleted.DelMatchingPath == item.DelMatchingPath)).ToList();
+                            DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>(LstAllData);
+                            selectToDelete.Clear();
+                        }
+                        else
+                        {
+                            ActiveFolderInfo?.Clear();
+                        }
+                        LoadPageData();
+                    });
+
+                }
 
             }
 
@@ -1322,12 +1309,19 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 {
                     string dir = match.DelMatchingPath;
                     isDeletedAll = await _deleteService.DeleteAsync(dir, true);
-                    // [폴더, 파일] 일괄 삭제하기 후, [진행률 업데이트] 작업!
+                    if (isDeletedAll)
+                    {
+                        await Application.Current.Dispatcher.InvokeAsync(() =>
+                        {
+                            _ = ActiveFolderInfo.Remove(match); // [UI 초기화]
+                        });
+
+                    }
+                    // [폴더, 파일] 일괄 삭제하기 후, [진행률 업데이트] 작업!!
                     processedAllMatch++;
                     progress?.Report((double)processedAllMatch / totalAllMatch * 100);
-                    await Task.Delay(10);
                 }
-                ActiveFolderInfo?.Clear();
+
             }
             catch (Exception ex)
             {
@@ -1346,8 +1340,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     // 삭제 후 데이터 업데이트
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                    // 삭제된 항목 제거
-                    if (entireToDelete?.Count > 0)
+                        // 삭제된 항목 제거
+                        if (entireToDelete?.Count > 0)
                         {
                             LstAllData = LstAllData.Where(item => !entireToDelete.Any(deleted => deleted.DelMatchingPath == item.DelMatchingPath)).ToList();
                             DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>(LstAllData);
@@ -1670,7 +1664,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
                 // [총 페이지 수] 계산
                 int totalPages = (int)Math.Ceiling((double)(LstAllData.Count - deleteCount) / PageRecords);
-
                 if (CurrentPage < totalPages)
                 {
                     CurrentPage++;
