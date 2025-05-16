@@ -71,6 +71,7 @@
     </ApplicationDefinition>
     <Compile Include="Common\AsyncRelayCommand.cs" />
     <Compile Include="Converters\VisibilityConverter.cs" />
+    <Compile Include="Services\IDeleteService.cs" />
     <Compile Include="Services\IEnumerateService.cs" />
     <Compile Include="Views\DestroyViewControl.xaml.cs">
       <DependentUpon>DestroyViewControl.xaml</DependentUpon>
