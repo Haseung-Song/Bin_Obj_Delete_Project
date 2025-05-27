@@ -18,6 +18,8 @@ namespace Bin_Obj_Delete_Project
         {
             InitializeComponent();
             DataContext = vm;
+            // Window 로드 시, 키보드 포커스 적용 (O)
+            Loaded += (s, e) => Keyboard.Focus(this);
         }
 
         /// <summary>
