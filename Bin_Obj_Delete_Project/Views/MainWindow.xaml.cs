@@ -18,6 +18,7 @@ namespace Bin_Obj_Delete_Project
         {
             InitializeComponent();
             DataContext = vm;
+            Loaded += (s, e) => Keyboard.Focus(this); // 로드 시, Focus 부여!
         }
 
         /// <summary>
@@ -29,7 +30,6 @@ namespace Bin_Obj_Delete_Project
         {
             if (e.LeftButton == MouseButtonState.Pressed)
             {
-                Keyboard.Focus(this);
                 DragMove();
             }
 
