@@ -21,10 +21,18 @@
             GlassFrameThickness="0"
             UseAeroCaptionButtons="False" />
     </WindowChrome.WindowChrome>
+
     <Window.Resources>
         <converter:TypeConverter x:Key="FormatConverter"/>
         <converter:BooleanToVisibilityConverter x:Key="VisibilityConverter"/>
     </Window.Resources>
+
+    <Window.InputBindings>
+        <KeyBinding Key="Left"
+                    Command="{Binding GoToPreviousPageCommand}"/>
+        <KeyBinding Key="Right"
+                    Command="{Binding GoToNextPageCommand}"/>
+    </Window.InputBindings>
 
     <Border CornerRadius="12"
             BorderThickness="1"
