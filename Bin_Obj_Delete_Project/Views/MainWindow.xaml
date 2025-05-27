@@ -15,18 +15,15 @@
         Width="1680"
         Height="810">
     <WindowChrome.WindowChrome>
-        <WindowChrome 
-            CaptionHeight="0"
-            CornerRadius="16"
-            GlassFrameThickness="0"
-            UseAeroCaptionButtons="False" />
+        <WindowChrome CaptionHeight="0"
+                      CornerRadius="16"
+                      GlassFrameThickness="0"
+                      UseAeroCaptionButtons="False" />
     </WindowChrome.WindowChrome>
-
     <Window.Resources>
         <converter:TypeConverter x:Key="FormatConverter"/>
         <converter:BooleanToVisibilityConverter x:Key="VisibilityConverter"/>
     </Window.Resources>
-
     <Window.InputBindings>
         <KeyBinding Key="Left"
                     Command="{Binding GoToPreviousPageCommand}"/>
