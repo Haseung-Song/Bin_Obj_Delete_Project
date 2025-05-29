@@ -224,7 +224,7 @@
                     <Button Content="일괄 삭제하기"
                             Command="{Binding DelAllMatchesCommand}"
                             IsEnabled="{Binding TheBtnEnabledOrNot}"
-                            Margin="10,0,6,0"
+                            Margin="10,0,10,0"
                             Height="33"
                             Background="AliceBlue"
                             FontSize="15"
@@ -433,6 +433,42 @@
                             </Button>
                         </StackPanel>
 
+                        <StackPanel Grid.Row="1"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Right"
+                                    Margin="5">
+                            <Button Content="휴지통 복원하기"
+                                    Command="{Binding RestoreFromRecycleBinCommand}"
+                                    IsEnabled="{Binding TheBtnEnabledOrNot}"
+                                    BorderThickness="0"
+                                    Foreground="DarkSlateGray"
+                                    FontSize="14"
+                                    FontFamily="Montserrat"
+                                    Cursor="Hand">
+
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Background" Value="PowderBlue"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="true">
+                                                <Setter Property="Background" Value="LightSkyBlue"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Width="135"
+                                                Height="40"
+                                                CornerRadius="10"
+                                                Background="{TemplateBinding Background}">
+                                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </StackPanel>
                     </Grid>
                 </Border>
 

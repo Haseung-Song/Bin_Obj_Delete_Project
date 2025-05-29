@@ -3,6 +3,7 @@ using Bin_Obj_Delete_Project.Models;
 using Bin_Obj_Delete_Project.Services;
 using Bin_Obj_Delete_Project.Views;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using Shell32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -226,6 +227,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// [_activeFolderInfo]
         /// </summary>
         private ObservableCollection<DelMatchingInfo> _activeFolderInfo;
+
+        /// <summary>
+        /// [_recycleItemsInfo]
+        /// </summary>
+        private ObservableCollection<DelMatchingInfo> _recycleItemsInfo;
 
         #endregion
 
@@ -658,6 +664,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
         // 7-2. 이전 페이지로 이동
         public ICommand GoToPreviousPageCommand { get; set; }
 
+        // 8. 휴지통 복원하기
+        public ICommand RestoreFromRecycleBinCommand { get; set; }
+
         #endregion
 
         #region 생성자 (Initialize)
@@ -710,6 +719,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             GoOrderByPathCommand = new RelayCommand(GoOrderByPath);
             GoToNextPageCommand = new RelayCommand(GoToNextPage);
             GoToPreviousPageCommand = new RelayCommand(GoToPreviousPage);
+            RestoreFromRecycleBinCommand = new AsyncRelayCommand(RestoreFromRecycleBin);
         }
 
         /// <summary>
@@ -1717,6 +1727,58 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 CurrentPage--;
                 LoadPageData();
+            }
+
+        }
+
+        /// <summary>
+        /// 8. 휴지통 복원하기 기능 (버튼)
+        /// </summary>
+        private async Task RestoreFromRecycleBin()
+        {
+            try
+            {
+                await Task.Run(() =>
+                {
+                    Type shellAppType = Type.GetTypeFromProgID("Shell.Application");
+                    dynamic shell = Activator.CreateInstance(shellAppType);
+
+                    // 휴지통 접근 (10번 폴더 ID)
+                    dynamic recycleBin = shell.NameSpace(10);
+                    dynamic items = recycleBin.Items();
+
+                    for (int i = 0; i < items.Count; i++)
+                    {
+                        dynamic item = items.Item(i);
+                        var verbs = item.Verbs();
+                        for (int j = 0; j < verbs.Count; j++)
+                        {
+                            dynamic verb = verbs.Item(j);
+                            // 해당 휴지통 항목의 우클릭 메뉴(명령어 목록)!
+                            if (verb.Name is string name)
+                            {
+                                if (name.Contains("복원"))
+                                {
+                                    verb.DoIt(); // 복원 실행
+                                    break;
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                });
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("복원 중 오류 발생: " + ex.Message);
+            }
+            finally
+            {
+                MessageBox.Show("복원이 완료되었습니다.");
             }
 
         }
