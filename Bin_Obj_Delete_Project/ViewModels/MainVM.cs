@@ -16,6 +16,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 
 namespace Bin_Obj_Delete_Project.ViewModels
@@ -204,6 +205,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private List<DelMatchingInfo> _lstAllData;
 
         /// <summary>
+        /// [_lstDelInfo]
+        /// </summary>
+        private List<DelMatchingInfo> _lstDelInfo;
+
+        /// <summary>
         /// [_currentPage]
         /// </summary>
         private int _currentPage;
@@ -227,11 +233,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// [_activeFolderInfo]
         /// </summary>
         private ObservableCollection<DelMatchingInfo> _activeFolderInfo;
-
-        /// <summary>
-        /// [_recycleItemsInfo]
-        /// </summary>
-        private ObservableCollection<DelMatchingInfo> _recycleItemsInfo;
 
         #endregion
 
@@ -537,6 +538,21 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
         }
 
+        public List<DelMatchingInfo> LstDelInfo
+        {
+            get => _lstDelInfo;
+            set
+            {
+                if (_lstDelInfo != value)
+                {
+                    _lstDelInfo = value;
+                    OnPropertyChanged();
+                }
+
+            }
+
+        }
+
         /// <summary>
         /// [CurrentPage]
         /// [현재 페이지]
@@ -688,6 +704,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             EnterLoadPathCommand = new RelayCommand(EnterLoadPath);
             SelectedCrFolder = new DelMatchingInfo();
             LstAllData = new List<DelMatchingInfo>();
+            LstDelInfo = new List<DelMatchingInfo>();
             SelectFolderInfo = new ObservableCollection<DelMatchingInfo>();
             DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
             ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>();
@@ -1208,6 +1225,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 VisibleDestroy = false;
                 if (isDeletedSel)
                 {
+                    LstDelInfo = DeleteFolderInfo.ToList();
                     // 삭제 후 데이터 업데이트
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
@@ -1347,6 +1365,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 VisibleDestroy = false;
                 if (isDeletedAll)
                 {
+                    LstDelInfo = DeleteFolderInfo.ToList();
                     // 삭제 후 데이터 업데이트
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
@@ -1738,18 +1757,32 @@ namespace Bin_Obj_Delete_Project.ViewModels
         {
             try
             {
+                Type shellAppType = Type.GetTypeFromProgID("Shell.Application");
+                dynamic shell = Activator.CreateInstance(shellAppType);
+                dynamic recycleBin = shell.NameSpace(10); // 휴지통 ID!
+                dynamic items = recycleBin.Items();
+
+                // 기준: 내가 삭제한 폴더 이름들
+                var deletedPathInfo = LstDelInfo
+                    .Where(x => !string.IsNullOrEmpty(x.DelMatchingPath))
+                    .Select(x => x.DelMatchingPath.ToLowerInvariant())
+                    .Distinct().ToList();
                 await Task.Run(() =>
                 {
-                    Type shellAppType = Type.GetTypeFromProgID("Shell.Application");
-                    dynamic shell = Activator.CreateInstance(shellAppType);
-
-                    // 휴지통 접근 (10번 폴더 ID)
-                    dynamic recycleBin = shell.NameSpace(10);
-                    dynamic items = recycleBin.Items();
-
                     for (int i = 0; i < items.Count; i++)
                     {
                         dynamic item = items.Item(i);
+
+                        string originPath = recycleBin.GetDetailsOf(item, 1)?.Trim();
+                        string itemName = item.Name?.Trim();
+                        if (string.IsNullOrEmpty(originPath) || string.IsNullOrEmpty(itemName))
+                            continue;
+
+                        // 삭제 경로 = [originPath] + [itemName]
+                        string fullDeletedPath = Path.Combine(originPath, itemName).ToLowerInvariant();
+                        if (!deletedPathInfo.Contains(fullDeletedPath))
+                            continue;
+
                         var verbs = item.Verbs();
                         for (int j = 0; j < verbs.Count; j++)
                         {
@@ -1770,6 +1803,14 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     }
 
                 });
+                if (LstDelInfo.Count > 0)
+                {
+                    MessageBox.Show("복원이 완료되었습니다.");
+                }
+                else
+                {
+                    MessageBox.Show("복원할 항목이 존재하지 않습니다.");
+                }
 
             }
             catch (Exception ex)
@@ -1778,7 +1819,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
             finally
             {
-                MessageBox.Show("복원이 완료되었습니다.");
+                LstDelInfo.Clear();
             }
 
         }
