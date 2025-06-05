@@ -3,7 +3,6 @@ using Bin_Obj_Delete_Project.Models;
 using Bin_Obj_Delete_Project.Services;
 using Bin_Obj_Delete_Project.Views;
 using Microsoft.WindowsAPICodePack.Dialogs;
-using Shell32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -16,7 +15,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
 using System.Windows.Input;
 
 namespace Bin_Obj_Delete_Project.ViewModels
@@ -1759,6 +1757,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 Type shellAppType = Type.GetTypeFromProgID("Shell.Application");
                 dynamic shell = Activator.CreateInstance(shellAppType);
+
                 dynamic recycleBin = shell.NameSpace(10); // 휴지통 ID!
                 dynamic items = recycleBin.Items();
 
@@ -1766,7 +1765,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 var deletedPathInfo = LstDelInfo
                     .Where(x => !string.IsNullOrEmpty(x.DelMatchingPath))
                     .Select(x => x.DelMatchingPath.ToLowerInvariant())
-                    .Distinct().ToList();
+                    .Distinct()
+                    .ToList();
+
                 await Task.Run(() =>
                 {
                     for (int i = 0; i < items.Count; i++)
@@ -1787,6 +1788,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         for (int j = 0; j < verbs.Count; j++)
                         {
                             dynamic verb = verbs.Item(j);
+
                             // 해당 휴지통 항목의 우클릭 메뉴(명령어 목록)!
                             if (verb.Name is string name)
                             {
