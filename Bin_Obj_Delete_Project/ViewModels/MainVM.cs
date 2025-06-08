@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -206,6 +207,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// [_lstDelInfo]
         /// </summary>
         private List<DelMatchingInfo> _lstDelInfo;
+
+        /// <summary>
+        /// [_lstRestoredInfo]
+        /// </summary>
+        private List<string> _lstResInfo;
 
         /// <summary>
         /// [_currentPage]
@@ -536,6 +542,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
         }
 
+        /// <summary>
+        /// [LstDelInfo]
+        /// [삭제 데이터 정보] (List 형태)
+        /// </summary>
         public List<DelMatchingInfo> LstDelInfo
         {
             get => _lstDelInfo;
@@ -544,6 +554,25 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 if (_lstDelInfo != value)
                 {
                     _lstDelInfo = value;
+                    OnPropertyChanged();
+                }
+
+            }
+
+        }
+
+        /// <summary>
+        /// [LstRestoredInfo]
+        /// [복구 데이터 정보] (List 형태)
+        /// </summary>
+        public List<string> LstResInfo
+        {
+            get => _lstResInfo;
+            set
+            {
+                if (_lstResInfo != value)
+                {
+                    _lstResInfo = value;
                     OnPropertyChanged();
                 }
 
@@ -703,6 +732,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             SelectedCrFolder = new DelMatchingInfo();
             LstAllData = new List<DelMatchingInfo>();
             LstDelInfo = new List<DelMatchingInfo>();
+            LstResInfo = new List<string>();
             SelectFolderInfo = new ObservableCollection<DelMatchingInfo>();
             DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
             ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>();
@@ -1191,6 +1221,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 VisibleDestroy = true;
                 int totalSelMatch = selectToDelete.Count();
                 int processedSelMatch = 0;
+                LstDelInfo = selectToDelete.ToList(); // 삭제 전 백업
                 foreach (DelMatchingInfo match in selectToDelete)
                 {
                     string dir = match.DelMatchingPath;
@@ -1223,7 +1254,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 VisibleDestroy = false;
                 if (isDeletedSel)
                 {
-                    LstDelInfo = DeleteFolderInfo.ToList();
                     // 삭제 후 데이터 업데이트
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
@@ -1331,6 +1361,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 VisibleDestroy = true;
                 int totalAllMatch = DeleteFolderInfo.Count();
                 int processedAllMatch = 0;
+                LstDelInfo = DeleteFolderInfo.ToList(); // 삭제 전 백업
                 foreach (DelMatchingInfo match in DeleteFolderInfo)
                 {
                     string dir = match.DelMatchingPath;
@@ -1363,7 +1394,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 VisibleDestroy = false;
                 if (isDeletedAll)
                 {
-                    LstDelInfo = DeleteFolderInfo.ToList();
                     // 삭제 후 데이터 업데이트
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
@@ -1795,6 +1825,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                                 if (name.Contains("복원"))
                                 {
                                     verb.DoIt(); // 복원 실행
+                                    LstResInfo.Add(fullDeletedPath);
                                     break;
                                 }
 
@@ -1805,9 +1836,37 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     }
 
                 });
-                if (LstDelInfo.Count > 0)
+
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    foreach (var path in LstResInfo)
+                    {
+                        var matchInfo = LstDelInfo.FirstOrDefault(
+                            x => x.DelMatchingPath.Equals(path, StringComparison.OrdinalIgnoreCase));
+
+                        if (matchInfo != null && !LstAllData.Any(x => x.DelMatchingPath == path))
+                        {
+                            var restoredData = new DelMatchingInfo
+                            {
+                                DelMatchingName = matchInfo.DelMatchingName,
+                                DelMatchingCreationTime = matchInfo.DelMatchingCreationTime,
+                                DelMatchingCategory = matchInfo.DelMatchingCategory,
+                                DelMatchingModifiedTime = matchInfo.DelMatchingModifiedTime,
+                                DelMatchingOfSize = matchInfo.DelMatchingOfSize,
+                                DelMatchingPath = matchInfo.DelMatchingPath
+                            };
+                            LstAllData.Add(restoredData);
+                            ActiveFolderInfo.Add(restoredData);
+                        }
+
+                    }
+
+                });
+
+                if (LstResInfo.Count > 0)
                 {
                     MessageBox.Show("복원이 완료되었습니다.");
+                    LstResInfo.Clear();
                 }
                 else
                 {
@@ -1818,10 +1877,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
             catch (Exception ex)
             {
                 MessageBox.Show("복원 중 오류 발생: " + ex.Message);
-            }
-            finally
-            {
-                LstDelInfo.Clear();
             }
 
         }
