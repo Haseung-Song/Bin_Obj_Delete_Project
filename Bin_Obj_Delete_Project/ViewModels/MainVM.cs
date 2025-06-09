@@ -1221,7 +1221,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 VisibleDestroy = true;
                 int totalSelMatch = selectToDelete.Count();
                 int processedSelMatch = 0;
-                LstDelInfo = selectToDelete.ToList(); // 삭제 전 백업
+                LstDelInfo = selectToDelete.ToList(); // [삭제 전] 백업!
                 foreach (DelMatchingInfo match in selectToDelete)
                 {
                     string dir = match.DelMatchingPath;
@@ -1361,7 +1361,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 VisibleDestroy = true;
                 int totalAllMatch = DeleteFolderInfo.Count();
                 int processedAllMatch = 0;
-                LstDelInfo = DeleteFolderInfo.ToList(); // 삭제 전 백업
+                LstDelInfo = DeleteFolderInfo.ToList(); // [삭제 전] 백업!
                 foreach (DelMatchingInfo match in DeleteFolderInfo)
                 {
                     string dir = match.DelMatchingPath;
@@ -1836,7 +1836,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     }
 
                 });
-
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     foreach (var path in LstResInfo)
@@ -1860,7 +1859,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         }
 
                     }
-
+                    // UI Update (총 항목 개수)
+                    TotalNumbersInfo = LstAllData.Count();
                 });
 
                 if (LstResInfo.Count > 0)
