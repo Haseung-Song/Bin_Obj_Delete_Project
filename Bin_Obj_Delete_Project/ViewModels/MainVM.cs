@@ -11,7 +11,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -24,8 +23,14 @@ namespace Bin_Obj_Delete_Project.ViewModels
     {
         #region [프로퍼티]
 
+        /// <summary>
+        /// [_enumerateService]
+        /// </summary>
         private readonly IEnumerateService _enumerateService;
 
+        /// <summary>
+        /// [_deleteService]
+        /// </summary>
         private readonly IDeleteService _deleteService;
 
         /// <summary>
@@ -1249,6 +1254,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 if (ProgressValue < 100)
                 {
                     progress?.Report(100); // [진행률: 100]: 작업 완료
+                    await Task.Delay(1);
                 }
                 TheBtnEnabledOrNot = true;
                 VisibleDestroy = false;
@@ -1389,6 +1395,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 if (ProgressValue < 100)
                 {
                     progress?.Report(100); // [진행률: 100]: 작업 완료
+                    await Task.Delay(1);
                 }
                 TheBtnEnabledOrNot = true;
                 VisibleDestroy = false;
@@ -1792,13 +1799,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 dynamic items = recycleBin.Items();
 
                 // 기준: 내가 삭제한 폴더 이름들
-                var deletedPathInfo = LstDelInfo
-                    .Where(x => !string.IsNullOrEmpty(x.DelMatchingPath))
-                    .Select(x => x.DelMatchingPath.ToLowerInvariant())
-                    .Distinct()
-                    .ToList();
-
-                await Task.Run(() =>
+                var deletedPathInfo = LstDelInfo.Where(x => !string.IsNullOrEmpty(x.DelMatchingPath)).Select(x => x.DelMatchingPath.ToLowerInvariant()).Distinct().ToList();
+                await Task.Run(async () =>
                 {
                     for (int i = 0; i < items.Count; i++)
                     {
@@ -1825,7 +1827,28 @@ namespace Bin_Obj_Delete_Project.ViewModels
                                 if (name.Contains("복원"))
                                 {
                                     verb.DoIt(); // 복원 실행
-                                    LstResInfo.Add(fullDeletedPath);
+                                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                                    {
+                                        LstResInfo.Add(fullDeletedPath);
+                                        var matchInfo = LstDelInfo.FirstOrDefault(
+                                            x => x.DelMatchingPath.Equals(fullDeletedPath, StringComparison.OrdinalIgnoreCase));
+                                        if (matchInfo != null && !LstAllData.Any(x => x.DelMatchingPath == fullDeletedPath))
+                                        {
+                                            var restoredData = new DelMatchingInfo
+                                            {
+                                                DelMatchingName = matchInfo.DelMatchingName,
+                                                DelMatchingCreationTime = matchInfo.DelMatchingCreationTime,
+                                                DelMatchingCategory = matchInfo.DelMatchingCategory,
+                                                DelMatchingModifiedTime = matchInfo.DelMatchingModifiedTime,
+                                                DelMatchingOfSize = matchInfo.DelMatchingOfSize,
+                                                DelMatchingPath = matchInfo.DelMatchingPath
+                                            };
+                                            LstAllData.Add(restoredData);
+                                            ActiveFolderInfo.Add(restoredData);
+                                        }
+                                        // UI Update (총 항목 개수)
+                                        TotalNumbersInfo = LstAllData.Count();
+                                    });
                                     break;
                                 }
 
@@ -1835,32 +1858,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
                     }
 
-                });
-                await Application.Current.Dispatcher.InvokeAsync(() =>
-                {
-                    foreach (var path in LstResInfo)
-                    {
-                        var matchInfo = LstDelInfo.FirstOrDefault(
-                            x => x.DelMatchingPath.Equals(path, StringComparison.OrdinalIgnoreCase));
-
-                        if (matchInfo != null && !LstAllData.Any(x => x.DelMatchingPath == path))
-                        {
-                            var restoredData = new DelMatchingInfo
-                            {
-                                DelMatchingName = matchInfo.DelMatchingName,
-                                DelMatchingCreationTime = matchInfo.DelMatchingCreationTime,
-                                DelMatchingCategory = matchInfo.DelMatchingCategory,
-                                DelMatchingModifiedTime = matchInfo.DelMatchingModifiedTime,
-                                DelMatchingOfSize = matchInfo.DelMatchingOfSize,
-                                DelMatchingPath = matchInfo.DelMatchingPath
-                            };
-                            LstAllData.Add(restoredData);
-                            ActiveFolderInfo.Add(restoredData);
-                        }
-
-                    }
-                    // UI Update (총 항목 개수)
-                    TotalNumbersInfo = LstAllData.Count();
                 });
 
                 if (LstResInfo.Count > 0)
