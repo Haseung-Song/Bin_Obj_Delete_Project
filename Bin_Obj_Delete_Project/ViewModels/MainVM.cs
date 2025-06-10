@@ -793,31 +793,35 @@ namespace Bin_Obj_Delete_Project.ViewModels
         public void StartContents()
         {
             string path = SelectedCrFolder.DelMatchingPath;
-            try
+            if (TheBtnEnabledOrNot)
             {
-                // 선택된 아이템이 "파일 폴더"(= 폴더)이거나, "응용 프로그램"(= 파일[.exe])일 경우, 파일 탐색기를 통해 열 수 있음.
-                _ = SelectedCrFolder.DelMatchingCategory == "파일 폴더" || SelectedCrFolder.DelMatchingCategory == "응용 프로그램"
-                    ? Process.Start(new ProcessStartInfo()
-                    {
-                        FileName = path, // 선택된 폴더의 경로
-                        UseShellExecute = true // 운영체제 셸 사용 여부: Yes
-                    })
-                    // 선택된 아이템이 (그 밖의 파일)에 해당하는 경우, [앱 선택] 창을 통해 열도록 함.
-                    : Process.Start(new ProcessStartInfo()
-                    {
-                        FileName = "rundll32.exe", // "rundll32.exe" 사용 DLL 호출
-                        Arguments = $"shell32.dll,OpenAs_RunDLL {path}", // [OpenWith] 창 호출 명령어
-                        UseShellExecute = false, // 운영체제 셸 사용 여부: No
-                        RedirectStandardError = true, // 표준 오류 리다이렉션 여부: Yes
-                        CreateNoWindow = true // 창 없이 실행
-                    });
+                try
+                {
+                    // 선택된 아이템이 "파일 폴더"(= 폴더)이거나, "응용 프로그램"(= 파일[.exe])일 경우, 파일 탐색기를 통해 열 수 있음.
+                    _ = SelectedCrFolder.DelMatchingCategory == "파일 폴더" || SelectedCrFolder.DelMatchingCategory == "응용 프로그램"
+                        ? Process.Start(new ProcessStartInfo()
+                        {
+                            FileName = path, // 선택된 폴더의 경로
+                            UseShellExecute = true // 운영체제 셸 사용 여부: Yes
+                        })
+                        // 선택된 아이템이 (그 밖의 파일)에 해당하는 경우, [앱 선택] 창을 통해 열도록 함.
+                        : Process.Start(new ProcessStartInfo()
+                        {
+                            FileName = "rundll32.exe", // "rundll32.exe" 사용 DLL 호출
+                            Arguments = $"shell32.dll,OpenAs_RunDLL {path}", // [OpenWith] 창 호출 명령어
+                            UseShellExecute = false, // 운영체제 셸 사용 여부: No
+                            RedirectStandardError = true, // 표준 오류 리다이렉션 여부: Yes
+                            CreateNoWindow = true // 창 없이 실행
+                        });
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error opening contents: {ex.Message}");
+                }
 
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error opening contents: {ex.Message}");
-            }
-
+            return;
         }
 
         /// <summary>
@@ -1848,9 +1852,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         if (!deletedPathInfo.Contains(fullDeletedPath))
                             continue;
 
-                        var verbs = item.Verbs();
                         // 복원 항목을 임시 List [lstToAdd]에 저장!
                         var lstToAdd = new List<DelMatchingInfo>();
+
+                        var verbs = item.Verbs();
                         for (int j = 0; j < verbs.Count; j++)
                         {
                             dynamic verb = verbs.Item(j);
