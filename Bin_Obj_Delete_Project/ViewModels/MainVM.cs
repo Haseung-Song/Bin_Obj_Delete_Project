@@ -643,8 +643,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
         /// <summary>
         /// [ActiveFolderInfo]
-        /// [선택 삭제하기] 시 => [ActiveFolderInfo = SelectFolderInfo]
-        /// [일괄 삭제하기] 시 => [ActiveFolderInfo = DeleteFolderInfo]
+        /// [선택 삭제하기] 시, [ActiveFolderInfo = DeleteFolderInfo]
+        /// [일괄 삭제하기] 시, [ActiveFolderInfo = DeleteFolderInfo]
         /// </summary>
         public ObservableCollection<DelMatchingInfo> ActiveFolderInfo
         {
@@ -837,9 +837,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }, cancellationToken);
             try
             {
-                Task cancelingTask = Task.Delay(210000); // [3분 30초] 후, 작업 취소!!
+                Task cancelingTask = Task.Delay(300000); // [5분] 이후, 작업 취소!!!!!
                 Task completedTask = await Task.WhenAny(enumerateTask, cancelingTask);
-                // [3분 30초]가 지나도 작업이 끝나지 않을 때, 작업 취소 요청!
+                // [5분] 이후가 지나도 작업이 끝나지 않으면, 작업 취소 요청!
                 if (completedTask == cancelingTask)
                 {
                     cancellationTokenSource.Cancel();
@@ -947,7 +947,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 int processedFldrs = 0;
                 foreach (string dir in lstEneumerateFldr)
                 {
-                    // 작업 취소 요청 (3분 30초) 후 작업 취소 수행
+                    // 작업 취소 요청 (5분) 이후 작업 취소 수행!!!
                     if (cancellationToken.IsCancellationRequested)
                     {
                         return;
@@ -1022,7 +1022,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         matchingFileInfoOrNot = true; // [파일]로 구분됨!
                         foreach (FileInfo files in lstEnumerateFilesInfo)
                         {
-                            // 작업 취소 요청 (3분 30초) 후 작업 취소 수행
+                            // 작업 취소 요청 (5분) 이후 작업 취소 수행!!!
                             if (cancellationToken.IsCancellationRequested)
                             {
                                 return;
@@ -1194,6 +1194,24 @@ namespace Bin_Obj_Delete_Project.ViewModels
         }
 
         /// <summary>
+        /// SyncActiveFolderInfo()
+        /// [ActiveFolderInfo = DeleteFolderInfo]
+        /// </summary>
+        private void SyncActiveFolderInfo()
+        {
+            foreach (var item in DeleteFolderInfo)
+            {
+                // [정렬 또는 상태] 유지 (중복 방지!)
+                if (!ActiveFolderInfo.Contains(item))
+                {
+                    ActiveFolderInfo.Add(item);
+                }
+
+            }
+
+        }
+
+        /// <summary>
         /// ResetUIState()
         /// 취소 후 UI 상태를 초기화
         /// </summary>
@@ -1214,7 +1232,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private async Task DelSelConfirm(IProgress<double> progress)
         {
             bool isDeletedSel = false;
-            if (ActiveFolderInfo?.Count == 0)
+            if (selectToDelete?.Count == 0)
             {
                 VisibleDestroy = false;
                 return;
@@ -1222,26 +1240,37 @@ namespace Bin_Obj_Delete_Project.ViewModels
             progress?.Report(0);
             try
             {
+                /* [중복 경로 방지용 필터]
+                 * [selectToDelete] 안에 있는 항목들 중에서 이미 LstDelInfo에 같은 DelMatchingPath를 가진 항목이 없을 경우에만 누적 추가 */
+                LstDelInfo?.AddRange(selectToDelete?.Where(sel => !LstDelInfo.Any(saved => saved.DelMatchingPath == sel.DelMatchingPath)));
                 TheBtnEnabledOrNot = false;
                 VisibleDestroy = true;
                 int totalSelMatch = selectToDelete.Count();
                 int processedSelMatch = 0;
-                LstDelInfo = selectToDelete.ToList(); // [삭제 전] 백업!
-                foreach (DelMatchingInfo match in selectToDelete)
+                /*
+                * [SelectFolderInfo]로 반복문을 돌리면 .Remove(match)을 수행 시, 
+                * [ActiveFolderInfo]와 동일 참조이기 때문에, 컬렉션이 변경되므로
+                * foreach문(반복문)이 중단되는 문제가 발생함. (반드시 참고)
+                * 이에, 컬렉션을 .ToList()화하여 복사 후 순회하는 것이 중요!
+                */
+                foreach (DelMatchingInfo match in SelectFolderInfo.ToList())
                 {
                     string dir = match.DelMatchingPath;
                     isDeletedSel = await _deleteService.DeleteAsync(dir, true);
                     if (isDeletedSel)
                     {
+                        // [폴더, 파일] 선택 삭제하기 후, [진행률 업데이트] 작업!!
+                        processedSelMatch++;
+                        progress?.Report((double)processedSelMatch / totalSelMatch * 100);
+                        await Task.Delay(5);
                         await Application.Current.Dispatcher.InvokeAsync(() =>
                         {
                             _ = ActiveFolderInfo.Remove(match); // [UI 초기화]
+                            TotalNumbersInfo = ActiveFolderInfo.Count; // UI Update! (총 항목 개수)
                         });
 
                     }
-                    // [폴더, 파일] 선택 삭제하기 후, [진행률 업데이트] 작업!!
-                    processedSelMatch++;
-                    progress?.Report((double)processedSelMatch / totalSelMatch * 100);
+
                 }
 
             }
@@ -1251,10 +1280,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
             finally
             {
+                await Task.Delay(5);
                 if (ProgressValue < 100)
                 {
                     progress?.Report(100); // [진행률: 100]: 작업 완료
-                    await Task.Delay(1);
                 }
                 TheBtnEnabledOrNot = true;
                 VisibleDestroy = false;
@@ -1291,6 +1320,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             bool shouldDelete = false;
             if (!string.IsNullOrEmpty(DeleteFolderPath) && SelectFolderInfo?.Count > 0)
             {
+                SyncActiveFolderInfo();
                 selectToDelete = new List<DelMatchingInfo>(SelectFolderInfo);
                 if (selectToDelete?.Count > 0 &&
                     !selectToDelete.Any(v => v.DelMatchingName.Equals("bin", StringComparison.OrdinalIgnoreCase) ||
@@ -1335,12 +1365,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 if (shouldDelete)
                 {
                     await DelSelConfirm(ProgressBar);
-                    // UI Update (총 항목 개수)
-                    await Application.Current.Dispatcher.InvokeAsync(() =>
-                    {
-                        TotalNumbersInfo = LstAllData.Count();
-                    });
-
                 }
                 ResetUIState(); // UI 상태 초기화
             }
@@ -1355,7 +1379,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private async Task DelAllConfirm(IProgress<double> progress)
         {
             bool isDeletedAll = false;
-            if (ActiveFolderInfo?.Count == 0)
+            if (entireToDelete?.Count == 0)
             {
                 VisibleDestroy = false;
                 return;
@@ -1363,26 +1387,37 @@ namespace Bin_Obj_Delete_Project.ViewModels
             progress?.Report(0);
             try
             {
+                /* [중복 경로 방지용 필터]
+                 * [entireToDelete] 안에 있는 항목들 중에서 이미 LstDelInfo에 같은 DelMatchingPath를 가진 항목이 없을 경우에만 누적 추가 */
+                LstDelInfo?.AddRange(entireToDelete?.Where(sel => !LstDelInfo.Any(saved => saved.DelMatchingPath == sel.DelMatchingPath)));
                 TheBtnEnabledOrNot = false;
                 VisibleDestroy = true;
-                int totalAllMatch = DeleteFolderInfo.Count();
+                int totalAllMatch = entireToDelete.Count();
                 int processedAllMatch = 0;
-                LstDelInfo = DeleteFolderInfo.ToList(); // [삭제 전] 백업!
-                foreach (DelMatchingInfo match in DeleteFolderInfo)
+                /*
+                * [DeleteFolderInfo]로 반복문을 돌리면 .Remove(match)을 수행 시, 
+                * [ActiveFolderInfo]와 동일 참조이기 때문에, 컬렉션이 변경되므로
+                * foreach문(반복문)이 중단되는 문제가 발생함. (반드시 참고)
+                * 이에, 컬렉션을 .ToList()화하여 복사 후 순회하는 것이 중요!
+                */
+                foreach (DelMatchingInfo match in DeleteFolderInfo.ToList())
                 {
                     string dir = match.DelMatchingPath;
                     isDeletedAll = await _deleteService.DeleteAsync(dir, true);
                     if (isDeletedAll)
                     {
+                        // [폴더, 파일] 일괄 삭제하기 후, [진행률 업데이트] 작업!!
+                        processedAllMatch++;
+                        progress?.Report((double)processedAllMatch / totalAllMatch * 100);
+                        await Task.Delay(5);
                         await Application.Current.Dispatcher.InvokeAsync(() =>
                         {
                             _ = ActiveFolderInfo.Remove(match); // [UI 초기화]
+                            TotalNumbersInfo = ActiveFolderInfo.Count; // UI Update! (총 항목 개수)
                         });
 
                     }
-                    // [폴더, 파일] 일괄 삭제하기 후, [진행률 업데이트] 작업!!
-                    processedAllMatch++;
-                    progress?.Report((double)processedAllMatch / totalAllMatch * 100);
+
                 }
 
             }
@@ -1392,10 +1427,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
             finally
             {
+                await Task.Delay(5);
                 if (ProgressValue < 100)
                 {
                     progress?.Report(100); // [진행률: 100]: 작업 완료
-                    await Task.Delay(1);
                 }
                 TheBtnEnabledOrNot = true;
                 VisibleDestroy = false;
@@ -1428,7 +1463,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
             bool shouldDelete = false;
             if (!string.IsNullOrEmpty(DeleteFolderPath) && DeleteFolderInfo?.Count > 0)
             {
-                entireToDelete = new List<DelMatchingInfo>(LstAllData);
+                SyncActiveFolderInfo();
+                entireToDelete = new List<DelMatchingInfo>(DeleteFolderInfo);
                 if (entireToDelete?.Count > 0 &&
                     !entireToDelete.All(v => v.DelMatchingName.Equals("bin", StringComparison.OrdinalIgnoreCase) ||
                     v.DelMatchingName.Equals("obj", StringComparison.OrdinalIgnoreCase)))
@@ -1452,12 +1488,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 if (shouldDelete)
                 {
                     await DelAllConfirm(ProgressBar);
-                    // UI Update (총 항목 개수)
-                    await Application.Current.Dispatcher.InvokeAsync(() =>
-                    {
-                        TotalNumbersInfo = LstAllData.Count();
-                    });
-
                 }
                 ResetUIState(); // UI 상태 초기화
             }
@@ -1798,10 +1828,12 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 dynamic recycleBin = shell.NameSpace(10); // 휴지통 ID!
                 dynamic items = recycleBin.Items();
 
-                // 기준: 내가 삭제한 폴더 이름들
+                // 기준: [삭제 데이터] 정보 중에서 프로그램 실행 후, [삭제한 폴더 경로]를 중복 없이 .ToList()화 하는 것
                 var deletedPathInfo = LstDelInfo.Where(x => !string.IsNullOrEmpty(x.DelMatchingPath)).Select(x => x.DelMatchingPath.ToLowerInvariant()).Distinct().ToList();
+                // [휴지통 복원하기] 과정!
                 await Task.Run(async () =>
                 {
+                    TheBtnEnabledOrNot = false;
                     for (int i = 0; i < items.Count; i++)
                     {
                         dynamic item = items.Item(i);
@@ -1817,63 +1849,84 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             continue;
 
                         var verbs = item.Verbs();
+                        // 복원 항목을 임시 List [lstToAdd]에 저장!
+                        var lstToAdd = new List<DelMatchingInfo>();
                         for (int j = 0; j < verbs.Count; j++)
                         {
                             dynamic verb = verbs.Item(j);
 
-                            // 해당 휴지통 항목의 우클릭 메뉴(명령어 목록)!
+                            // 해당 휴지통 항목의 우클릭 메뉴(명령어 목록)
                             if (verb.Name is string name)
                             {
                                 if (name.Contains("복원"))
                                 {
                                     verb.DoIt(); // 복원 실행
-                                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                                    LstResInfo.Add(fullDeletedPath);
+                                    var matchInfo = LstDelInfo.FirstOrDefault(
+                                        x => x.DelMatchingPath.Equals(fullDeletedPath, StringComparison.OrdinalIgnoreCase));
+                                    if (matchInfo != null && !LstAllData.Any(x => x.DelMatchingPath == fullDeletedPath))
                                     {
-                                        LstResInfo.Add(fullDeletedPath);
-                                        var matchInfo = LstDelInfo.FirstOrDefault(
-                                            x => x.DelMatchingPath.Equals(fullDeletedPath, StringComparison.OrdinalIgnoreCase));
-                                        if (matchInfo != null && !LstAllData.Any(x => x.DelMatchingPath == fullDeletedPath))
+                                        var restoredData = new DelMatchingInfo
                                         {
-                                            var restoredData = new DelMatchingInfo
-                                            {
-                                                DelMatchingName = matchInfo.DelMatchingName,
-                                                DelMatchingCreationTime = matchInfo.DelMatchingCreationTime,
-                                                DelMatchingCategory = matchInfo.DelMatchingCategory,
-                                                DelMatchingModifiedTime = matchInfo.DelMatchingModifiedTime,
-                                                DelMatchingOfSize = matchInfo.DelMatchingOfSize,
-                                                DelMatchingPath = matchInfo.DelMatchingPath
-                                            };
-                                            LstAllData.Add(restoredData);
-                                            ActiveFolderInfo.Add(restoredData);
-                                        }
-                                        // UI Update (총 항목 개수)
-                                        TotalNumbersInfo = LstAllData.Count();
-                                    });
+                                            DelMatchingName = matchInfo.DelMatchingName,
+                                            DelMatchingCreationTime = matchInfo.DelMatchingCreationTime,
+                                            DelMatchingCategory = matchInfo.DelMatchingCategory,
+                                            DelMatchingModifiedTime = matchInfo.DelMatchingModifiedTime,
+                                            DelMatchingOfSize = matchInfo.DelMatchingOfSize,
+                                            DelMatchingPath = matchInfo.DelMatchingPath
+                                        };
+                                        lstToAdd.Add(restoredData);
+                                    }
                                     break;
                                 }
 
                             }
 
                         }
+                        // [UI 실시간 업데이트]를 위한 [복원 데이터 정보] 추가
+                        await Application.Current.Dispatcher.InvokeAsync(() =>
+                        {
+                            foreach (var restored in lstToAdd)
+                            {
+                                LstAllData.Add(restored);
+                                DeleteFolderInfo.Add(restored);
+                                ActiveFolderInfo.Add(restored);
+                            }
+                            TotalNumbersInfo = LstAllData.Count(); // [UI Update] (총 항목 개수)
+                        });
 
                     }
 
                 });
 
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"복원 중 오류 발생: {ex.Message}");
+            }
+            finally
+            {
                 if (LstResInfo.Count > 0)
                 {
-                    MessageBox.Show("복원이 완료되었습니다.");
+                    TheBtnEnabledOrNot = true;
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
+                        _ = MessageBox.Show(mainWindow, "복원이 완료되었습니다.", "복원 완료", MessageBoxButton.OK, MessageBoxImage.Information);
+                    });
+                    LstDelInfo.Clear();
                     LstResInfo.Clear();
                 }
                 else
                 {
-                    MessageBox.Show("복원할 항목이 존재하지 않습니다.");
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
+                        _ = MessageBox.Show(mainWindow, "복원할 항목이 존재하지 않습니다.", "복원 실패", MessageBoxButton.OK, MessageBoxImage.Error);
+                    });
+
                 }
 
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("복원 중 오류 발생: " + ex.Message);
             }
 
         }
