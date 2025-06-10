@@ -1866,6 +1866,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                                 if (name.Contains("복원"))
                                 {
                                     verb.DoIt(); // 복원 실행
+
                                     LstResInfo.Add(fullDeletedPath);
                                     var matchInfo = LstDelInfo.FirstOrDefault(
                                         x => x.DelMatchingPath.Equals(fullDeletedPath, StringComparison.OrdinalIgnoreCase));
@@ -1913,7 +1914,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 if (LstResInfo.Count > 0)
                 {
-                    TheBtnEnabledOrNot = true;
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
                         Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
@@ -1931,7 +1931,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     });
 
                 }
-
+                TheBtnEnabledOrNot = true; // 복원 시도 후, 버튼 활성화
             }
 
         }
