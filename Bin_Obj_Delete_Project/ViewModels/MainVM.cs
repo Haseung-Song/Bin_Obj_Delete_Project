@@ -1733,11 +1733,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
         {
             if (LstAllData?.Count > 0)
             {
-                if (CurrentPage < 1)
-                {
-                    CurrentPage = 1;
-                }
                 List<DelMatchingInfo> filteredData = LstAllData.Skip((CurrentPage - 1) * PageRecords).Take(PageRecords).ToList();
+                if (filteredData.Count() == 0 && CurrentPage > 1)
+                {
+                    CurrentPage--; // 해당 페이지 자동 삭제 후, 전 페이지로 이동시킴.
+                }
                 ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>(filteredData); // [현재 페이지] 초기화 및 갱신
             }
             else
