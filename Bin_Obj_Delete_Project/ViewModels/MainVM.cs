@@ -857,7 +857,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         LstAllData?.Clear();
                         Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
                         _ = MessageBox.Show(mainWindow, "로딩 시간이 초과되었습니다. 다른 작업을 수행하세요.", "작업 취소", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                    });
+                    }).Task;
                     return;
                 }
                 await enumerateTask; // 해당 작업 수행!
