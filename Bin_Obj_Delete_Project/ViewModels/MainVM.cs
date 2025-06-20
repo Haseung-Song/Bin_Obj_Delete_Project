@@ -99,6 +99,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private bool orderByAscendingOrNot;
 
         /// <summary>
+        /// [lastSortAscending]
+        /// </summary>
+        private bool lastSortAscending;
+
+        /// <summary>
         /// [matchingFldrName]
         /// </summary>
         private string matchingFldrName;
@@ -242,6 +247,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// [_activeFolderInfo]
         /// </summary>
         private ObservableCollection<DelMatchingInfo> _activeFolderInfo;
+
+        /// <summary>
+        /// [_lastSortKey]
+        /// </summary>
+        private Func<DelMatchingInfo, object> _lastSortKey;
 
         #endregion
 
@@ -661,6 +671,24 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
         }
 
+        /// <summary>
+        /// [LastSortKey]
+        /// </summary>
+        public Func<DelMatchingInfo, object> LastSortKey
+        {
+            get => _lastSortKey;
+            set
+            {
+                if (_lastSortKey != value)
+                {
+                    _lastSortKey = value;
+                    OnPropertyChanged();
+                }
+
+            }
+
+        }
+
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -741,9 +769,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
             SelectFolderInfo = new ObservableCollection<DelMatchingInfo>();
             DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
             ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>();
+            LastSortKey = new Func<DelMatchingInfo, object>(x => x.DelMatchingOfSize); // 기본 정렬 기준 = 삭제할 폴더 크기
             uniqueFilePathSet = new HashSet<string>();
             enumerateFldrCache = new Dictionary<string, IEnumerable<string>>();
             orderByAscendingOrNot = true;
+            lastSortAscending = true;
             matchingFldrName = string.Empty;
             matchingFileName = string.Empty;
             matchingFldrCreationTime = string.Empty;
@@ -1259,6 +1289,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 */
                 foreach (DelMatchingInfo match in SelectFolderInfo.ToList())
                 {
+
                     string dir = match.DelMatchingPath;
                     isDeletedSel = await _deleteService.DeleteAsync(dir, true);
                     if (isDeletedSel)
@@ -1307,7 +1338,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         {
                             ActiveFolderInfo?.Clear();
                         }
-                        LoadPageData();
+                        CommonSortFunc(); // 삭제 후, 정렬 재적용
                     });
 
                 }
@@ -1450,7 +1481,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>(LstAllData);
                             entireToDelete.Clear();
                         }
-                        LoadPageData();
+                        CommonSortFunc(); // 삭제 후, 정렬 재적용
                     });
 
                 }
@@ -1613,20 +1644,28 @@ namespace Bin_Obj_Delete_Project.ViewModels
         }
 
         /// <summary>
-        /// 6-1. 정렬 (이름 순)
+        /// [CommonSortFunc(): 공통 정렬 함수]
         /// </summary>
-        private void GoOrderByName()
+        private void CommonSortFunc()
         {
             // (n = 1, 2, 3...)
             // (2n - 1)번 클릭 후: [오름차순] 정렬!
             // (2n)번 클릭 후: [내림차순]으로 정렬!
-            LstAllData = orderByAscendingOrNot
-                ? LstAllData.OrderBy(item => item.DelMatchingName).ToList()
-                : LstAllData.OrderByDescending(item => item.DelMatchingName).ToList();
+            LstAllData = lastSortAscending
+                ? LstAllData.OrderBy(LastSortKey).ToList()
+                : LstAllData.OrderByDescending(LastSortKey).ToList();
 
-            // 1) 정렬 후, 페이지 초기화 작업 (갱신)
             LoadPageData();
+        }
 
+        /// <summary>
+        /// 6-1. 정렬 (이름 순)
+        /// </summary>
+        private void GoOrderByName()
+        {
+            LastSortKey = x => x.DelMatchingName;
+            lastSortAscending = orderByAscendingOrNot; // 정렬 값을 저장
+            CommonSortFunc();
             // 2) 플래그(flag) 값, 반전시키기
             orderByAscendingOrNot = !orderByAscendingOrNot;
         }
@@ -1636,16 +1675,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private void OrderByCrTime()
         {
-            // (n = 1, 2, 3...)
-            // (2n - 1)번 클릭 후: [오름차순] 정렬!
-            // (2n)번 클릭 후: [내림차순]으로 정렬!
-            LstAllData = orderByAscendingOrNot
-                ? LstAllData.OrderBy(item => item.DelMatchingCreationTime).ToList()
-                : LstAllData.OrderByDescending(item => item.DelMatchingCreationTime).ToList();
-
-            // 1) 정렬 후, 페이지 초기화 작업 (갱신)
-            LoadPageData();
-
+            LastSortKey = x => x.DelMatchingCreationTime;
+            lastSortAscending = orderByAscendingOrNot; // 정렬 값을 저장
+            CommonSortFunc();
             // 2) 플래그(flag) 값, 반전시키기
             orderByAscendingOrNot = !orderByAscendingOrNot;
         }
@@ -1655,16 +1687,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private void GoOrderByType()
         {
-            // (n = 1, 2, 3...)
-            // (2n - 1)번 클릭 후: [오름차순] 정렬!
-            // (2n)번 클릭 후: [내림차순]으로 정렬!
-            LstAllData = orderByAscendingOrNot
-                ? LstAllData.OrderBy(item => item.DelMatchingCategory).ToList()
-                : LstAllData.OrderByDescending(item => item.DelMatchingCategory).ToList();
-
-            // 1) 정렬 후, 페이지 초기화 작업 (갱신)
-            LoadPageData();
-
+            LastSortKey = x => x.DelMatchingCategory;
+            lastSortAscending = orderByAscendingOrNot; // 정렬 값을 저장
+            CommonSortFunc();
             // 2) 플래그(flag) 값, 반전시키기
             orderByAscendingOrNot = !orderByAscendingOrNot;
         }
@@ -1674,16 +1699,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private void OrderByMdTime()
         {
-            // (n = 1, 2, 3...)
-            // (2n - 1)번 클릭 후: [오름차순] 정렬!
-            // (2n)번 클릭 후: [내림차순]으로 정렬!
-            LstAllData = orderByAscendingOrNot
-                ? LstAllData.OrderBy(item => item.DelMatchingModifiedTime).ToList()
-                : LstAllData.OrderByDescending(item => item.DelMatchingModifiedTime).ToList();
-
-            // 1) 정렬 후, 페이지 초기화 작업 (갱신)
-            LoadPageData();
-
+            LastSortKey = x => x.DelMatchingModifiedTime;
+            lastSortAscending = orderByAscendingOrNot; // 정렬 값을 저장
+            CommonSortFunc();
             // 2) 플래그(flag) 값, 반전시키기
             orderByAscendingOrNot = !orderByAscendingOrNot;
         }
@@ -1693,16 +1711,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private void GoOrderBySize()
         {
-            // (n = 1, 2, 3...)
-            // (2n - 1)번 클릭 후: [오름차순] 정렬!
-            // (2n)번 클릭 후: [내림차순]으로 정렬!
-            LstAllData = orderByAscendingOrNot
-                ? LstAllData.OrderBy(item => item.DelMatchingOfSize).ToList()
-                : LstAllData.OrderByDescending(item => item.DelMatchingOfSize).ToList();
-
-            // 1) 정렬 후, 페이지 초기화 작업 (갱신)
-            LoadPageData();
-
+            LastSortKey = x => x.DelMatchingOfSize;
+            lastSortAscending = orderByAscendingOrNot; // 정렬 값을 저장
+            CommonSortFunc();
             // 2) 플래그(flag) 값, 반전시키기
             orderByAscendingOrNot = !orderByAscendingOrNot;
         }
@@ -1712,16 +1723,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private void GoOrderByPath()
         {
-            // (n = 1, 2, 3...)
-            // (2n - 1)번 클릭 후: [오름차순] 정렬!
-            // (2n)번 클릭 후: [내림차순]으로 정렬!
-            LstAllData = orderByAscendingOrNot
-                ? LstAllData.OrderBy(item => item.DelMatchingPath).ToList()
-                : LstAllData.OrderByDescending(item => item.DelMatchingPath).ToList();
-
-            // 1) 정렬 후, 페이지 초기화 작업 (갱신)
-            LoadPageData();
-
+            LastSortKey = x => x.DelMatchingPath;
+            lastSortAscending = orderByAscendingOrNot; // 정렬 값을 저장
+            CommonSortFunc();
             // 2) 플래그(flag) 값, 반전시키기
             orderByAscendingOrNot = !orderByAscendingOrNot;
         }
