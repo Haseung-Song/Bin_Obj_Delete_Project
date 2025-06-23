@@ -1289,7 +1289,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 */
                 foreach (DelMatchingInfo match in SelectFolderInfo.ToList())
                 {
-
                     string dir = match.DelMatchingPath;
                     isDeletedSel = await _deleteService.DeleteAsync(dir, true);
                     if (isDeletedSel)
@@ -1298,12 +1297,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         processedSelMatch++;
                         progress?.Report((double)processedSelMatch / totalSelMatch * 100);
                         await Task.Delay(5);
-                        await Application.Current.Dispatcher.InvokeAsync(() =>
-                        {
-                            _ = ActiveFolderInfo.Remove(match); // [UI 초기화]
-                            TotalNumbersInfo = ActiveFolderInfo.Count; // UI Update! (총 항목 개수)
-                        });
-
                     }
 
                 }
@@ -1338,7 +1331,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         {
                             ActiveFolderInfo?.Clear();
                         }
-                        CommonSortFunc(); // 삭제 후, 정렬 재적용
+                        ActiveFolderInfo = DeleteFolderInfo;
+                        TotalNumbersInfo = ActiveFolderInfo.Count; // UI Update! (총 항목 개수)
+                        CommonSortedFunc(); // 삭제 후, 정렬 재적용
                     });
 
                 }
@@ -1481,7 +1476,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>(LstAllData);
                             entireToDelete.Clear();
                         }
-                        CommonSortFunc(); // 삭제 후, 정렬 재적용
+                        CommonSortedFunc(); // 삭제 후, 정렬 재적용
                     });
 
                 }
@@ -1646,7 +1641,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// <summary>
         /// [CommonSortFunc(): 공통 정렬 함수]
         /// </summary>
-        private void CommonSortFunc()
+        private void CommonSortedFunc()
         {
             // (n = 1, 2, 3...)
             // (2n - 1)번 클릭 후: [오름차순] 정렬!
@@ -1665,7 +1660,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         {
             LastSortKey = x => x.DelMatchingName;
             lastSortAscending = orderByAscendingOrNot; // 정렬 값을 저장
-            CommonSortFunc();
+            CommonSortedFunc();
             // 2) 플래그(flag) 값, 반전시키기
             orderByAscendingOrNot = !orderByAscendingOrNot;
         }
@@ -1677,7 +1672,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         {
             LastSortKey = x => x.DelMatchingCreationTime;
             lastSortAscending = orderByAscendingOrNot; // 정렬 값을 저장
-            CommonSortFunc();
+            CommonSortedFunc();
             // 2) 플래그(flag) 값, 반전시키기
             orderByAscendingOrNot = !orderByAscendingOrNot;
         }
@@ -1689,7 +1684,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         {
             LastSortKey = x => x.DelMatchingCategory;
             lastSortAscending = orderByAscendingOrNot; // 정렬 값을 저장
-            CommonSortFunc();
+            CommonSortedFunc();
             // 2) 플래그(flag) 값, 반전시키기
             orderByAscendingOrNot = !orderByAscendingOrNot;
         }
@@ -1701,7 +1696,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         {
             LastSortKey = x => x.DelMatchingModifiedTime;
             lastSortAscending = orderByAscendingOrNot; // 정렬 값을 저장
-            CommonSortFunc();
+            CommonSortedFunc();
             // 2) 플래그(flag) 값, 반전시키기
             orderByAscendingOrNot = !orderByAscendingOrNot;
         }
@@ -1713,7 +1708,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         {
             LastSortKey = x => x.DelMatchingOfSize;
             lastSortAscending = orderByAscendingOrNot; // 정렬 값을 저장
-            CommonSortFunc();
+            CommonSortedFunc();
             // 2) 플래그(flag) 값, 반전시키기
             orderByAscendingOrNot = !orderByAscendingOrNot;
         }
@@ -1725,7 +1720,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         {
             LastSortKey = x => x.DelMatchingPath;
             lastSortAscending = orderByAscendingOrNot; // 정렬 값을 저장
-            CommonSortFunc();
+            CommonSortedFunc();
             // 2) 플래그(flag) 값, 반전시키기
             orderByAscendingOrNot = !orderByAscendingOrNot;
         }
@@ -1925,6 +1920,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     });
                     LstDelInfo.Clear();
                     LstResInfo.Clear();
+                    CommonSortedFunc(); // 복원 후, 정렬 재적용
                 }
                 else
                 {
