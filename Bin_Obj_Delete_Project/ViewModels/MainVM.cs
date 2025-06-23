@@ -34,6 +34,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private readonly IDeleteService _deleteService;
 
         /// <summary>
+        /// [_recyclebinService]
+        /// </summary>
+        private readonly IRecycleBinService _recycleBinService;
+
+        /// <summary>
         /// [_IssTheBtnEnabledOrNot]
         /// </summary>
         private bool _IsTheBtnEnabledOrNot;
@@ -219,9 +224,14 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private List<DelMatchingInfo> _lstDelInfo;
 
         /// <summary>
-        /// [_lstRestoredInfo]
+        /// [lastSortKey]
         /// </summary>
-        private List<string> _lstResInfo;
+        private Func<DelMatchingInfo, object> lastSortKey;
+
+        /// <summary>
+        /// [deletedSuccessfully]
+        /// </summary>
+        private List<DelMatchingInfo> deletedSuccessfully;
 
         /// <summary>
         /// [_currentPage]
@@ -247,11 +257,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// [_activeFolderInfo]
         /// </summary>
         private ObservableCollection<DelMatchingInfo> _activeFolderInfo;
-
-        /// <summary>
-        /// [_lastSortKey]
-        /// </summary>
-        private Func<DelMatchingInfo, object> _lastSortKey;
 
         #endregion
 
@@ -502,7 +507,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         }
 
         /// <summary>
-        /// [TotalSelectInfo]
+        /// [SelectedCntsInfo]
         /// </summary>
         public int SelectedCntsInfo
         {
@@ -559,7 +564,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
         /// <summary>
         /// [LstDelInfo]
-        /// [삭제 데이터 정보] (List 형태)
+        /// [삭제(복원) 데이터 정보] (List 형태)
         /// </summary>
         public List<DelMatchingInfo> LstDelInfo
         {
@@ -569,25 +574,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 if (_lstDelInfo != value)
                 {
                     _lstDelInfo = value;
-                    OnPropertyChanged();
-                }
-
-            }
-
-        }
-
-        /// <summary>
-        /// [LstRestoredInfo]
-        /// [복구 데이터 정보] (List 형태)
-        /// </summary>
-        public List<string> LstResInfo
-        {
-            get => _lstResInfo;
-            set
-            {
-                if (_lstResInfo != value)
-                {
-                    _lstResInfo = value;
                     OnPropertyChanged();
                 }
 
@@ -653,8 +639,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
         /// <summary>
         /// [ActiveFolderInfo]
-        /// [선택 삭제하기] 시, [ActiveFolderInfo = DeleteFolderInfo]
-        /// [일괄 삭제하기] 시, [ActiveFolderInfo = DeleteFolderInfo]
         /// </summary>
         public ObservableCollection<DelMatchingInfo> ActiveFolderInfo
         {
@@ -664,24 +648,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 if (_activeFolderInfo != value)
                 {
                     _activeFolderInfo = value;
-                    OnPropertyChanged();
-                }
-
-            }
-
-        }
-
-        /// <summary>
-        /// [LastSortKey]
-        /// </summary>
-        public Func<DelMatchingInfo, object> LastSortKey
-        {
-            get => _lastSortKey;
-            set
-            {
-                if (_lastSortKey != value)
-                {
-                    _lastSortKey = value;
                     OnPropertyChanged();
                 }
 
@@ -747,7 +713,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
         #region 생성자 (Initialize)
 
-        public MainVM() : this(new EnumerateService(), new DeleteService())
+        public MainVM() : this(new EnumerateService(), new DeleteService(), new RecycleBinService())
         {
             TheBtnEnabledOrNot = true;
             VisibleLoading = false;
@@ -765,11 +731,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
             SelectedCrFolder = new DelMatchingInfo();
             LstAllData = new List<DelMatchingInfo>();
             LstDelInfo = new List<DelMatchingInfo>();
-            LstResInfo = new List<string>();
+            lastSortKey = new Func<DelMatchingInfo, object>(x => x.DelMatchingOfSize); // 기본 정렬
+            deletedSuccessfully = new List<DelMatchingInfo>();
             SelectFolderInfo = new ObservableCollection<DelMatchingInfo>();
             DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>();
             ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>();
-            LastSortKey = new Func<DelMatchingInfo, object>(x => x.DelMatchingOfSize); // 기본 정렬 기준 = 삭제할 폴더 크기
             uniqueFilePathSet = new HashSet<string>();
             enumerateFldrCache = new Dictionary<string, IEnumerable<string>>();
             orderByAscendingOrNot = true;
@@ -802,15 +768,18 @@ namespace Bin_Obj_Delete_Project.ViewModels
             RestoreFromRecycleBinCommand = new AsyncRelayCommand(RestoreFromRecycleBin);
         }
 
+
         /// <summary>
         /// 의존성 주입 생성자 (Service 인터페이스)
         /// </summary>
         /// <param name="enumerateService"></param>
         /// <param name="deleteService"></param>
-        public MainVM(EnumerateService enumerateService, IDeleteService deleteService)
+        /// <param name="recycleBinService"></param>
+        public MainVM(EnumerateService enumerateService, IDeleteService deleteService, IRecycleBinService recycleBinService)
         {
             _enumerateService = enumerateService;
             _deleteService = deleteService;
+            _recycleBinService = recycleBinService;
         }
 
         #endregion
@@ -1271,6 +1240,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 VisibleDestroy = false;
                 return;
             }
+            deletedSuccessfully?.Clear();
             progress?.Report(0);
             try
             {
@@ -1290,9 +1260,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 foreach (DelMatchingInfo match in SelectFolderInfo.ToList())
                 {
                     string dir = match.DelMatchingPath;
-                    isDeletedSel = await _deleteService.DeleteAsync(dir, true);
+                    isDeletedSel = await _deleteService.DeleteAsync(dir, true); // _deleteService 사용
                     if (isDeletedSel)
                     {
+                        deletedSuccessfully?.Add(match); // 삭제 성공 항목만 저장!
                         // [폴더, 파일] 선택 삭제하기 후, [진행률 업데이트] 작업!!
                         processedSelMatch++;
                         progress?.Report((double)processedSelMatch / totalSelMatch * 100);
@@ -1320,16 +1291,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     // 삭제 후 데이터 업데이트
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        // 삭제된 항목 제거
-                        if (selectToDelete?.Count > 0)
+                        if (deletedSuccessfully?.Count > 0)
                         {
-                            LstAllData = LstAllData.Where(item => !selectToDelete.Any(deleted => deleted.DelMatchingPath == item.DelMatchingPath)).ToList();
+                            LstAllData = LstAllData.Where(item => !deletedSuccessfully.Any(deleted => deleted.DelMatchingPath == item.DelMatchingPath)).ToList();
                             DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>(LstAllData);
                             selectToDelete.Clear();
-                        }
-                        else
-                        {
-                            ActiveFolderInfo?.Clear();
                         }
                         ActiveFolderInfo = DeleteFolderInfo;
                         TotalNumbersInfo = ActiveFolderInfo.Count; // UI Update! (총 항목 개수)
@@ -1414,12 +1380,13 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 VisibleDestroy = false;
                 return;
             }
+            deletedSuccessfully?.Clear();
             progress?.Report(0);
             try
             {
                 /* [중복 경로 방지용 필터]
                  * [entireToDelete] 안에 있는 항목들 중에서 이미 LstDelInfo에 같은 DelMatchingPath를 가진 항목이 없을 경우에만 누적 추가 */
-                LstDelInfo?.AddRange(entireToDelete?.Where(sel => !LstDelInfo.Any(saved => saved.DelMatchingPath == sel.DelMatchingPath)));
+                LstDelInfo?.AddRange(entireToDelete?.Where(ent => !LstDelInfo.Any(saved => saved.DelMatchingPath == ent.DelMatchingPath)));
                 TheBtnEnabledOrNot = false;
                 VisibleDestroy = true;
                 int totalAllMatch = entireToDelete.Count();
@@ -1433,16 +1400,17 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 foreach (DelMatchingInfo match in DeleteFolderInfo.ToList())
                 {
                     string dir = match.DelMatchingPath;
-                    isDeletedAll = await _deleteService.DeleteAsync(dir, true);
+                    isDeletedAll = await _deleteService.DeleteAsync(dir, true); // _deleteService 사용
                     if (isDeletedAll)
                     {
+                        deletedSuccessfully?.Add(match); // 삭제 성공 항목만 저장!
                         // [폴더, 파일] 일괄 삭제하기 후, [진행률 업데이트] 작업!!
                         processedAllMatch++;
                         progress?.Report((double)processedAllMatch / totalAllMatch * 100);
                         await Task.Delay(5);
                         await Application.Current.Dispatcher.InvokeAsync(() =>
                         {
-                            _ = ActiveFolderInfo.Remove(match); // [UI 초기화]
+                            ActiveFolderInfo.Remove(match); // [UI 초기화]
                             TotalNumbersInfo = ActiveFolderInfo.Count; // UI Update! (총 항목 개수)
                         });
 
@@ -1469,10 +1437,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     // 삭제 후 데이터 업데이트
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        // 삭제된 항목 제거
-                        if (entireToDelete?.Count > 0)
+                        if (deletedSuccessfully?.Count > 0)
                         {
-                            LstAllData = LstAllData.Where(item => !entireToDelete.Any(deleted => deleted.DelMatchingPath == item.DelMatchingPath)).ToList();
+                            LstAllData = LstAllData.Where(item => !deletedSuccessfully.Any(deleted => deleted.DelMatchingPath == item.DelMatchingPath)).ToList();
                             DeleteFolderInfo = new ObservableCollection<DelMatchingInfo>(LstAllData);
                             entireToDelete.Clear();
                         }
@@ -1639,7 +1606,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         }
 
         /// <summary>
-        /// [CommonSortFunc(): 공통 정렬 함수]
+        /// 6. [CommonSortFunc(): 공통 정렬 함수]
         /// </summary>
         private void CommonSortedFunc()
         {
@@ -1647,8 +1614,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
             // (2n - 1)번 클릭 후: [오름차순] 정렬!
             // (2n)번 클릭 후: [내림차순]으로 정렬!
             LstAllData = lastSortAscending
-                ? LstAllData.OrderBy(LastSortKey).ToList()
-                : LstAllData.OrderByDescending(LastSortKey).ToList();
+                ? LstAllData.OrderBy(lastSortKey).ToList()
+                : LstAllData.OrderByDescending(lastSortKey).ToList();
 
             LoadPageData();
         }
@@ -1658,10 +1625,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private void GoOrderByName()
         {
-            LastSortKey = x => x.DelMatchingName;
-            lastSortAscending = orderByAscendingOrNot; // 정렬 값을 저장
+            lastSortKey = x => x.DelMatchingName;
+            lastSortAscending = orderByAscendingOrNot; // lastSortAscending = 이전 정렬 기준
             CommonSortedFunc();
-            // 2) 플래그(flag) 값, 반전시키기
             orderByAscendingOrNot = !orderByAscendingOrNot;
         }
 
@@ -1670,10 +1636,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private void OrderByCrTime()
         {
-            LastSortKey = x => x.DelMatchingCreationTime;
-            lastSortAscending = orderByAscendingOrNot; // 정렬 값을 저장
+            lastSortKey = x => x.DelMatchingCreationTime;
+            lastSortAscending = orderByAscendingOrNot; // lastSortAscending = 이전 정렬 기준
             CommonSortedFunc();
-            // 2) 플래그(flag) 값, 반전시키기
             orderByAscendingOrNot = !orderByAscendingOrNot;
         }
 
@@ -1682,10 +1647,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private void GoOrderByType()
         {
-            LastSortKey = x => x.DelMatchingCategory;
-            lastSortAscending = orderByAscendingOrNot; // 정렬 값을 저장
+            lastSortKey = x => x.DelMatchingCategory;
+            lastSortAscending = orderByAscendingOrNot; // lastSortAscending = 이전 정렬 기준
             CommonSortedFunc();
-            // 2) 플래그(flag) 값, 반전시키기
             orderByAscendingOrNot = !orderByAscendingOrNot;
         }
 
@@ -1694,10 +1658,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private void OrderByMdTime()
         {
-            LastSortKey = x => x.DelMatchingModifiedTime;
-            lastSortAscending = orderByAscendingOrNot; // 정렬 값을 저장
+            lastSortKey = x => x.DelMatchingModifiedTime;
+            lastSortAscending = orderByAscendingOrNot; // lastSortAscending = 이전 정렬 기준
             CommonSortedFunc();
-            // 2) 플래그(flag) 값, 반전시키기
             orderByAscendingOrNot = !orderByAscendingOrNot;
         }
 
@@ -1706,10 +1669,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private void GoOrderBySize()
         {
-            LastSortKey = x => x.DelMatchingOfSize;
-            lastSortAscending = orderByAscendingOrNot; // 정렬 값을 저장
+            lastSortKey = x => x.DelMatchingOfSize;
+            lastSortAscending = orderByAscendingOrNot; // lastSortAscending = 이전 정렬 기준
             CommonSortedFunc();
-            // 2) 플래그(flag) 값, 반전시키기
             orderByAscendingOrNot = !orderByAscendingOrNot;
         }
 
@@ -1718,10 +1680,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private void GoOrderByPath()
         {
-            LastSortKey = x => x.DelMatchingPath;
-            lastSortAscending = orderByAscendingOrNot; // 정렬 값을 저장
+            lastSortKey = x => x.DelMatchingPath;
+            lastSortAscending = orderByAscendingOrNot; // lastSortAscending = 이전 정렬 기준
             CommonSortedFunc();
-            // 2) 플래그(flag) 값, 반전시키기
             orderByAscendingOrNot = !orderByAscendingOrNot;
         }
 
@@ -1733,6 +1694,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             if (LstAllData?.Count > 0)
             {
                 List<DelMatchingInfo> filteredData = LstAllData.Skip((CurrentPage - 1) * PageRecords).Take(PageRecords).ToList();
+                // 현재 페이지 표시 항목 (X) => 이전 페이지 이동!
                 if (filteredData.Count() == 0 && CurrentPage > 1)
                 {
                     CurrentPage--; // 해당 페이지 자동 삭제 후, 전 페이지로 이동시킴.
@@ -1741,7 +1703,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
             else
             {
-                // 데이터가 없을 때 초기화
                 ActiveFolderInfo?.Clear();
                 CurrentPage = 1;
             }
@@ -1825,82 +1786,19 @@ namespace Bin_Obj_Delete_Project.ViewModels
         {
             try
             {
-                Type shellAppType = Type.GetTypeFromProgID("Shell.Application");
-                dynamic shell = Activator.CreateInstance(shellAppType);
-
-                dynamic recycleBin = shell.NameSpace(10); // 휴지통 ID!
-                dynamic items = recycleBin.Items();
-
-                // 기준: [삭제 데이터] 정보 중에서 프로그램 실행 후, [삭제한 폴더 경로]를 중복 없이 .ToList()화 하는 것
-                var deletedPathInfo = LstDelInfo.Where(x => !string.IsNullOrEmpty(x.DelMatchingPath)).Select(x => x.DelMatchingPath.ToLowerInvariant()).Distinct().ToList();
-                // [휴지통 복원하기] 과정!
-                await Task.Run(async () =>
+                TheBtnEnabledOrNot = false;
+                // _recycleBinService 사용!
+                await _recycleBinService.RestoreDelInfoAsync(LstDelInfo, restoredItem =>
                 {
-                    TheBtnEnabledOrNot = false;
-                    for (int i = 0; i < items.Count; i++)
+                    // 복원 항목마다 UI 실시간 업데이트 반영
+                    Application.Current.Dispatcher.Invoke(() =>
                     {
-                        dynamic item = items.Item(i);
-
-                        string originPath = recycleBin.GetDetailsOf(item, 1)?.Trim();
-                        string itemName = item.Name?.Trim();
-                        if (string.IsNullOrEmpty(originPath) || string.IsNullOrEmpty(itemName))
-                            continue;
-
-                        // 삭제 경로 = [originPath] + [itemName]
-                        string fullDeletedPath = Path.Combine(originPath, itemName).ToLowerInvariant();
-                        if (!deletedPathInfo.Contains(fullDeletedPath))
-                            continue;
-
-                        // 복원 항목을 임시 List [lstToAdd]에 저장!
-                        var lstToAdd = new List<DelMatchingInfo>();
-
-                        var verbs = item.Verbs();
-                        for (int j = 0; j < verbs.Count; j++)
-                        {
-                            dynamic verb = verbs.Item(j);
-
-                            // 해당 휴지통 항목의 우클릭 메뉴(명령어 목록)
-                            if (verb.Name is string name)
-                            {
-                                if (name.Contains("복원"))
-                                {
-                                    verb.DoIt(); // 복원 실행
-
-                                    LstResInfo.Add(fullDeletedPath);
-                                    var matchInfo = LstDelInfo.FirstOrDefault(
-                                        x => x.DelMatchingPath.Equals(fullDeletedPath, StringComparison.OrdinalIgnoreCase));
-                                    if (matchInfo != null && !LstAllData.Any(x => x.DelMatchingPath == fullDeletedPath))
-                                    {
-                                        var restoredData = new DelMatchingInfo
-                                        {
-                                            DelMatchingName = matchInfo.DelMatchingName,
-                                            DelMatchingCreationTime = matchInfo.DelMatchingCreationTime,
-                                            DelMatchingCategory = matchInfo.DelMatchingCategory,
-                                            DelMatchingModifiedTime = matchInfo.DelMatchingModifiedTime,
-                                            DelMatchingOfSize = matchInfo.DelMatchingOfSize,
-                                            DelMatchingPath = matchInfo.DelMatchingPath
-                                        };
-                                        lstToAdd.Add(restoredData);
-                                    }
-                                    break;
-                                }
-
-                            }
-
-                        }
-                        // [UI 실시간 업데이트]를 위한 [복원 데이터 정보] 추가
-                        await Application.Current.Dispatcher.InvokeAsync(() =>
-                        {
-                            foreach (var restored in lstToAdd)
-                            {
-                                LstAllData.Add(restored);
-                                DeleteFolderInfo.Add(restored);
-                                ActiveFolderInfo.Add(restored);
-                            }
-                            TotalNumbersInfo = LstAllData.Count(); // [UI Update] (총 항목 개수)
-                        });
-
-                    }
+                        LstAllData.Add(restoredItem);
+                        DeleteFolderInfo.Add(restoredItem);
+                        ActiveFolderInfo.Add(restoredItem);
+                        // [UI Update] (총 항목 개수)
+                        TotalNumbersInfo = LstAllData.Count();
+                    });
 
                 });
 
@@ -1911,15 +1809,14 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
             finally
             {
-                if (LstResInfo.Count > 0)
+                if (LstDelInfo.Count > 0)
                 {
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
                         Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
                         _ = MessageBox.Show(mainWindow, "복원이 완료되었습니다.", "복원 완료", MessageBoxButton.OK, MessageBoxImage.Information);
                     });
-                    LstDelInfo.Clear();
-                    LstResInfo.Clear();
+                    LstDelInfo.Clear(); // 삭제(복원) 데이터 정보 초기화
                     CommonSortedFunc(); // 복원 후, 정렬 재적용
                 }
                 else
@@ -1931,7 +1828,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     });
 
                 }
-                TheBtnEnabledOrNot = true; // 복원 시도 후, 버튼 활성화
+                TheBtnEnabledOrNot = true;
             }
 
         }
@@ -1952,14 +1849,12 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 return enumerateFldrCache[DeleteFolderPath];
             }
 
-            // EnumerateSerivce를 사용하여 디렉토리 가져오기
-            IEnumerable<string> directories = _enumerateService.GetDirectories(DeleteFolderPath);
+            IEnumerable<string> directories = _enumerateService.GetDirectories(DeleteFolderPath); // _enumerateService 사용
 
             // 하위 디렉토리 중 요소가 하나라도 존재하면,
             if (directories != null && directories.Any())
             {
-                // [Cache]에 데이터가 없으면, 데이터를 새로 저장함!
-                enumerateFldrCache[DeleteFolderPath] = directories;
+                enumerateFldrCache[DeleteFolderPath] = directories; // [Cache]에 데이터가 없으면, 데이터를 새로 저장함!
             }
             return directories ?? Enumerable.Empty<string>();
         }
