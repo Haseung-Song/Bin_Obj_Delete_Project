@@ -231,7 +231,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// <summary>
         /// [deletedSuccessfully]
         /// </summary>
-        private List<DelMatchingInfo> deletedSuccessfully;
+        private readonly List<DelMatchingInfo> deletedSuccessfully;
 
         /// <summary>
         /// [_currentPage]
