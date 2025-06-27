@@ -1801,7 +1801,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     });
 
                 });
-
+                CommonSortedFunc(); // 복원 후, 정렬 재적용
             }
             catch (Exception ex)
             {
@@ -1817,7 +1817,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         _ = MessageBox.Show(mainWindow, "복원이 완료되었습니다.", "복원 완료", MessageBoxButton.OK, MessageBoxImage.Information);
                     });
                     LstDelInfo.Clear(); // 삭제(복원) 데이터 정보 초기화
-                    CommonSortedFunc(); // 복원 후, 정렬 재적용
                 }
                 else
                 {
