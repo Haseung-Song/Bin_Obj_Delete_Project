@@ -828,10 +828,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private async void OperatingTask()
         {
+            //mouseHook.HookMouse();
+
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
             CancellationToken cancellationToken = cancellationTokenSource.Token;
             TotalNumbersInfo = 0; // 총 항목 개수 초기화
-            //mouseHook.HookMouse();
             TheBtnEnabledOrNot = false;
             VisibleLoading = true;
             Task enumerateTask = Task.Run(() =>
