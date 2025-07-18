@@ -1202,7 +1202,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private void SyncActiveFolderInfo()
         {
-            foreach (var item in DeleteFolderInfo)
+            foreach (DelMatchingInfo item in DeleteFolderInfo)
             {
                 // [정렬 또는 상태] 유지 (중복 방지!)
                 if (!ActiveFolderInfo.Contains(item))
