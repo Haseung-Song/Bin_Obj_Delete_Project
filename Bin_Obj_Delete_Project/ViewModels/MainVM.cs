@@ -1,5 +1,6 @@
 ﻿using Bin_Obj_Delete_Project.Common;
 using Bin_Obj_Delete_Project.Models;
+using Bin_Obj_Delete_Project.Repository;
 using Bin_Obj_Delete_Project.Services;
 using Bin_Obj_Delete_Project.Views;
 using Microsoft.WindowsAPICodePack.Dialogs;
@@ -37,6 +38,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// [_recyclebinService]
         /// </summary>
         private readonly IRecycleBinService _recycleBinService;
+
+        /// <summary>
+        /// [_auditService]
+        /// </summary>
+        private readonly IAuditService _auditService;
 
         /// <summary>
         /// [_IssTheBtnEnabledOrNot]
@@ -713,7 +719,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
         #region 생성자 (Initialize)
 
-        public MainVM() : this(new EnumerateService(), new DeleteService(), new RecycleBinService())
+        public MainVM() : this(new EnumerateService(), new DeleteService(), new RecycleBinService(), new SqlServerAuditRepository())
         {
             TheBtnEnabledOrNot = true;
             VisibleLoading = false;
@@ -775,11 +781,12 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// <param name="enumerateService"></param>
         /// <param name="deleteService"></param>
         /// <param name="recycleBinService"></param>
-        public MainVM(EnumerateService enumerateService, IDeleteService deleteService, IRecycleBinService recycleBinService)
+        public MainVM(IEnumerateService enumerateService, IDeleteService deleteService, IRecycleBinService recycleBinService, IAuditService auditService)
         {
             _enumerateService = enumerateService;
             _deleteService = deleteService;
             _recycleBinService = recycleBinService;
+            _auditService = auditService;
         }
 
         #endregion
@@ -1270,7 +1277,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         progress?.Report((double)processedSelMatch / totalSelMatch * 100);
                         await Task.Delay(5);
                     }
-
+                    // 삭제 시, DB에 로그 남기기
+                    await _auditService.LogAsync("DELETE", match, isDeletedSel, isDeletedSel ? "Success" : "Failure", CancellationToken.None);
                 }
 
             }
@@ -1416,7 +1424,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         });
 
                     }
-
+                    // 삭제 시, DB에 로그 남기기
+                    await _auditService.LogAsync("DELETE", match, isDeletedAll, isDeletedAll ? "Success" : "Failure", CancellationToken.None);
                 }
 
             }
