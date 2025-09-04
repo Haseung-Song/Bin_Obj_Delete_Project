@@ -9,15 +9,17 @@ namespace Bin_Obj_Delete_Project.Services
 {
     public interface IRecycleBinService
     {
-        Task RestoreDelInfoAsync(List<DelMatchingInfo> lstDelInfo, Action<DelMatchingInfo> onItemRestored);
+        Task<bool> RestoreDelInfoAsync(List<DelMatchingInfo> lstDelInfo, Action<DelMatchingInfo> onItemRestored);
     }
 
     public class RecycleBinService : IRecycleBinService
     {
-        public async Task RestoreDelInfoAsync(List<DelMatchingInfo> lstDelInfo, Action<DelMatchingInfo> onItemRestored)
+        public async Task<bool> RestoreDelInfoAsync(List<DelMatchingInfo> lstDelInfo, Action<DelMatchingInfo> onItemRestored)
         {
-            await Task.Run(() =>
+            return await Task.Run(() =>
             {
+                bool itemRestored = false; // 복원이 실행되었는가의 여부를 확인!
+
                 Type shellAppType = Type.GetTypeFromProgID("Shell.Application");
                 dynamic shell = Activator.CreateInstance(shellAppType);
 
@@ -54,7 +56,7 @@ namespace Bin_Obj_Delete_Project.Services
                             if (name.Contains("복원"))
                             {
                                 verb.DoIt(); // 복원 실행
-
+                                itemRestored = true; // 복원이 실행되었음.
                                 var matchInfo = lstDelInfo.FirstOrDefault(
                                     x => x.DelMatchingPath.Equals(fullDeletedPath, StringComparison.OrdinalIgnoreCase));
                                 if (matchInfo != null)
@@ -69,7 +71,7 @@ namespace Bin_Obj_Delete_Project.Services
                     }
 
                 }
-
+                return itemRestored; // 값 반환
             });
 
         }

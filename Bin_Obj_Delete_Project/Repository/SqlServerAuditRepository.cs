@@ -59,7 +59,7 @@ namespace Bin_Obj_Delete_Project.Repository
                     cmd.CommandTimeout = 30;
 
                     cmd.Parameters.Add("@ACTION_TYPE", SqlDbType.VarChar, 10).Value = actionType ?? "UNKNOWN";
-                    cmd.Parameters.Add("@ITEM_TYPE", SqlDbType.VarChar, 10).Value = IsFolder(item) ? "FOLDER" : "FILE";
+                    cmd.Parameters.Add("@ITEM_TYPE", SqlDbType.VarChar, 10).Value = IsFolder(item) ? "Folder" : "File";
                     var name = (item != null && item.DelMatchingName != null)
                         ? (object)item.DelMatchingName
                         : DBNull.Value;
