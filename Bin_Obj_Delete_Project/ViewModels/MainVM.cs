@@ -12,7 +12,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -750,9 +749,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
             ActiveFolderInfo = new ObservableCollection<DelMatchingInfo>();
             uniqueFilePathSet = new HashSet<string>();
             enumerateFldrCache = new Dictionary<string, IEnumerable<string>>();
-            //orderByAscendingOrNot = true;
-            //lastSortAscending = true;
-            //isTargetsRestored = true;
             matchingFldrName = string.Empty;
             matchingFileName = string.Empty;
             matchingFldrCreationTime = string.Empty;
@@ -1271,7 +1267,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         await Task.Delay(5);
                     }
                     // [선택 삭제] 진행 시, MSSQL [master] DB 테이블에 로그 기록 남기기!!!
-                    await _auditService.LogAsync("Delete", match, isDeletedSel, isDeletedSel ? "Success" : "Failure", CancellationToken.None);
+                    await _auditService.LogAsync("DELETE", match, isDeletedSel, isDeletedSel ? "Success" : "Failure", CancellationToken.None);
                 }
 
             }
@@ -1425,7 +1421,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         await Task.Delay(5);
                     }
                     // [일괄 삭제] 진행 시, MSSQL [master] DB 테이블에 로그 기록 남기기!!!
-                    await _auditService.LogAsync("Delete", match, isDeletedAll, isDeletedAll ? "Success" : "Failure", CancellationToken.None);
+                    await _auditService.LogAsync("DELETE", match, isDeletedAll, isDeletedAll ? "Success" : "Failure", CancellationToken.None);
                 }
 
             }
@@ -1821,10 +1817,13 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         CommonSortedFunc(); // 복원 후, 정렬 즉시 재적용
                         TotalNumbersInfo = LstAllData.Count(); // [UI Update] (총 항목 개수)
                     });
-
+                    // 즉시 [Success] 또는 [Failure] 판정 (파일 또는 폴더가 존재하면 성공)
+                    bool ok = Directory.Exists(restoredItem.DelMatchingPath)
+                                || File.Exists(restoredItem.DelMatchingPath);
+                    // [선택 복구] 진행 시, MSSQL [master] DB 테이블에 로그 기록 남기기!!!
+                    _auditService.LogAsync("RESTORE", restoredItem, ok, ok ? "Success" : "Failure", CancellationToken.None);
                 });
-                // [선택 복구] 진행 시, MSSQL [master] DB 테이블에 로그 기록 남기기!!!
-                //_auditService.LogAsync("Restore", restoredItem, isTargetsRestored, isTargetsRestored ? "Success" : "Failure", CancellationToken.None);
+
             }
             catch (Exception ex)
             {

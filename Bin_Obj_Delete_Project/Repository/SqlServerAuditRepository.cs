@@ -1,13 +1,10 @@
 ﻿using Bin_Obj_Delete_Project.Models;
 using Bin_Obj_Delete_Project.Services;
-using Microsoft.IdentityModel.Protocols;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
