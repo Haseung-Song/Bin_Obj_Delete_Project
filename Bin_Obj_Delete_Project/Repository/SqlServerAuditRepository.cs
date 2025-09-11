@@ -2,7 +2,6 @@
 using Bin_Obj_Delete_Project.Services;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Threading;
@@ -12,27 +11,17 @@ namespace Bin_Obj_Delete_Project.Repository
 {
     public sealed class SqlServerAuditRepository : IAuditService
     {
-        // 연결 문자열 (App.config의 name="SqlServerDb")
-        private readonly string _cs;
+        private readonly string _cs; // 연결 문자열 (App.config의 name="sqlDB")
 
         private static bool IsFolder(DelMatchingInfo item) => string.Equals(item.DelMatchingCategory, "파일 폴더", StringComparison.OrdinalIgnoreCase);
 
-        public SqlServerAuditRepository()
+        public SqlServerAuditRepository(string connectionString)
         {
-            var cs = ConfigurationManager.ConnectionStrings["SqlServerDb"].ConnectionString;
-            if (cs != null && !string.IsNullOrEmpty(cs))
-            {
-                _cs = cs;
-            }
-            else
-            {
-                throw new InvalidOperationException("connectionStrings[\"SqlServerDb\"]가 설정되지 않았습니다.");
-            }
-
+            _cs = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
         }
 
         /// <summary>
-        /// 1건의 '행위' 기록 (삭제/복구/스캔 등)
+        /// [삭제, 복원] "ACTION" 기록
         /// </summary>
         /// <param name="actionType"></param>
         /// <param name="item"></param>
@@ -42,10 +31,11 @@ namespace Bin_Obj_Delete_Project.Repository
         /// <returns></returns>
         public async Task LogAsync(string actionType, DelMatchingInfo item, bool ok, string error, CancellationToken ct)
         {
+            if (item == null || String.IsNullOrEmpty(error)) return;
             const string SQL = @"INSERT INTO dbo.ACTION_LOG
-                                    (ACTION_TYPE, ITEM_TYPE, NAME, FULL_PATH, SIZE_BYTES, RESULT, ERROR_MSG)
+                                    (ACTION, ITEM, NAME, PATH, SIZE, ERROR_MSG, RESULT_MSG)
                                  VALUES
-                                    (@ACTION_TYPE, @ITEM_TYPE, @NAME, @FULL_PATH, @SIZE_BYTES, @RESULT, @ERROR_MSG);";
+                                    (@ACTION, @ITEM, @NAME, @PATH, @SIZE, @ERROR_MSG, @RESULT_MSG);";
 
             using (var con = new SqlConnection(_cs))
             {
@@ -54,21 +44,17 @@ namespace Bin_Obj_Delete_Project.Repository
                 {
                     cmd.CommandType = CommandType.Text;
                     cmd.CommandTimeout = 30;
-
-                    cmd.Parameters.Add("@ACTION_TYPE", SqlDbType.VarChar, 10).Value = actionType ?? "UNKNOWN";
-                    cmd.Parameters.Add("@ITEM_TYPE", SqlDbType.VarChar, 10).Value = IsFolder(item) ? "Folder" : "File";
-                    var name = (item != null && item.DelMatchingName != null)
-                        ? (object)item.DelMatchingName
-                        : DBNull.Value;
+                    cmd.Parameters.Add("@ACTION", SqlDbType.VarChar, 10).Value = actionType ?? "기타";
+                    cmd.Parameters.Add("@ITEM", SqlDbType.VarChar, 10).Value = IsFolder(item) ? "폴더" : "파일";
+                    var name = (item != null && item.DelMatchingName != null) ? (object)item.DelMatchingName : DBNull.Value;
                     cmd.Parameters.Add("@NAME", SqlDbType.NVarChar, 260).Value = name;
-                    var path = (item != null && item.DelMatchingPath != null)
-                        ? (object)item.DelMatchingPath
-                        : DBNull.Value;
-                    cmd.Parameters.Add("@FULL_PATH", SqlDbType.NVarChar, 2000).Value = path;
+                    string path = item.DelMatchingPath;
+                    cmd.Parameters.Add("@PATH", SqlDbType.NVarChar, 260).Value = path;
                     var size = item != null ? item.DelMatchingOfSize : 0L;
-                    cmd.Parameters.Add("@SIZE_BYTES", SqlDbType.BigInt).Value = size;
-                    cmd.Parameters.Add("@RESULT", SqlDbType.VarChar, 10).Value = ok ? "OK" : "FAIL";
-                    cmd.Parameters.Add("@ERROR_MSG", SqlDbType.NVarChar, 1000).Value = string.IsNullOrEmpty(error) ? (object)DBNull.Value : error;
+                    cmd.Parameters.Add("@SIZE", SqlDbType.BigInt).Value = size;
+                    cmd.Parameters.Add("@ERROR_MSG", SqlDbType.VarChar, 10).Value = ok ? "OK" : "Not OK";
+                    cmd.Parameters.Add("@RESULT_MSG", SqlDbType.NVarChar, 1000).Value = string.IsNullOrEmpty(error) ? (object)DBNull.Value : error;
+
                     await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
                 }
 
