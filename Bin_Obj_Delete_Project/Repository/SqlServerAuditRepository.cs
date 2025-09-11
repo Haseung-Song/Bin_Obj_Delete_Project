@@ -44,6 +44,7 @@ namespace Bin_Obj_Delete_Project.Repository
                 {
                     cmd.CommandType = CommandType.Text;
                     cmd.CommandTimeout = 30;
+
                     cmd.Parameters.Add("@ACTION", SqlDbType.VarChar, 10).Value = actionType ?? "기타";
                     cmd.Parameters.Add("@ITEM", SqlDbType.VarChar, 10).Value = IsFolder(item) ? "폴더" : "파일";
                     var name = (item != null && item.DelMatchingName != null) ? (object)item.DelMatchingName : DBNull.Value;
@@ -62,6 +63,14 @@ namespace Bin_Obj_Delete_Project.Repository
 
         }
 
+        /// <summary>
+        /// [InsertScanItemsAsync]
+        /// </summary>
+        /// <param name="sessionId"></param>
+        /// <param name="items"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
         public Task InsertScanItemsAsnyc(string sessionId, IEnumerable<DelMatchingInfo> items, CancellationToken ct)
         {
             throw new NotImplementedException();
