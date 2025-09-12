@@ -1235,6 +1235,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private async Task DelSelConfirm(IProgress<double> progress)
         {
             bool isDeletedSel = false;
+
+            int totalSelMatch = selectToDelete.Count();
+            int processedSelMatch = 0;
             if (selectToDelete?.Count == 0)
             {
                 VisibleDestroy = false;
@@ -1248,12 +1251,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
             LstDelInfo?.AddRange(selectToDelete?.Where(sel => !LstDelInfo.Any(saved => saved.DelMatchingPath == sel.DelMatchingPath)));
             TheBtnEnabledOrNot = false;
             VisibleDestroy = true;
-
-            await _auditService.LogAsync("삭제 진행", null, true, null, CancellationToken.None);
-            int totalSelMatch = selectToDelete.Count();
-            int processedSelMatch = 0;
             try
             {
+                bool logged = await _auditService.LogAsync("  삭제", null, false, null, CancellationToken.None);
+                if (!logged) return; // 로그 실패(에러) 시, 삭제 중단하기
                 foreach (DelMatchingInfo match in GetSelInCurrentOrder())
                 {
                     string dir = match.DelMatchingPath;
@@ -1261,22 +1262,21 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     if (isDeletedSel)
                     {
                         deletedSuccessfully?.Add(match); // 삭제 성공 항목만 저장!
-                        // [선택 삭제] 성공 시, MSSQL [sqlDB] DB 테이블에 성공 기록 남기기!
-                        await _auditService.LogAsync("삭제", match, true, "성공", CancellationToken.None);
+                        await _auditService.LogAsync("  삭제", match, true, "  성공", CancellationToken.None);
                         await Application.Current.Dispatcher.InvokeAsync(() =>
                         {
                             ActiveFolderInfo.Remove(match); // [UI 초기화]
                             // [폴더, 파일] 선택 삭제하기 후, [진행률 업데이트] 작업!!
                             processedSelMatch++;
                             progress?.Report((double)processedSelMatch / totalSelMatch * 100);
-                            TotalNumbersInfo = DeleteFolderInfo.Count - deletedSuccessfully.Count; // UI Update! (총 항목 개수)
+                            // UI Update! (총 항목 개수)
+                            TotalNumbersInfo = DeleteFolderInfo.Count - deletedSuccessfully.Count;
                         });
-                        await Task.Delay(2);
+                        await Task.Delay(3);
                     }
                     else
                     {
-                        // [선택 삭제] 실패 시, MSSQL [sqlDB] DB 테이블에 실패 기록 남기기!
-                        await _auditService.LogAsync("삭제", match, false, "실패", CancellationToken.None);
+                        await _auditService.LogAsync("  삭제", match, true, "  실패", CancellationToken.None);
                     }
 
                 }
@@ -1288,16 +1288,16 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
             finally
             {
-                await Task.Delay(5);
-                if (ProgressValue < 100)
-                {
-                    progress?.Report(100); // [진행률: 100]: 작업 완료
-                }
                 TheBtnEnabledOrNot = true;
                 VisibleDestroy = false;
                 if (isDeletedSel)
                 {
-                    // 삭제 후, 데이터 업데이트
+                    await Task.Delay(7);
+                    if (ProgressValue < 100)
+                    {
+                        progress?.Report(100); // [진행률: 100]: 작업 완료
+                    }
+                    // 삭제 후, 데이터 최신화!
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
                         if (deletedSuccessfully?.Count > 0)
@@ -1398,6 +1398,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private async Task DelAllConfirm(IProgress<double> progress)
         {
             bool isDeletedAll = false;
+
+            int totalAllMatch = entireToDelete.Count();
+            int processedAllMatch = 0;
             if (entireToDelete?.Count == 0)
             {
                 VisibleDestroy = false;
@@ -1411,21 +1414,18 @@ namespace Bin_Obj_Delete_Project.ViewModels
             LstDelInfo?.AddRange(entireToDelete?.Where(ent => !LstDelInfo.Any(saved => saved.DelMatchingPath == ent.DelMatchingPath)));
             TheBtnEnabledOrNot = false;
             VisibleDestroy = true;
-
-            await _auditService.LogAsync("삭제 진행", null, true, null, CancellationToken.None);
-            int totalAllMatch = entireToDelete.Count();
-            int processedAllMatch = 0;
             try
             {
+                bool logged = await _auditService.LogAsync("  삭제", null, false, null, CancellationToken.None);
+                if (!logged) return; // 로그 실패(에러) 시, 삭제 중단하기
                 foreach (DelMatchingInfo match in GetAllInCurrentOrder())
                 {
                     string dir = match.DelMatchingPath;
                     isDeletedAll = await _deleteService.DeleteAsync(dir, true); // _deleteService 사용
                     if (isDeletedAll)
                     {
-                        // [일괄 삭제] 성공 시, MSSQL [sqlDB] DB 테이블에 성공 기록 남기기!
-                        await _auditService.LogAsync("삭제", match, true, "성공", CancellationToken.None);
                         deletedSuccessfully?.Add(match); // 삭제 성공 항목만 저장!
+                        await _auditService.LogAsync("  삭제", match, true, "  성공", CancellationToken.None);
                         await Application.Current.Dispatcher.InvokeAsync(() =>
                         {
                             ActiveFolderInfo.Remove(match); // [UI 초기화]
@@ -1434,12 +1434,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             progress?.Report((double)processedAllMatch / totalAllMatch * 100);
                             TotalNumbersInfo = DeleteFolderInfo.Count - deletedSuccessfully.Count; // UI Update! (총 항목 개수)
                         });
-                        await Task.Delay(2);
+                        await Task.Delay(3);
                     }
                     else
                     {
-                        // [일괄 삭제] 실패 시, MSSQL [sqlDB] DB 테이블에 실패 기록 남기기!
-                        await _auditService.LogAsync("삭제", match, false, "실패", CancellationToken.None);
+                        await _auditService.LogAsync("  삭제", match, true, "  실패", CancellationToken.None);
                     }
 
                 }
@@ -1451,16 +1450,16 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
             finally
             {
-                await Task.Delay(5);
-                if (ProgressValue < 100)
-                {
-                    progress?.Report(100); // [진행률: 100]: 작업 완료
-                }
                 TheBtnEnabledOrNot = true;
                 VisibleDestroy = false;
                 if (isDeletedAll)
                 {
-                    // 삭제 후, 데이터 업데이트
+                    await Task.Delay(7);
+                    if (ProgressValue < 100)
+                    {
+                        progress?.Report(100); // [진행률: 100]: 작업 완료
+                    }
+                    // 삭제 후, 데이터 최신화!
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
                         if (deletedSuccessfully?.Count > 0)
@@ -1663,10 +1662,13 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private void GoOrderByName()
         {
+            // 현재 상태 반전 (오름차순 <-> 내림차순) 토글!
+            orderByAscendingOrNot = !orderByAscendingOrNot;
+
             lastSortKey = x => x.DelMatchingName;
             lastSortAscending = orderByAscendingOrNot; // lastSortAscending = 이전 정렬 기준
-            CommonSortedFunc();
-            orderByAscendingOrNot = !orderByAscendingOrNot;
+
+            CommonSortedFunc(); // 정렬 실행
         }
 
         /// <summary>
@@ -1674,10 +1676,13 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private void OrderByCrTime()
         {
+            // 현재 상태 반전 (오름차순 <-> 내림차순) 토글!
+            orderByAscendingOrNot = !orderByAscendingOrNot;
+
             lastSortKey = x => x.DelMatchingCreationTime;
             lastSortAscending = orderByAscendingOrNot; // lastSortAscending = 이전 정렬 기준
-            CommonSortedFunc();
-            orderByAscendingOrNot = !orderByAscendingOrNot;
+
+            CommonSortedFunc(); // 정렬 실행
         }
 
         /// <summary>
@@ -1685,10 +1690,13 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private void GoOrderByType()
         {
+            // 현재 상태 반전 (오름차순 <-> 내림차순) 토글!
+            orderByAscendingOrNot = !orderByAscendingOrNot;
+
             lastSortKey = x => x.DelMatchingCategory;
             lastSortAscending = orderByAscendingOrNot; // lastSortAscending = 이전 정렬 기준
-            CommonSortedFunc();
-            orderByAscendingOrNot = !orderByAscendingOrNot;
+
+            CommonSortedFunc(); // 정렬 실행
         }
 
         /// <summary>
@@ -1696,10 +1704,13 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private void OrderByMdTime()
         {
+            // 현재 상태 반전 (오름차순 <-> 내림차순) 토글!
+            orderByAscendingOrNot = !orderByAscendingOrNot;
+
             lastSortKey = x => x.DelMatchingModifiedTime;
             lastSortAscending = orderByAscendingOrNot; // lastSortAscending = 이전 정렬 기준
-            CommonSortedFunc();
-            orderByAscendingOrNot = !orderByAscendingOrNot;
+
+            CommonSortedFunc(); // 정렬 실행
         }
 
         /// <summary>
@@ -1707,10 +1718,13 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private void GoOrderBySize()
         {
+            // 현재 상태 반전 (오름차순 <-> 내림차순) 토글!
+            orderByAscendingOrNot = !orderByAscendingOrNot;
+
             lastSortKey = x => x.DelMatchingOfSize;
             lastSortAscending = orderByAscendingOrNot; // lastSortAscending = 이전 정렬 기준
-            CommonSortedFunc();
-            orderByAscendingOrNot = !orderByAscendingOrNot;
+
+            CommonSortedFunc(); // 정렬 실행
         }
 
         /// <summary>
@@ -1718,10 +1732,13 @@ namespace Bin_Obj_Delete_Project.ViewModels
         /// </summary>
         private void GoOrderByPath()
         {
+            // 현재 상태 반전 (오름차순 <-> 내림차순) 토글!
+            orderByAscendingOrNot = !orderByAscendingOrNot;
+
             lastSortKey = x => x.DelMatchingPath;
             lastSortAscending = orderByAscendingOrNot; // lastSortAscending = 이전 정렬 기준
-            CommonSortedFunc();
-            orderByAscendingOrNot = !orderByAscendingOrNot;
+
+            CommonSortedFunc(); // 정렬 실행
         }
 
         /// <summary>
@@ -1837,11 +1854,12 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         CommonSortedFunc(); // 복원 후, 정렬 즉시 재적용
                         TotalNumbersInfo = LstAllData.Count(); // [UI Update] (총 항목 개수)
                     });
+
                     // 즉시 [Success] 또는 [Failure] 판정 (파일 또는 폴더가 존재하면 성공)
                     bool ok = Directory.Exists(restoredItem.DelMatchingPath)
                                 || File.Exists(restoredItem.DelMatchingPath);
-                    // [선택 복구] 진행 시, MSSQL [master] DB 테이블에 로그 기록 남기기!!!
-                    _auditService.LogAsync("복원", restoredItem, ok, ok ? "성공" : "실패", CancellationToken.None);
+
+                    _auditService.LogAsync("  복원", restoredItem, ok, ok ? "  성공" : "  실패", CancellationToken.None);
                 });
 
             }

@@ -6,6 +6,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace Bin_Obj_Delete_Project.Repository
 {
@@ -13,11 +14,11 @@ namespace Bin_Obj_Delete_Project.Repository
     {
         private readonly string _cs; // 연결 문자열 (App.config의 name="sqlDB")
 
-        private static bool IsFolder(DelMatchingInfo item) => string.Equals(item.DelMatchingCategory, "파일 폴더", StringComparison.OrdinalIgnoreCase);
+        private static bool IsFolder(DelMatchingInfo item) => string.Equals(item?.DelMatchingCategory, "파일 폴더", StringComparison.OrdinalIgnoreCase);
 
         public SqlServerAuditRepository(string connectionString)
         {
-            _cs = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
+            _cs = connectionString ?? throw new ArgumentNullException(nameof(connectionString)); // [QUERY] 구문 에러 시, 기본 예외 메시지 생성
         }
 
         /// <summary>
@@ -29,36 +30,52 @@ namespace Bin_Obj_Delete_Project.Repository
         /// <param name="error"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        public async Task LogAsync(string actionType, DelMatchingInfo item, bool ok, string error, CancellationToken ct)
+        public async Task<bool> LogAsync(string actionType, DelMatchingInfo item, bool ok, string error, CancellationToken ct)
         {
-            if (item == null || String.IsNullOrEmpty(error)) return;
-            const string SQL = @"INSERT INTO dbo.ACTION_LOG
-                                    (ACTION, ITEM, NAME, PATH, SIZE, ERROR_MSG, RESULT_MSG)
-                                 VALUES
-                                    (@ACTION, @ITEM, @NAME, @PATH, @SIZE, @ERROR_MSG, @RESULT_MSG);";
-
-            using (var con = new SqlConnection(_cs))
+            // 🔹 실제 로그 INSERT (성공/실패 루프 안에서 호출)
+            try
             {
-                await con.OpenAsync(ct).ConfigureAwait(false);
-                using (var cmd = new SqlCommand(SQL, con))
+                // [DML Query]: Data Manipulation Language, 데이터 조작어)
+                const string SQL = @"INSERT INTO dbo.ACTION_LOG
+                                    (ACTION, ITEM, NAME, PATH, SIZE, IS_ERROR, RESULT)
+                                 VALUES
+                                    (@ACTION, ITEM, @NAME, @PATH, @SIZE, @IS_ERROR, @RESULT);";
+
+                using (var con = new SqlConnection(_cs))
                 {
-                    cmd.CommandType = CommandType.Text;
-                    cmd.CommandTimeout = 30;
+                    await con.OpenAsync(ct).ConfigureAwait(false);
+                    using (var cmd = new SqlCommand(SQL, con))
+                    {
+                        cmd.CommandType = CommandType.Text;
+                        cmd.CommandTimeout = 30;
+                        cmd.Parameters.Add("@ACTION", SqlDbType.VarChar, 10).Value = actionType ?? "기타";
+                        cmd.Parameters.Add("@ITEM", SqlDbType.VarChar, 10).Value = IsFolder(item) ? "폴더" : "파일";
 
-                    cmd.Parameters.Add("@ACTION", SqlDbType.VarChar, 10).Value = actionType ?? "기타";
-                    cmd.Parameters.Add("@ITEM", SqlDbType.VarChar, 10).Value = IsFolder(item) ? "폴더" : "파일";
-                    var name = (item != null && item.DelMatchingName != null) ? (object)item.DelMatchingName : DBNull.Value;
-                    cmd.Parameters.Add("@NAME", SqlDbType.NVarChar, 260).Value = name;
-                    string path = item.DelMatchingPath;
-                    cmd.Parameters.Add("@PATH", SqlDbType.NVarChar, 260).Value = path;
-                    var size = item != null ? item.DelMatchingOfSize : 0L;
-                    cmd.Parameters.Add("@SIZE", SqlDbType.BigInt).Value = size;
-                    cmd.Parameters.Add("@ERROR_MSG", SqlDbType.VarChar, 10).Value = ok ? "OK" : "Not OK";
-                    cmd.Parameters.Add("@RESULT_MSG", SqlDbType.NVarChar, 1000).Value = string.IsNullOrEmpty(error) ? (object)DBNull.Value : error;
+                        var name = (item != null && item.DelMatchingName != null) ? (object)item.DelMatchingName : DBNull.Value;
+                        cmd.Parameters.Add("@NAME", SqlDbType.NVarChar, 260).Value = name;
 
-                    await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+                        var path = (item != null && item.DelMatchingPath != null) ? (object)item.DelMatchingPath : DBNull.Value;
+                        cmd.Parameters.Add("@PATH", SqlDbType.NVarChar, 1024).Value = path;
+
+                        var size = (item != null) ? item.DelMatchingOfSize : 0L;
+                        cmd.Parameters.Add("@SIZE", SqlDbType.BigInt).Value = size;
+                        cmd.Parameters.Add("@IS_ERROR", SqlDbType.VarChar, 20).Value = ok ? " No Error" : "   Error";
+                        cmd.Parameters.Add("@RESULT", SqlDbType.NVarChar, 10).Value = string.IsNullOrEmpty(error) ? (object)DBNull.Value : error;
+
+                        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+                    }
+
                 }
-
+                return ok;
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
+                    _ = MessageBox.Show(mainWindow, $"SQL 오류: {ex.Message}", "Query 재확인", MessageBoxButton.OK, MessageBoxImage.Error);
+                });
+                return false;
             }
 
         }

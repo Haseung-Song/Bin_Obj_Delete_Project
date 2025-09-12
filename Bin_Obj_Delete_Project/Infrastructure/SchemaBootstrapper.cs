@@ -4,7 +4,7 @@ namespace Bin_Obj_Delete_Project.Infrastructure
 {
     public static class SchemaBootstrapper
     {
-        // [DDL 생성]
+        // [DDL Query]: Data Definition Language, 데이터 정의어)
         private const string EnsureTableSql = @"
 IF OBJECT_ID(N'dbo.ACTION_LOG', N'U') IS NULL
 BEGIN
@@ -16,11 +16,15 @@ BEGIN
         [NAME]        NVARCHAR(260)  NULL,
         [PATH]        NVARCHAR(1024) NULL,
         [SIZE]        BIGINT         NULL,
-        [ERROR_MSG]   NVARCHAR(10)   NULL,
-        [RESULT_MSG]  NVARCHAR(10)   NULL
+        [IS_ERROR]    NVARCHAR(20)   NULL,
+        [RESULT]      NVARCHAR(10)   NULL
     );
 END";
 
+        /// <summary>
+        /// [ActionLogTable] 생성
+        /// </summary>
+        /// <param name="connectionString"></param>
         public static void EnsureActionLogTable(string connectionString)
         {
             SqlConnection con = null;
@@ -40,6 +44,10 @@ END";
 
         }
 
+        /// <summary>
+        /// [ActionLogTable] 삭제
+        /// </summary>
+        /// <param name="connectionString"></param>
         public static void ClearActionLogTable(string connectionString)
         {
             const string sql = "DROP TABLE IF EXISTS dbo.ACTION_LOG;";
@@ -50,7 +58,6 @@ END";
             {
                 con = new SqlConnection(connectionString);
                 con.Open();
-
                 cmd = new SqlCommand(sql, con);
                 cmd.ExecuteNonQuery();
             }

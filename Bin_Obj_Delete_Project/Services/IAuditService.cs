@@ -13,7 +13,7 @@ namespace Bin_Obj_Delete_Project.Services
     /// </summary>
     public interface IAuditService
     {
-        Task LogAsync(string actionType, DelMatchingInfo item, bool ok, string error, CancellationToken ct);
+        Task<bool> LogAsync(string actionType, DelMatchingInfo item, bool ok, string error, CancellationToken ct);
     }
 
 }
