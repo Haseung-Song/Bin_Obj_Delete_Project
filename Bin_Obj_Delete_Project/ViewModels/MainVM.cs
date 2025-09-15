@@ -873,6 +873,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     return;
                 }
                 await enumerateTask; // 해당 작업 수행!
+
                 //mouseHook.UnhookMouse();
                 VisibleLoading = false;
                 TheBtnEnabledOrNot = true;
@@ -1249,20 +1250,25 @@ namespace Bin_Obj_Delete_Project.ViewModels
             /* [중복 경로 방지용 필터]
              * [selectToDelete] 안에 있는 항목들 중에서 이미 LstDelInfo에 같은 DelMatchingPath를 가진 항목이 없을 경우에만 누적 추가 */
             LstDelInfo?.AddRange(selectToDelete?.Where(sel => !LstDelInfo.Any(saved => saved.DelMatchingPath == sel.DelMatchingPath)));
+
             TheBtnEnabledOrNot = false;
             VisibleDestroy = true;
             try
             {
-                bool logged = await _auditService.LogAsync("  삭제", null, false, null, CancellationToken.None);
-                if (!logged) return; // 로그 실패(에러) 시, 삭제 중단하기
                 foreach (DelMatchingInfo match in GetSelInCurrentOrder())
                 {
+                    bool logged = await _auditService.LogAsync("  삭제", match, ok: true, "  성공", CancellationToken.None);
+                    if (!logged)
+                    {
+                        LstDelInfo?.Clear();
+                        return;
+                    }
                     string dir = match.DelMatchingPath;
                     isDeletedSel = await _deleteService.DeleteAsync(dir, true); // _deleteService 사용
                     if (isDeletedSel)
                     {
+                        //await _auditService.LogAsync("  삭제", match, ok: true, "  성공", CancellationToken.None);
                         deletedSuccessfully?.Add(match); // 삭제 성공 항목만 저장!
-                        await _auditService.LogAsync("  삭제", match, true, "  성공", CancellationToken.None);
                         await Application.Current.Dispatcher.InvokeAsync(() =>
                         {
                             ActiveFolderInfo.Remove(match); // [UI 초기화]
@@ -1272,19 +1278,15 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             // UI Update! (총 항목 개수)
                             TotalNumbersInfo = DeleteFolderInfo.Count - deletedSuccessfully.Count;
                         });
-                        await Task.Delay(3);
+
                     }
                     else
                     {
-                        await _auditService.LogAsync("  삭제", match, true, "  실패", CancellationToken.None);
+                        await _auditService.LogAsync("  삭제", match, ok: false, "  실패", CancellationToken.None);
                     }
 
                 }
 
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Exception: Error Deleting... {ex.Message}");
             }
             finally
             {
@@ -1292,9 +1294,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 VisibleDestroy = false;
                 if (isDeletedSel)
                 {
-                    await Task.Delay(7);
                     if (ProgressValue < 100)
                     {
+                        await Task.Delay(5);
                         progress?.Report(100); // [진행률: 100]: 작업 완료
                     }
                     // 삭제 후, 데이터 최신화!
@@ -1412,20 +1414,24 @@ namespace Bin_Obj_Delete_Project.ViewModels
             /* [중복 경로 방지용 필터]
              * [entireToDelete] 안에 있는 항목들 중에서 이미 LstDelInfo에 같은 DelMatchingPath를 가진 항목이 없을 경우에만 누적 추가 */
             LstDelInfo?.AddRange(entireToDelete?.Where(ent => !LstDelInfo.Any(saved => saved.DelMatchingPath == ent.DelMatchingPath)));
+
             TheBtnEnabledOrNot = false;
             VisibleDestroy = true;
             try
             {
-                bool logged = await _auditService.LogAsync("  삭제", null, false, null, CancellationToken.None);
-                if (!logged) return; // 로그 실패(에러) 시, 삭제 중단하기
                 foreach (DelMatchingInfo match in GetAllInCurrentOrder())
                 {
+                    bool logged = await _auditService.LogAsync("  삭제", match, ok: true, "  성공", CancellationToken.None);
+                    if (!logged)
+                    {
+                        LstDelInfo?.Clear();
+                        return;
+                    }
                     string dir = match.DelMatchingPath;
                     isDeletedAll = await _deleteService.DeleteAsync(dir, true); // _deleteService 사용
                     if (isDeletedAll)
                     {
                         deletedSuccessfully?.Add(match); // 삭제 성공 항목만 저장!
-                        await _auditService.LogAsync("  삭제", match, true, "  성공", CancellationToken.None);
                         await Application.Current.Dispatcher.InvokeAsync(() =>
                         {
                             ActiveFolderInfo.Remove(match); // [UI 초기화]
@@ -1434,19 +1440,15 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             progress?.Report((double)processedAllMatch / totalAllMatch * 100);
                             TotalNumbersInfo = DeleteFolderInfo.Count - deletedSuccessfully.Count; // UI Update! (총 항목 개수)
                         });
-                        await Task.Delay(3);
+
                     }
                     else
                     {
-                        await _auditService.LogAsync("  삭제", match, true, "  실패", CancellationToken.None);
+                        await _auditService.LogAsync("  삭제", match, ok: false, "  실패", CancellationToken.None);
                     }
 
                 }
 
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Exception: Error Deleting... {ex.Message}");
             }
             finally
             {
@@ -1454,9 +1456,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 VisibleDestroy = false;
                 if (isDeletedAll)
                 {
-                    await Task.Delay(7);
                     if (ProgressValue < 100)
                     {
+                        await Task.Delay(5);
                         progress?.Report(100); // [진행률: 100]: 작업 완료
                     }
                     // 삭제 후, 데이터 최신화!
@@ -1865,7 +1867,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"복원 중 오류 발생: {ex.Message}");
+                Console.WriteLine($"복원 중 발생 오류: {ex.Message}");
             }
             finally
             {
@@ -1887,10 +1889,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     });
 
                 }
+
             }
             TheBtnEnabledOrNot = true;
         }
-
         #endregion
 
         #region [캐싱 처리]

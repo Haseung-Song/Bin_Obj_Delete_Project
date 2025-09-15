@@ -21,7 +21,7 @@ namespace Bin_Obj_Delete_Project.Services
                     FileSystem.DeleteDirectory(dir, UIOption.OnlyErrorDialogs, useRecycleBin ? RecycleOption.SendToRecycleBin : RecycleOption.DeletePermanently);
                     return true;
                 }
-                // 해당 파일 경로 존재 시,
+                // 또는, 해당 파일의 경로가 존재 시,
                 else if (FileSystem.FileExists(dir))
                 {
                     // 지정한 파일 휴지통 또는 영구적으로 삭제

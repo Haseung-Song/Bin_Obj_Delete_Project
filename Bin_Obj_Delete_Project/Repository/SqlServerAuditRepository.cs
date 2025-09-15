@@ -32,22 +32,23 @@ namespace Bin_Obj_Delete_Project.Repository
         /// <returns></returns>
         public async Task<bool> LogAsync(string actionType, DelMatchingInfo item, bool ok, string error, CancellationToken ct)
         {
-            // 🔹 실제 로그 INSERT (성공/실패 루프 안에서 호출)
             try
             {
-                // [DML Query]: Data Manipulation Language, 데이터 조작어)
-                const string SQL = @"INSERT INTO dbo.ACTION_LOG
-                                    (ACTION, ITEM, NAME, PATH, SIZE, IS_ERROR, RESULT)
-                                 VALUES
-                                    (@ACTION, ITEM, @NAME, @PATH, @SIZE, @IS_ERROR, @RESULT);";
-
                 using (var con = new SqlConnection(_cs))
                 {
                     await con.OpenAsync(ct).ConfigureAwait(false);
+
+                    // [DML Query]: Data Manipulation Language, 데이터 조작어)
+                    const string SQL = @"INSERT INTO dbo.ACTION_LOG
+                                    (ACTION, ITEM, NAME, PATH, SIZE, IS_ERROR, RESULT)
+                                 VALUES
+                                    (@ACTION, ITEM, NAME, @PATH, @SIZE, @IS_ERROR, @RESULT);";
+
                     using (var cmd = new SqlCommand(SQL, con))
                     {
                         cmd.CommandType = CommandType.Text;
                         cmd.CommandTimeout = 30;
+
                         cmd.Parameters.Add("@ACTION", SqlDbType.VarChar, 10).Value = actionType ?? "기타";
                         cmd.Parameters.Add("@ITEM", SqlDbType.VarChar, 10).Value = IsFolder(item) ? "폴더" : "파일";
 
@@ -66,14 +67,14 @@ namespace Bin_Obj_Delete_Project.Repository
                     }
 
                 }
-                return ok;
+                return true;
             }
             catch (Exception ex)
             {
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
-                    _ = MessageBox.Show(mainWindow, $"SQL 오류: {ex.Message}", "Query 재확인", MessageBoxButton.OK, MessageBoxImage.Error);
+                    _ = MessageBox.Show(mainWindow, $"SQL 오류:\r\n{ex.Message}", "Query 재확인", MessageBoxButton.OK, MessageBoxImage.Error);
                 });
                 return false;
             }
