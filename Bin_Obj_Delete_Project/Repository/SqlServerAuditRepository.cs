@@ -42,7 +42,7 @@ namespace Bin_Obj_Delete_Project.Repository
                     const string SQL = @"INSERT INTO dbo.ACTION_LOG
                                     (ACTION, ITEM, NAME, PATH, SIZE, IS_ERROR, RESULT)
                                  VALUES
-                                    (@ACTION, ITEM, NAME, @PATH, @SIZE, @IS_ERROR, @RESULT);";
+                                    (@ACTION, @ITEM, @NAME, @PATH, @SIZE, @IS_ERROR, @RESULT);";
 
                     using (var cmd = new SqlCommand(SQL, con))
                     {
