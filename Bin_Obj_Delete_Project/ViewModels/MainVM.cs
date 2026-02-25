@@ -1257,12 +1257,12 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 foreach (DelMatchingInfo match in GetSelInCurrentOrder())
                 {
-                    bool logged = await _auditService.LogAsync("  삭제", match, ok: true, "  성공", CancellationToken.None);
-                    if (!logged)
-                    {
-                        LstDelInfo?.Clear();
-                        return;
-                    }
+                    //bool logged = await _auditService.LogAsync("  삭제", match, ok: true, "  성공", CancellationToken.None);
+                    //if (!logged)
+                    //{
+                    //    LstDelInfo?.Clear();
+                    //    return;
+                    //}
                     string dir = match.DelMatchingPath;
                     isDeletedSel = await _deleteService.DeleteAsync(dir, true); // _deleteService 사용
                     if (isDeletedSel)
@@ -1282,7 +1282,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     }
                     else
                     {
-                        await _auditService.LogAsync("  삭제", match, ok: false, "  실패", CancellationToken.None);
+                        //await _auditService.LogAsync("  삭제", match, ok: false, "  실패", CancellationToken.None);
                     }
 
                 }
@@ -1421,12 +1421,12 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 foreach (DelMatchingInfo match in GetAllInCurrentOrder())
                 {
-                    bool logged = await _auditService.LogAsync("  삭제", match, ok: true, "  성공", CancellationToken.None);
-                    if (!logged)
-                    {
-                        LstDelInfo?.Clear();
-                        return;
-                    }
+                    //bool logged = await _auditService.LogAsync("  삭제", match, ok: true, "  성공", CancellationToken.None);
+                    //if (!logged)
+                    //{
+                    //    LstDelInfo?.Clear();
+                    //    return;
+                    //}
                     string dir = match.DelMatchingPath;
                     isDeletedAll = await _deleteService.DeleteAsync(dir, true); // _deleteService 사용
                     if (isDeletedAll)
@@ -1444,7 +1444,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     }
                     else
                     {
-                        await _auditService.LogAsync("  삭제", match, ok: false, "  실패", CancellationToken.None);
+                        //await _auditService.LogAsync("  삭제", match, ok: false, "  실패", CancellationToken.None);
                     }
 
                 }
@@ -1861,7 +1861,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     bool ok = Directory.Exists(restoredItem.DelMatchingPath)
                                 || File.Exists(restoredItem.DelMatchingPath);
 
-                    _auditService.LogAsync("  복원", restoredItem, ok, ok ? "  성공" : "  실패", CancellationToken.None);
+                    //_auditService.LogAsync("  복원", restoredItem, ok, ok ? "  성공" : "  실패", CancellationToken.None);
                 });
 
             }

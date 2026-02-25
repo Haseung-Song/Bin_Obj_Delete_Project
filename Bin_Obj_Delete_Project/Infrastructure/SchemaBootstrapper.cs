@@ -25,49 +25,49 @@ END";
         /// [ActionLogTable] 생성
         /// </summary>
         /// <param name="connectionString"></param>
-        public static void EnsureActionLogTable(string connectionString)
-        {
-            SqlConnection con = null;
-            SqlCommand cmd = null;
-            try
-            {
-                con = new SqlConnection(connectionString);
-                con.Open();
-                cmd = new SqlCommand(EnsureTableSql, con);
-                cmd.ExecuteNonQuery();
-            }
-            finally
-            {
-                cmd?.Dispose();
-                con?.Dispose();
-            }
+        //public static void EnsureActionLogTable(string connectionString)
+        //{
+        //    SqlConnection con = null;
+        //    SqlCommand cmd = null;
+        //    try
+        //    {
+        //        con = new SqlConnection(connectionString);
+        //        con.Open();
+        //        cmd = new SqlCommand(EnsureTableSql, con);
+        //        cmd.ExecuteNonQuery();
+        //    }
+        //    finally
+        //    {
+        //        cmd?.Dispose();
+        //        con?.Dispose();
+        //    }
 
-        }
+        //}
 
         /// <summary>
         /// [ActionLogTable] 삭제
         /// </summary>
         /// <param name="connectionString"></param>
-        public static void ClearActionLogTable(string connectionString)
-        {
-            const string sql = "DROP TABLE IF EXISTS dbo.ACTION_LOG;";
+        //public static void ClearActionLogTable(string connectionString)
+        //{
+        //    const string sql = "DROP TABLE IF EXISTS dbo.ACTION_LOG;";
 
-            SqlConnection con = null;
-            SqlCommand cmd = null;
-            try
-            {
-                con = new SqlConnection(connectionString);
-                con.Open();
-                cmd = new SqlCommand(sql, con);
-                cmd.ExecuteNonQuery();
-            }
-            finally
-            {
-                cmd?.Dispose();
-                con?.Dispose();
-            }
+        //    SqlConnection con = null;
+        //    SqlCommand cmd = null;
+        //    try
+        //    {
+        //        con = new SqlConnection(connectionString);
+        //        con.Open();
+        //        cmd = new SqlCommand(sql, con);
+        //        cmd.ExecuteNonQuery();
+        //    }
+        //    finally
+        //    {
+        //        cmd?.Dispose();
+        //        con?.Dispose();
+        //    }
 
-        }
+        //}
 
     }
 
