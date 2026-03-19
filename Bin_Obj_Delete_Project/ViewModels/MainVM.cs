@@ -1216,7 +1216,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
         /// <summary>
         /// 헬퍼 함수 1
-        /// 정렬된 전체 순서를 기준으로, 선택된 항목만(경로 기준)
+        /// 정렬된 전체 순서를 기준으로, [선택된 항목 + 그 하위 항목들] 모두 경로 기준으로
         /// 그 순서를 유지해 걸러서 반환하는 함수
         /// </summary>
         /// <returns></returns>
@@ -1225,7 +1225,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
             var order = GetAllInCurrentOrder();
             var sel = new HashSet<string>(SelectFolderInfo.Select(x => x.DelMatchingPath), StringComparer.OrdinalIgnoreCase);
 
-            return order.Where(x => sel.Contains(x.DelMatchingPath)).ToList();
+            return order.Where(x => sel.Any(selectedPath =>
+            string.Equals(x.DelMatchingPath, selectedPath, StringComparison.OrdinalIgnoreCase) ||
+            // 즉, 현재 항목의 경로가 선택한 폴더의 하위 경로인지 확인 후, 리스트화!  
+            x.DelMatchingPath.StartsWith(selectedPath + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
+            )).ToList();
         }
 
         /// <summary>
@@ -1237,9 +1241,15 @@ namespace Bin_Obj_Delete_Project.ViewModels
         {
             bool isDeletedSel = false;
 
-            int totalSelMatch = selectToDelete.Count();
+            // 크기 순 정렬 시에 부모부터 삭제 시 자식도 이미 삭제가 되어버리므로,
+            // IDeleteService의 삭제 기능 작동 시 삭제 경로가 존재하더라도,
+            // 실제 자식 폴더는 삭제가 된 상태 => 결국 false로 return을 함.
+            // 경로가 긴 것부터, 즉 자식부터 먼저 삭제하도록 항상 순서를 변경 필요
+            var deleteTargets = GetSelInCurrentOrder().OrderByDescending(x => x.DelMatchingPath.Length).ToList();
+
+            int totalSelMatch = deleteTargets.Count();
             int processedSelMatch = 0;
-            if (selectToDelete?.Count == 0)
+            if (deleteTargets?.Count == 0)
             {
                 VisibleDestroy = false;
                 return;
@@ -1247,42 +1257,44 @@ namespace Bin_Obj_Delete_Project.ViewModels
             deletedSuccessfully?.Clear();
             progress?.Report(0);
 
+
             /* [중복 경로 방지용 필터]
              * [selectToDelete] 안에 있는 항목들 중에서 이미 LstDelInfo에 같은 DelMatchingPath를 가진 항목이 없을 경우에만 누적 추가 */
-            LstDelInfo?.AddRange(selectToDelete?.Where(sel => !LstDelInfo.Any(saved => saved.DelMatchingPath == sel.DelMatchingPath)));
+            LstDelInfo?.AddRange(deleteTargets?.Where(sel => !LstDelInfo.Any(saved => saved.DelMatchingPath == sel.DelMatchingPath)));
 
             TheBtnEnabledOrNot = false;
             VisibleDestroy = true;
             try
             {
-                foreach (DelMatchingInfo match in GetSelInCurrentOrder())
+                foreach (DelMatchingInfo match in deleteTargets)
                 {
-                    //bool logged = await _auditService.LogAsync("  삭제", match, ok: true, "  성공", CancellationToken.None);
-                    //if (!logged)
-                    //{
-                    //    LstDelInfo?.Clear();
-                    //    return;
-                    //}
                     string dir = match.DelMatchingPath;
                     isDeletedSel = await _deleteService.DeleteAsync(dir, true); // _deleteService 사용
+                    bool logged = await _auditService.LogAsync("  삭제", match, ok: isDeletedSel, isDeletedSel ? "  성공" : " 실패", CancellationToken.None);
+                    if (!logged)
+                    {
+                        LstDelInfo?.Clear();
+                        return;
+                    }
                     if (isDeletedSel)
                     {
-                        //await _auditService.LogAsync("  삭제", match, ok: true, "  성공", CancellationToken.None);
                         deletedSuccessfully?.Add(match); // 삭제 성공 항목만 저장!
                         await Application.Current.Dispatcher.InvokeAsync(() =>
                         {
-                            ActiveFolderInfo.Remove(match); // [UI 초기화]
+                            var removeTarget = ActiveFolderInfo
+                            .FirstOrDefault(x => x.DelMatchingPath.Equals(match.DelMatchingPath, StringComparison.OrdinalIgnoreCase));
+
+                            if (removeTarget != null)
+                            {
+                                ActiveFolderInfo.Remove(removeTarget); // [UI 초기화]
+                            }
                             // [폴더, 파일] 선택 삭제하기 후, [진행률 업데이트] 작업!!
                             processedSelMatch++;
                             progress?.Report((double)processedSelMatch / totalSelMatch * 100);
                             // UI Update! (총 항목 개수)
-                            TotalNumbersInfo = DeleteFolderInfo.Count - deletedSuccessfully.Count;
+                            TotalNumbersInfo = LstAllData.Count - deletedSuccessfully.Count;
                         });
                         await Task.Delay(5);
-                    }
-                    else
-                    {
-                        //await _auditService.LogAsync("  삭제", match, ok: false, "  실패", CancellationToken.None);
                     }
 
                 }
@@ -1419,16 +1431,18 @@ namespace Bin_Obj_Delete_Project.ViewModels
             VisibleDestroy = true;
             try
             {
-                foreach (DelMatchingInfo match in GetAllInCurrentOrder())
+                // 일괄 삭제 시, 부모/자식 폴더가 동시에 존재하는 경우에 부모가 먼저 삭제되면서 자식이 삭제되지 않는 경우가 생길 수 있음.
+                // 이에, 기본적으로 현재 정렬 상태(GetAllInCurrentOrder())를 가져온 후, 경로 깊은 것부터 다시 정렬(내림차순)하며 삭제를 해야만 함.
+                foreach (DelMatchingInfo match in GetAllInCurrentOrder().OrderByDescending(x => x.DelMatchingPath.Count(c => c == '\\')).ToList())
                 {
-                    //bool logged = await _auditService.LogAsync("  삭제", match, ok: true, "  성공", CancellationToken.None);
-                    //if (!logged)
-                    //{
-                    //    LstDelInfo?.Clear();
-                    //    return;
-                    //}
                     string dir = match.DelMatchingPath;
                     isDeletedAll = await _deleteService.DeleteAsync(dir, true); // _deleteService 사용
+                    bool logged = await _auditService.LogAsync("  삭제", match, ok: isDeletedAll, isDeletedAll ? "  성공" : "  실패", CancellationToken.None);
+                    if (!logged)
+                    {
+                        LstDelInfo?.Clear();
+                        return;
+                    }
                     if (isDeletedAll)
                     {
                         deletedSuccessfully?.Add(match); // 삭제 성공 항목만 저장!
@@ -1441,10 +1455,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             TotalNumbersInfo = DeleteFolderInfo.Count - deletedSuccessfully.Count; // UI Update! (총 항목 개수)
                         });
                         await Task.Delay(5);
-                    }
-                    else
-                    {
-                        //await _auditService.LogAsync("  삭제", match, ok: false, "  실패", CancellationToken.None);
                     }
 
                 }
@@ -1845,23 +1855,49 @@ namespace Bin_Obj_Delete_Project.ViewModels
             try
             {
                 isTargetsRestored = false;
+
+                // 복원 처리한 경로 중복 방지용
+                var restoredPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
                 isTargetsRestored = await _recycleBinService.RestoreDelInfoAsync(LstDelInfo, restoredItem => // _recycleBinService 사용
                 {
-                    // 복원 항목마다 UI 실시간 업데이트 반영
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        LstAllData.Add(restoredItem);
-                        DeleteFolderInfo.Add(restoredItem);
-                        ActiveFolderInfo.Add(restoredItem);
-                        CommonSortedFunc(); // 복원 후, 정렬 즉시 재적용
-                        TotalNumbersInfo = LstAllData.Count(); // [UI Update] (총 항목 개수)
-                    });
-
                     // 즉시 [Success] 또는 [Failure] 판정 (파일 또는 폴더가 존재하면 성공)
                     bool ok = Directory.Exists(restoredItem.DelMatchingPath)
                                 || File.Exists(restoredItem.DelMatchingPath);
 
-                    //_auditService.LogAsync("  복원", restoredItem, ok, ok ? "  성공" : "  실패", CancellationToken.None);
+                    // 복원 항목마다 UI 실시간 업데이트 반영
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        // 1. null / 빈 경로 방어
+                        if (restoredItem == null || string.IsNullOrWhiteSpace(restoredItem.DelMatchingPath))
+                            return;
+
+                        // 2. 이미 처리한 경로만 중복 복원 방지
+                        if (!restoredPaths.Add(restoredItem.DelMatchingPath))
+                            return;
+
+                        // 4-1. 각 컬렉션(LstAllData)에도 중복 없이 추가!
+                        if (!LstAllData.Any(x => x.DelMatchingPath.Equals(restoredItem.DelMatchingPath, StringComparison.OrdinalIgnoreCase)))
+                        {
+                            LstAllData.Add(restoredItem);
+                        }
+
+                        // 4-1. 각 컬렉션(DeleteFolderInfo)에도 중복 없이 추가!
+                        if (!DeleteFolderInfo.Any(x => x.DelMatchingPath.Equals(restoredItem.DelMatchingPath, StringComparison.OrdinalIgnoreCase)))
+                        {
+                            DeleteFolderInfo.Add(restoredItem);
+                        }
+
+                        // 4-1. 각 컬렉션(ActiveFolderInfo)에도 중복 없이 추가!
+                        if (!ActiveFolderInfo.Any(x => x.DelMatchingPath.Equals(restoredItem.DelMatchingPath, StringComparison.OrdinalIgnoreCase)))
+                        {
+                            ActiveFolderInfo.Add(restoredItem);
+                        }
+
+                        CommonSortedFunc(); // 복원 후, 정렬 즉시 재적용
+                        TotalNumbersInfo = LstAllData.Count(); // [UI Update] (총 항목 개수)
+                    });
+                    _auditService.LogAsync("  복원", restoredItem, ok, ok ? "  성공" : "  실패", CancellationToken.None);
                 });
 
             }
