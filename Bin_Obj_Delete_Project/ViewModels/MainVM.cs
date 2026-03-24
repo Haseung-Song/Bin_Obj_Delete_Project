@@ -1194,7 +1194,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     //    Console.WriteLine(item.DelMatchingOfSize);
                     //    Console.WriteLine(item.DelMatchingPath);
                     //}
-                    if (ProgressValue < 100)
+                    if (ProgressValue <= 100)
                     {
                         fldrProgress?.Report(100); // [진행률: 100] 작업 완료
                         fileProgress?.Report(100); // [진행률: 100] 작업 완료
@@ -1311,7 +1311,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             // UI Update! (총 항목 개수)
                             TotalNumbersInfo = LstAllData.Count - deletedSuccessfully.Count;
                         });
-                        await Task.Delay(5);
+                        await Task.Delay(30);
                     }
 
                 }
@@ -1323,9 +1323,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 VisibleDestroy = false;
                 if (isDeletedSel)
                 {
-                    if (ProgressValue < 100)
+                    if (ProgressValue <= 100)
                     {
-                        await Task.Delay(5);
+                        await Task.Delay(50);
                         progress?.Report(100); // [진행률: 100]: 작업 완료
                     }
                     // 삭제 후, 데이터 최신화!
@@ -1478,7 +1478,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             progress?.Report((double)processedAllMatch / totalAllMatch * 100);
                             TotalNumbersInfo = DeleteFolderInfo.Count - deletedSuccessfully.Count; // UI Update! (총 항목 개수)
                         });
-                        await Task.Delay(5);
+                        await Task.Delay(30);
                     }
 
                 }
@@ -1490,9 +1490,9 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 VisibleDestroy = false;
                 if (isDeletedAll)
                 {
-                    if (ProgressValue < 100)
+                    if (ProgressValue <= 100)
                     {
-                        await Task.Delay(5);
+                        await Task.Delay(50);
                         progress?.Report(100); // [진행률: 100]: 작업 완료
                     }
                     // 삭제 후, 데이터 최신화!
@@ -1899,7 +1899,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         ActiveFolderInfo.Add(restoredItem);
 
                         CommonSortedFunc(); // 복원 후, 정렬 즉시 재적용
-
                         TotalNumbersInfo = LstAllData.Count(); // [UI Update] (총 항목 개수)
                     });
 
