@@ -725,7 +725,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
 
         #region 생성자 (Initialize)
 
-        public MainVM() : this(new EnumerateService(), new DeleteService(), new RecycleBinService(),
+        public MainVM() : this(
+            new EnumerateService(),
+            new DeleteService(),
+            new RecycleBinService(new SqlServerAuditRepository(ConfigurationManager.ConnectionStrings["sqlDB"].ConnectionString)),
             new SqlServerAuditRepository(ConfigurationManager.ConnectionStrings["sqlDB"].ConnectionString))
         {
             TheBtnEnabledOrNot = true;
@@ -1256,7 +1259,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
             deletedSuccessfully?.Clear();
             progress?.Report(0);
-
 
             /* [중복 경로 방지용 필터]
              * [selectToDelete] 안에 있는 항목들 중에서 이미 LstDelInfo에 같은 DelMatchingPath를 가진 항목이 없을 경우에만 누적 추가 */
@@ -1856,15 +1858,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
             {
                 isTargetsRestored = false;
 
-                // 복원 처리한 경로 중복 방지용
+                // 복원 처리한 경로 중복 방지용 (UI 기준)
                 var restoredPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
                 isTargetsRestored = await _recycleBinService.RestoreDelInfoAsync(LstDelInfo, restoredItem => // _recycleBinService 사용
                 {
-                    // 즉시 [Success] 또는 [Failure] 판정 (파일 또는 폴더가 존재하면 성공)
-                    bool ok = Directory.Exists(restoredItem.DelMatchingPath)
-                                || File.Exists(restoredItem.DelMatchingPath);
-
                     // 복원 항목마다 UI 실시간 업데이트 반영
                     Application.Current.Dispatcher.Invoke(() =>
                     {
@@ -1876,28 +1874,14 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         if (!restoredPaths.Add(restoredItem.DelMatchingPath))
                             return;
 
-                        // 4-1. 각 컬렉션(LstAllData)에도 중복 없이 추가!
-                        if (!LstAllData.Any(x => x.DelMatchingPath.Equals(restoredItem.DelMatchingPath, StringComparison.OrdinalIgnoreCase)))
-                        {
-                            LstAllData.Add(restoredItem);
-                        }
-
-                        // 4-1. 각 컬렉션(DeleteFolderInfo)에도 중복 없이 추가!
-                        if (!DeleteFolderInfo.Any(x => x.DelMatchingPath.Equals(restoredItem.DelMatchingPath, StringComparison.OrdinalIgnoreCase)))
-                        {
-                            DeleteFolderInfo.Add(restoredItem);
-                        }
-
-                        // 4-1. 각 컬렉션(ActiveFolderInfo)에도 중복 없이 추가!
-                        if (!ActiveFolderInfo.Any(x => x.DelMatchingPath.Equals(restoredItem.DelMatchingPath, StringComparison.OrdinalIgnoreCase)))
-                        {
-                            ActiveFolderInfo.Add(restoredItem);
-                        }
+                        LstAllData.Add(restoredItem);
+                        DeleteFolderInfo.Add(restoredItem);
+                        ActiveFolderInfo.Add(restoredItem);
 
                         CommonSortedFunc(); // 복원 후, 정렬 즉시 재적용
                         TotalNumbersInfo = LstAllData.Count(); // [UI Update] (총 항목 개수)
                     });
-                    _auditService.LogAsync("  복원", restoredItem, ok, ok ? "  성공" : "  실패", CancellationToken.None);
+
                 });
 
             }

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Bin_Obj_Delete_Project.Services
@@ -14,6 +15,13 @@ namespace Bin_Obj_Delete_Project.Services
 
     public class RecycleBinService : IRecycleBinService
     {
+        private readonly IAuditService _auditService;
+
+        public RecycleBinService(IAuditService auditService)
+        {
+            _auditService = auditService;
+        }
+
         public async Task<bool> RestoreDelInfoAsync(List<DelMatchingInfo> lstDelInfo, Action<DelMatchingInfo> onItemRestored)
         {
             return await Task.Run(() =>
@@ -81,8 +89,20 @@ namespace Bin_Obj_Delete_Project.Services
                         {
                             if (name.Contains("복원"))
                             {
-                                verb.DoIt(); // 복원 실행
-                                itemRestored = true; // 복원이 실행되었음.
+                                bool ok = false; // 복원 [성공/실패] 여부!
+
+                                try
+                                {
+                                    verb.DoIt(); // 복원 실행
+                                    ok = true;
+                                    itemRestored = true; // 복원이 실행되었음.
+                                }
+                                catch
+                                {
+                                    ok = false;
+                                }
+                                // 복원 성공 시, 성공 로그, 실패 시, 실패 로그를 띄움.
+                                _auditService.LogAsync("  복원", matchInfo, ok, ok ? "  성공" : "  실패", CancellationToken.None);
 
                                 // 1. 부모 본인 복원 콜백
                                 onItemRestored?.Invoke(matchInfo); // 콜백 호출: [MainVM]에서 UI 실시간 반영
