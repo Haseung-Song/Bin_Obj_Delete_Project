@@ -116,11 +116,6 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private bool lastSortAscending;
 
         /// <summary>
-        /// [isTargetsRestored]
-        /// </summary>
-        private bool isTargetsRestored;
-
-        /// <summary>
         /// [matchingFldrName]
         /// </summary>
         private string matchingFldrName;
