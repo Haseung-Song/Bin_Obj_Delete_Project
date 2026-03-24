@@ -1899,6 +1899,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         ActiveFolderInfo.Add(restoredItem);
 
                         CommonSortedFunc(); // 복원 후, 정렬 즉시 재적용
+
                         TotalNumbersInfo = LstAllData.Count(); // [UI Update] (총 항목 개수)
                     });
 
