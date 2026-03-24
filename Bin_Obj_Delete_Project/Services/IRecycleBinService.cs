@@ -39,7 +39,7 @@ namespace Bin_Obj_Delete_Project.Services
                     dynamic item = items.Item(i);
 
                     string originPath = recycleBin.GetDetailsOf(item, 1)?.Trim();
-                    string itemName = item.Name?.Trim(); // [파일] 기준으로, 확장자 제외됨!
+                    string itemName = item.Name?.Trim(); // 확장자가 포함되어 있을 수 있음.
                     if (string.IsNullOrEmpty(originPath) || string.IsNullOrEmpty(itemName))
                         continue;
 
@@ -56,13 +56,27 @@ namespace Bin_Obj_Delete_Project.Services
                             return x.DelMatchingPath.Equals(folderFullPath, StringComparison.OrdinalIgnoreCase);
                         }
 
-                        // [파일] (DelMatchingCategory가 "파일 폴더"가 아닌 경우만)
-                        string savedDir = Path.GetDirectoryName(x.DelMatchingPath); // [파일]의 폴더 경로 +
-                        string savedFileNameWithoutExt = Path.GetFileNameWithoutExtension(x.DelMatchingPath); // 확장자 제외
+                        // [파일] (DelMatchingCategory가 "파일 폴더"가 아닌 경우)
+                        // [파일] 매칭 로직
+                        // 조건:
+                        // 1) 파일이 위치한 폴더 경로가 동일해야 함.
+                        // 2) 파일명이 동일해야 함.
+                        // 3) 이 때, 확장자는 제거 후 비교
 
-                        // 즉, [파일]의 폴더 경로도 일치하면서, itemName(확장자 제외)도 동시에 일치해야 return 가능!
-                        return string.Equals(savedDir, originPath, StringComparison.OrdinalIgnoreCase) &&
-                               string.Equals(savedFileNameWithoutExt, itemName, StringComparison.OrdinalIgnoreCase);
+                        // 저장 경로에서 폴더 경로 추출 (Ex. C:\A\test.txt → C:\A)
+                        string savedDir = Path.GetDirectoryName(x.DelMatchingPath);
+
+                        // 저장 경로에서 가져온 파일명(확장자 제외) 추출 (Ex. test.txt → test)
+                        string fileNameWithoutExt = Path.GetFileNameWithoutExtension(x.DelMatchingPath);
+
+                        // 휴지통 안에서 가져온 파일명(확장자 제외) 추출 (Ex. test.txt → test)
+                        string itemNameWithoutExt = Path.GetFileNameWithoutExtension(itemName);
+
+                        // 최종 비교:
+                        // 1) 폴더 경로가 일치하고,
+                        // 2) 파일명(확장자 제거)이 일치하면, 동일한 파일로 판단!
+                        return string.Equals(savedDir, originPath, StringComparison.OrdinalIgnoreCase) && // 1)
+                               string.Equals(fileNameWithoutExt, itemNameWithoutExt, StringComparison.OrdinalIgnoreCase); // 2)
                     });
 
                     //Console.WriteLine($"[휴지통] originPath = [{originPath}]");
@@ -101,6 +115,7 @@ namespace Bin_Obj_Delete_Project.Services
                                 {
                                     ok = false;
                                 }
+
                                 // 복원 성공 시, 성공 로그, 실패 시, 실패 로그를 띄움.
                                 _auditService.LogAsync("  복원", matchInfo, ok, ok ? "  성공" : "  실패", CancellationToken.None);
 

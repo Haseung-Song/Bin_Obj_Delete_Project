@@ -116,6 +116,11 @@ namespace Bin_Obj_Delete_Project.ViewModels
         private bool lastSortAscending;
 
         /// <summary>
+        /// [isTargetsRestored]
+        /// </summary>
+        private bool isTargetsRestored;
+
+        /// <summary>
         /// [matchingFldrName]
         /// </summary>
         private string matchingFldrName;
@@ -1876,7 +1881,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 // 복원 처리한 경로 중복 방지용 (UI 기준)
                 var restoredPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-                await _recycleBinService.RestoreDelInfoAsync(LstDelInfo, restoredItem => // _recycleBinService 사용
+                isTargetsRestored = await _recycleBinService.RestoreDelInfoAsync(LstDelInfo, restoredItem => // _recycleBinService 사용
                 {
                     // 복원 항목마다 UI 실시간 업데이트 반영
                     Application.Current.Dispatcher.Invoke(() =>
@@ -1894,6 +1899,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                         ActiveFolderInfo.Add(restoredItem);
 
                         CommonSortedFunc(); // 복원 후, 정렬 즉시 재적용
+
                         TotalNumbersInfo = LstAllData.Count(); // [UI Update] (총 항목 개수)
                     });
 
@@ -1906,14 +1912,18 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
             finally
             {
-                if (LstDelInfo?.Count > 0)
+                if (isTargetsRestored)
                 {
-                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    if (LstDelInfo?.Count > 0)
                     {
-                        Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
-                        _ = MessageBox.Show(mainWindow, "복원이 완료되었습니다.", "복원 완료", MessageBoxButton.OK, MessageBoxImage.Information);
-                    });
-                    LstDelInfo.Clear(); // 삭제(복원) 데이터 정보 초기화
+                        await Application.Current.Dispatcher.InvokeAsync(() =>
+                        {
+                            Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
+                            _ = MessageBox.Show(mainWindow, "복원이 완료되었습니다.", "복원 완료", MessageBoxButton.OK, MessageBoxImage.Information);
+                        });
+                        LstDelInfo.Clear(); // 삭제(복원) 데이터 정보 초기화
+                    }
+
                 }
                 else
                 {
