@@ -1,7 +1,7 @@
 # 📂 Bin_Obj_Delete_Project
 
 ## 1. 프로젝트 개요
-Bin_Obj_Delete_Project는 지정한 경로에서 **bin/obj 등**의 여러 폴더와 **특정 확장자** 파일을 
+Bin_Obj_Delete_Project는 지정한 경로에서 **bin/obj 등**의 여러 폴더와 **특정 확장자**를 가진 파일을 
 **탐색 → 필터링 → 정렬 → 삭제 → 복원**까지 수행할 수 있는 WPF 기반 폴더·파일 관리 프로그램입니다.  
 
 MVVM 패턴을 적용하여 **UI와 비지니스 로직을 분리**하였으며,  
