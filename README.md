@@ -1,8 +1,10 @@
 # 📂 Bin_Obj_Delete_Project
 
 ## 1. 프로젝트 개요
-Bin_Obj_Delete_Project는 지정한 경로에서 `bin` / `obj` 폴더 또는 특정 확장자 파일을 **탐색 → 필터링 → 정렬 → 삭제 → 복원**까지 수행할 수 있는 WPF 기반 폴더·파일 관리 프로그램입니다.  
-MVVM 패턴을 적용하고, 주요 기능은 **폴더/파일 열거, 조건부 삭제, 휴지통 복원, 페이징 및 정렬, 진행률 표시** 등을 포함합니다.
+Bin_Obj_Delete_Project는 지정한 경로에서 bin / obj 폴더 또는 특정 확장자 파일을 탐색 → 필터링 → 정렬 → 삭제 → 복원까지 수행할 수 있는 WPF 기반 폴더·파일 관리 프로그램입니다.  
+MVVM 패턴을 적용하여 UI와 비지니스 로직을 분리하였으며,
+대용량 파일 처리 환경에서도 안정적으로 동작하도록 설계되었습니다.
+주요 기능은 **폴더/파일 열거, 조건부 삭제, 휴지통 복원, 페이징 및 정렬, 진행률 표시** 등을 포함합니다.
 
 ---
 
@@ -37,6 +39,19 @@ MVVM 패턴을 적용하고, 주요 기능은 **폴더/파일 열거, 조건부 
 - 페이지 당 표시 개수 지정 (기본 100개)
 - 이전/다음 페이지 이동 지원
 
+### 📄 작업 로그 기록 (MSSQL)
+- 삭제 및 복원 작업 결과를 DB에 기록
+- 작업 대상 정보(INFO) 기록
+  - ID (번호)
+  - ACTION (삭제/복원)
+  - ITEM (폴더/파일)
+  - NAME (폴더명/파일명)
+  - PATH (폴더 경로/파일 경로)
+  - SIZE (바이트 단위)
+  - IS_ERROR (에러 유무)
+  - RESULT (성공/실패)
+- 감사(Audit) 및 이력 추적 기능
+
 ---
 
 ## 3. 내부 구조 (MainVM 중심)
@@ -44,69 +59,114 @@ MVVM 패턴을 적용하고, 주요 기능은 **폴더/파일 열거, 조건부 
 ### MainVM
 MVVM 패턴의 ViewModel로서 UI 상태와 비즈니스 로직 연결
 
-#### 주요 의존성 주입 서비스
-- `IEnumerateService` : 폴더/파일 탐색 및 정보 수집
-- `IDeleteService` : 항목 삭제 (휴지통 / 영구)
-- `IRecycleBinService` : 휴지통 복원
+#### 의존성 주입 서비스
+- IEnumerateService : 폴더/파일 탐색 및 정보 수집
+- IDeleteService : 항목 삭제 (휴지통 / 영구)
+- IRecycleBinService : 휴지통 복원
+- IAuditService : MSSQL 기반 작업 로그 기록
 
 #### 상태 관리 프로퍼티
-- 경로 : `DeleteFolderPath`
-- 필터 : `FilterFolderName`, `FilterExtensions`
-- 진행률 : `ProgressValue`, `ProgressStyle`
-- 컬렉션 : `ActiveFolderInfo`, `DeleteFolderInfo`, `SelectFolderInfo`
+- **경로**
+  -> DeleteFolderPath
+- **필터**
+  -> FilterFolderName, FilterExtensions
+- **진행률**
+  -> ProgressValue, ProgressStyle
+- **데이터 컬렉션**
+  -> LstAllData (전체 데이터)
+  -> DeleteFolderInfo (삭제 데이터)
+  -> ActiveFolderInfo (현재 UI 표시 데이터)
+  -> SelectFolderInfo (선택 항목 데이터)
 
-#### 명령(ICommand) 바인딩
-- `LoadingFolderCommand` — 폴더 대화상자 열기
-- `EnterLoadPathCommand` — 경로 직접 입력
-- `DelSelMatchesCommand`, `DelAllMatchesCommand` — 삭제 실행
-- `FilterResetFNCommand`, `FilterResetFECommand` — 필터 초기화
-- `RestoreFromRecycleBinCommand` — 복원 실행
-- 정렬 및 페이징 관련 커맨드
+#### ICommand 바인딩
+- **폴더 선택**
+  -> LoadingFolderCommand
+- **경로 입력**
+  -> EnterLoadPathCommand
+- **삭제 기능**
+  -> DelSelMatchesCommand, DelAllMatchesCommand
+- **필터 리셋**
+  -> FilterResetFNCommand, FilterResetFECommand
+- **복원 기능**
+  -> RestoreFromRecycleBinCommand
+- **기타**
+  -> 정렬 / 페이징 관련 기타 커맨드
 
 ---
 
-## 4. 동작 방식 요약
+## 4. 동작 흐름
 1. **폴더 선택**
-   - `CommonOpenFileDialog` 또는 직접 입력으로 경로 설정
-   - 기존 목록 초기화
-2. **열거 작업 실행**
-   - 비동기 폴더 탐색 (`EnumerateFolders`)
-   - 진행률 UI 업데이트
-3. **필터 조건 적용 후 목록 표시**
-   - `ObservableCollection` 바인딩
-   - 페이지 단위로 `ActiveFolderInfo` 갱신
-4. **삭제**
-   - 선택/전체 삭제 시 `_deleteService.DeleteAsync` 호출
-   - 삭제 성공 항목만 목록에서 제거
-5. **복원**
-   - `LstDelInfo` 내역 기반 복원 후 목록 재정렬
+   - Dialog 또는 직접 입력 -> 경로 설정
+   - 기존 데이터 초기화
+2. **탐색 수행**
+   - 비동기 폴더 탐색 (EnumerateFolders)
+   - 진행률 UI 반영
+3. **필터 적용 및 데이터 구성**
+   - 조건에 맞는 데이터 UI 표시
+   - ObservableCollection 바인딩
+4. **페이징 처리**
+   - 페이지 단위 데이터 구성
+   - ActiveFolderInfo 업데이트
+5. **삭제 처리**
+   - DeleteService 호출
+   - 삭제 성공 항목만 UI 제거
+   - MSSQL DB 로그 기록
+7. **복원 처리**
+   - RecycleBinService 호출
+   - 원래 경로로 복원
+   - UI 동기화
+   - MSSQL DB 로그 동기화
 
 ---
 
 ## 5. 기술 스택
-- **언어/플랫폼** : C#, WPF (.NET)
+- **언어/프레임워크** : C#, WPF (.NET)
 - **UI 패턴** : MVVM
-- **사용 라이브러리**
-  - `Microsoft.WindowsAPICodePack.Dialogs` — 폴더 선택 대화상자
-  - `ObservableCollection<T>` — UI 데이터 바인딩
-  - Custom Command (`RelayCommand`, `AsyncRelayCommand`)
 
+## 6. 주요 사용 기술
+1. **Microsoft.WindowsAPICodePack.Dialogs**
+ -> 폴더 선택 UI
+2. **ObservableCollection<T>**
+ -> UI 데이터 바인딩
+3. **RelayCommand/AsyncRelayCommand**
+ -> MVVM 패턴 Command 처리
+4. **Shell.Application (COM)**
+ -> 휴지통 접근 및 복원
+5. **MSSQL (ADO.NET)**
+ -> 작업 로그 기록
+    
 ---
 
-## 6. 기술적 도전 & 성과
+## 7. 기술적 도전 & 해결
 - **대용량 디렉터리 탐색 속도 최적화**
-  - `Directory.EnumerateDirectories` 활용으로 메모리 효율성 향상
-  - 진행률 UI 업데이트와 탐색 로직을 분리하여 UI 끊김 최소화
-- **휴지통 복원 기능 구현**
-  - Win32 API / COM 인터페이스(IContextMenu) 분석 및 C# 적용
-- **페이징 처리로 성능 최적화**
-  - 페이지별 데이터 로딩으로 메모리 사용량 절감
+  - Directory.EnumerateDirectories 사용
+  - 메모리 사용 최소화
+- **UI 끊김 최소화**
+  - 비동기 처리 + 프로그레스 분리
+  - Dispatcher -> UI 업데이트
+- **휴지통 복원 구현**
+  - Windows Shell COM 인터페이스 분석
+  - 원본 경로 기반 매칭 로직 구현
+- **페이징 처리**
+  - 페이지 단위 데이터 로딩
+  - 대량 데이터 처리로 UI 성능 유지
 - **예외 처리 강화**
-  - 경로 접근 권한, 파일 잠김 상태, 네트워크 경로 예외 처리
-- **성과**
-  - 수백~수천 개 항목을 UI 끊김 없이 관리 가능
-  - 수동 삭제 대비 작업 시간 **80% 이상 단축**
-  - 업무 환경에서도 실사용 가능 수준 완성
+  - 접근 권한 오류
+  - 파일 잠금 상태
+  - 경로 길이 문제
+  - 네트워크 경로 예외 처리
+- **작업 로그 시스템 구축**
+  - MSSQL DB 연동
+  - 삭제/복원 && 성공/실패 등 데이터 기록
+  - 작업 이력 추적 가능
+   
+## 8. 성과
+  - **수백 ~ 수천 개** 폴더/파일을 UI 지연 없이 처리
+  - 반복적인 수동 삭제 작업 대비 **80% 이상 시간 절감**
+  - 실무 환경에서도 활용 가능한 수준의 **폴더/파일 관리 도구** 구현
+
+## 9. 한줄 요약
+ - **파일 시스템 처리** + **UI** + **OS(Shell)** + **DB 로그**까지 통합한 실사용 가능 **미니 파일탐색기** 제작
 
 ---
 
