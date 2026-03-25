@@ -76,10 +76,10 @@ MVVM 패턴의 ViewModel로서 UI 상태와 비즈니스 로직 연결
 - **진행률**
   -> ProgressValue, ProgressStyle
 - **데이터 컬렉션**
-  -> LstAllData (전체 데이터)
-  -> DeleteFolderInfo (삭제 데이터)
-  -> ActiveFolderInfo (현재 UI 표시 데이터)
-  -> SelectFolderInfo (선택 항목 데이터)
+  -> LstAllData (전체 데이터)  
+  -> DeleteFolderInfo (삭제 데이터)  
+  -> ActiveFolderInfo (현재 UI 표시 데이터)  
+  -> SelectFolderInfo (선택 항목 데이터)  
 
 #### ICommand 바인딩
 - **폴더 선택**
