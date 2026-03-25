@@ -1311,7 +1311,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             // UI Update! (총 항목 개수)
                             TotalNumbersInfo = LstAllData.Count - deletedSuccessfully.Count;
                         });
-                        await Task.Delay(30);
+
                     }
 
                 }
@@ -1478,7 +1478,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             progress?.Report((double)processedAllMatch / totalAllMatch * 100);
                             TotalNumbersInfo = DeleteFolderInfo.Count - deletedSuccessfully.Count; // UI Update! (총 항목 개수)
                         });
-                        await Task.Delay(30);
+
                     }
 
                 }

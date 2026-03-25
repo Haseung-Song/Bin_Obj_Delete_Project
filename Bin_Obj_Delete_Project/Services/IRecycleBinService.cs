@@ -38,12 +38,15 @@ namespace Bin_Obj_Delete_Project.Services
                 {
                     dynamic item = items.Item(i);
 
+                    // 휴지통 안의 해당 파일의 삭제 전 저장된 폴더 경로를 가져옴.
                     string originPath = recycleBin.GetDetailsOf(item, 1)?.Trim();
-                    string itemName = item.Name?.Trim(); // 확장자가 포함되어 있을 수 있음.
+
+                    string itemName = item.Name?.Trim(); // 확장자는 제거된 상태!
+
                     if (string.IsNullOrEmpty(originPath) || string.IsNullOrEmpty(itemName))
                         continue;
 
-                    // lstDelInfo에서 직접 [폴더/파일] 구분 후, 매칭
+                    // lstDelInfo에서 직접 폴더/파일 구분 후, 매칭
                     var matchInfo = lstDelInfo.FirstOrDefault(x =>
                     {
                         if (string.IsNullOrEmpty(x.DelMatchingPath))
@@ -60,23 +63,19 @@ namespace Bin_Obj_Delete_Project.Services
                         // [파일] 매칭 로직
                         // 조건:
                         // 1) 파일이 위치한 폴더 경로가 동일해야 함.
-                        // 2) 파일명이 동일해야 함.
-                        // 3) 이 때, 확장자는 제거 후 비교
+                        // 2) 파일명(확장자 제거)이 동일해야 함.
 
-                        // 저장 경로에서 폴더 경로 추출 (Ex. C:\A\test.txt → C:\A)
-                        string savedDir = Path.GetDirectoryName(x.DelMatchingPath);
+                        // 1) 저장 경로에서 [폴더 경로] 추출 (Ex. C:\A\test.txt → C:\A)
+                        string savedDir = Path.GetDirectoryName(x.DelMatchingPath).Trim();
 
-                        // 저장 경로에서 가져온 파일명(확장자 제외) 추출 (Ex. test.txt → test)
-                        string fileNameWithoutExt = Path.GetFileNameWithoutExtension(x.DelMatchingPath);
-
-                        // 휴지통 안에서 가져온 파일명(확장자 제외) 추출 (Ex. test.txt → test)
-                        string itemNameWithoutExt = Path.GetFileNameWithoutExtension(itemName);
+                        // 2) 저장 경로에서 가져온 파일명(확장자 제외) 추출 (Ex. test.txt → test)
+                        string fileNameWithoutExt = Path.GetFileNameWithoutExtension(x.DelMatchingPath).Trim();
 
                         // 최종 비교:
-                        // 1) 폴더 경로가 일치하고,
-                        // 2) 파일명(확장자 제거)이 일치하면, 동일한 파일로 판단!
+                        // 1. 폴더 경로가 일치하고,
+                        // 2. 파일명(확장자 제외)와 휴지통에서 가져온 파일명이 일치하면, 동일한 파일로 판단!
                         return string.Equals(savedDir, originPath, StringComparison.OrdinalIgnoreCase) && // 1)
-                               string.Equals(fileNameWithoutExt, itemNameWithoutExt, StringComparison.OrdinalIgnoreCase); // 2)
+                               string.Equals(fileNameWithoutExt, itemName, StringComparison.OrdinalIgnoreCase); // 2)
                     });
 
                     //Console.WriteLine($"[휴지통] originPath = [{originPath}]");
@@ -94,6 +93,7 @@ namespace Bin_Obj_Delete_Project.Services
                         continue;
 
                     var verbs = item.Verbs();
+
                     for (int j = 0; j < verbs.Count; j++)
                     {
                         dynamic verb = verbs.Item(j);
