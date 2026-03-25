@@ -113,12 +113,13 @@ MVVM 패턴의 ViewModel로서 UI 상태와 비즈니스 로직 연결
 5. **삭제 처리**
    - DeleteService 호출
    - 삭제 성공 항목만 UI 제거
+   - UI 동기화
    - MSSQL DB 로그 기록
 7. **복원 처리**
    - RecycleBinService 호출
    - 원래 경로로 복원
    - UI 동기화
-   - MSSQL DB 로그 동기화
+   - MSSQL DB 로그 기록
 
 ---
 
