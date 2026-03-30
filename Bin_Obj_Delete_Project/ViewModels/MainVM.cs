@@ -981,28 +981,17 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     matchingFldrPath = dir;
                     matchingFileInfoOrNot = false; // [폴더]로 구분
 
-                    // 1. 필터 키워드를 콤마(',')로 구분 후, 배열로 생성 (FilterFolderName)
-                    string[] filterComma1 = string.IsNullOrEmpty(FilterFolderName) ? Array.Empty<string>() : FilterFolderName.Split(',');
-
-                    // Filter 01: 폴더 이름으로 검색(대소문자 구분(X))
-                    // 1) [FilterFolderName]이 null이거나 string.Empty 문자열인 경우
-                    // 2) [FilterFolderName]이 디렉토리 또는 하위 디렉토리 폴더의 이름과 일치하는 경우
-                    //bool folderMatches1 = string.IsNullOrEmpty(FilterFolderName) || dirInfo.Name.Equals(FilterFolderName, StringComparison.OrdinalIgnoreCase);
-
-                    //if (!folderMatches1)
-                    //{
-                    //    continue;
-                    //}
+                    // 1. 사용자 입력 필터 문자열[FilterFolderName]의 앞뒤 공백을 제거!
+                    var filterComma1 = FilterFolderName?.Trim();
 
                     // [Filter 01]: 폴더 이름으로 검색(대소문자 구분(X))
-                    // 지정한 배열에 정의된 조건과 일치하는지 여부 확인!
-                    // 1) [FilterFolderName]이 null이거나 string.Empty 문자열인 경우
-                    // 2) 콤마(',')로 구분된 [FilterFolderName]이 디렉토리 또는 하위 디렉토리 폴더의 이름과 일치하는 경우
-                    bool folderMatches2 = string.IsNullOrEmpty(FilterFolderName) ||
-                         Array.Exists(filterComma1, comma1 => dirInfo.Name.Equals(comma1.Trim(), StringComparison.OrdinalIgnoreCase));
+                    // 1) [FilterFolderName]이 비어있으면 -> 필터를 적용하지 않고, 모든 폴더 전시!
+                    // 2) [FilterFolderName]이 존재할때는 -> 필터를 적용하고 현재 폴더명과 정확히 일치할 때만 전시!
+                    bool folderMatches = string.IsNullOrEmpty(filterComma1) ||
+                                         matchingFldrName.Equals(filterComma1, StringComparison.OrdinalIgnoreCase);
 
                     // 1), 2)가 아닐 때,
-                    if (!folderMatches2)
+                    if (!folderMatches)
                     {
                         processedFldrs++;
                         fldrProgress.Report((double)processedFldrs / totalFldrs * 100);
@@ -1054,7 +1043,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                             }
 
                             // 2) 콤마(',')로 구분된 [FilterExtensions]이 파일의 확장명 부분의 문자열과 일치하는 경우 (확장자 비교)
-                            if (Array.Exists(filterComma2, comma2 => files.Extension.Equals(comma2.Trim(), StringComparison.OrdinalIgnoreCase)))
+                            if (Array.Exists(filterComma2, comma => files.Extension.Equals(comma.Trim(), StringComparison.OrdinalIgnoreCase)))
                             {
                                 matchingFileName = files.Name;
                                 matchingFileCreationTime = files.CreationTime.ToString("yyyy-MM-dd tt HH:mm:ss");
@@ -1242,6 +1231,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 x.DelMatchingPath.StartsWith(
                     selectedPath + Path.DirectorySeparatorChar,
                     StringComparison.OrdinalIgnoreCase)
+
             )).ToList();
         }
 
