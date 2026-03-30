@@ -3,6 +3,7 @@ using Bin_Obj_Delete_Project.Models;
 using Bin_Obj_Delete_Project.Repository;
 using Bin_Obj_Delete_Project.Services;
 using Bin_Obj_Delete_Project.Views;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.Collections.Generic;
@@ -981,14 +982,17 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     matchingFldrPath = dir;
                     matchingFileInfoOrNot = false; // [폴더]로 구분
 
-                    // 1. 사용자 입력 필터 문자열[FilterFolderName]의 앞뒤 공백을 제거!
-                    var filterComma1 = FilterFolderName?.Trim();
+                    // 1. 필터 문자열 [FilterFolderName] 전처리 (공백 제거 + 배열 분리)
+                    string[] filterComma1 = string.IsNullOrWhiteSpace(FilterFolderName) ? Array.Empty<string>()
+                        : FilterFolderName.Split(',').Select(x => x.Trim()).ToArray();
 
                     // [Filter 01]: 폴더 이름으로 검색(대소문자 구분(X))
-                    // 1) [FilterFolderName]이 비어있으면 -> 필터를 적용하지 않고, 모든 폴더 전시!
-                    // 2) [FilterFolderName]이 존재할때는 -> 필터를 적용하고 현재 폴더명과 정확히 일치할 때만 전시!
-                    bool folderMatches = string.IsNullOrEmpty(filterComma1) ||
-                                         matchingFldrName.Equals(filterComma1, StringComparison.OrdinalIgnoreCase);
+                    // 1) [FilterFolderName]이 비어있으면 -> 필터를 적용하지 않고, 모든 폴더 전시
+                    // 2) [FilterFolderName]이 존재할때는 -> 필터를 적용하고, 그 폴더명이 콤마(',')로 구분된 필터 배열의 요소와 일치할 때
+                    // 3) 또는 폴더명이 콤마(',')로 구분되지 않는 전체 문자열 포함 검색 (즉, 콤마(',')가 포함된 폴더 이름을 대응하기 위해
+                    bool folderMatches = filterComma1.IsNullOrEmpty() ||
+                                         filterComma1.Any(comma => matchingFldrName.Equals(comma, StringComparison.OrdinalIgnoreCase)) ||
+                                         matchingFldrName.Equals(FilterFolderName, StringComparison.OrdinalIgnoreCase);
 
                     // 1), 2)가 아닐 때,
                     if (!folderMatches)
@@ -1233,6 +1237,7 @@ namespace Bin_Obj_Delete_Project.ViewModels
                     StringComparison.OrdinalIgnoreCase)
 
             )).ToList();
+
         }
 
         /// <summary>
