@@ -1772,8 +1772,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
             CommonSortedFunc(); // 정렬 실행
         }
 
+        #region [페이징 처리] 기능
+
         /// <summary>
-        /// [페이징 처리] 기능
+        /// 대용량 데이터 처리 성능 병목 현상 해결: [페이징 처리] 기능
         /// </summary>
         private void LoadPageData()
         {
@@ -1794,6 +1796,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
             }
 
         }
+
+        #endregion
 
         /// <summary>
         /// 7-1. 다음 페이지로 이동 (버튼)
@@ -1876,7 +1880,8 @@ namespace Bin_Obj_Delete_Project.ViewModels
                 // 복원 처리한 경로 중복 방지용 (UI 기준)
                 var restoredPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-                isTargetsRestored = await _recycleBinService.RestoreDelInfoAsync(LstDelInfo, restoredItem => // _recycleBinService 사용
+                // Services: [_recycleBinService] 사용
+                isTargetsRestored = await _recycleBinService.RestoreDelInfoAsync(LstDelInfo, restoredItem =>
                 {
                     // 복원 항목마다 UI 실시간 업데이트 반영
                     Application.Current.Dispatcher.Invoke(() =>
@@ -1935,10 +1940,10 @@ namespace Bin_Obj_Delete_Project.ViewModels
         }
         #endregion
 
-        #region [캐싱 처리]
+        #region [폴더 캐싱 처리]
 
         /// <summary>
-        /// [폴더 캐싱]
+        /// 대용량 데이터 처리 성능 병목 현상 해결: [폴더 캐싱 처리]
         /// </summary>
         /// <returns></returns>
         public IEnumerable<string> GetEneumerateFldrList()
