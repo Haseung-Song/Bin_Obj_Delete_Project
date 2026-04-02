@@ -289,8 +289,6 @@ MVVM 패턴의 ViewModel로서 UI 상태와 비즈니스 로직 연결
 ---
 
 ## 12. 실행 방법
+
 ```bash
 git clone https://github.com/사용자명/Bin_Obj_Delete_Project.git
-
----
-
