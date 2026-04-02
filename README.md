@@ -172,8 +172,19 @@ MVVM 패턴의 ViewModel로서 UI 상태와 비즈니스 로직 연결
 ## 9. 한줄 요약
  - **파일 시스템 처리** + **UI** + **OS(Shell)** + **DB 로그**까지 통합한 실사용 가능 **미니 파일탐색기** 제작
 
+## 10. 스크린샷 화면
+### 10-1. 초기 구성 화면
+
+<img width="1253" height="599" alt="초기 구성 화면" src="https://github.com/user-attachments/assets/1d3bed78-b8ac-4dc3-9420-128b35b0cc11" />
+
+### 10-2. 초기 구성 화면
+
+<img width="1252" height="601" alt="폴더 불러오기 진행 화면" src="https://github.com/user-attachments/assets/517e4bf9-2069-404f-9b60-e67dfdc2a740" />
+
+
+
 ---
 
-## 10. 실행 방법
+## 11. 실행 방법
 ```bash
 git clone https://github.com/사용자명/Bin_Obj_Delete_Project.git
