@@ -163,28 +163,129 @@ MVVM 패턴의 ViewModel로서 UI 상태와 비즈니스 로직 연결
   - MSSQL DB 연동
   - 삭제/복원 && 성공/실패 등 데이터 기록
   - 작업 이력 추적 가능
-   
+
+---
+
 ## 8. 성과
   - **수백 ~ 수천 개** 폴더/파일을 UI 지연 없이 처리
   - 반복적인 수동 삭제 작업 대비 **80% 이상 시간 절감**
   - 실무 환경에서도 활용 가능한 수준의 **폴더/파일 관리 도구** 구현
 
+---
+
 ## 9. 한줄 요약
  - **파일 시스템 처리** + **UI** + **OS(Shell)** + **DB 로그**까지 통합한 실사용 가능 **미니 파일탐색기** 제작
 
-## 10. 스크린샷 화면
+---
+
+## 10. 프로그램 UI 구성
+---
 ### 10-1. 초기 구성 화면
 
 <img width="1253" height="599" alt="초기 구성 화면" src="https://github.com/user-attachments/assets/1d3bed78-b8ac-4dc3-9420-128b35b0cc11" />
 
-### 10-2. 초기 구성 화면
+### 10-2. 폴더 불러오기 진행 화면
 
 <img width="1252" height="601" alt="폴더 불러오기 진행 화면" src="https://github.com/user-attachments/assets/517e4bf9-2069-404f-9b60-e67dfdc2a740" />
 
+### 10-3. 폴더 불러오기 (진행률 0%) 화면
 
+<img width="1252" height="601" alt="폴더 불러오기 (진행률 0%) 화면" src="https://github.com/user-attachments/assets/81e041ca-98dd-4211-aeb2-f3c146bfb171" />
+
+### 10-4. 폴더 불러오기 (진행률 67%) 화면
+
+<img width="1252" height="601" alt="폴더 불러오기 (진행 67%) 화면" src="https://github.com/user-attachments/assets/8e5f0717-65d9-4bd1-8d6f-b31d89d0c4e6" />
+
+### 10-5. 폴더 불러오기 완료 화면
+
+<img width="1250" height="599" alt="폴더 불러오기 완료 화면" src="https://github.com/user-attachments/assets/4286d216-d825-4502-9cde-72eee94a9a49" />
+
+### 10-6. 폴더 선택하기 (최대 100개) 첫 화면
+
+<img width="1252" height="599" alt="폴더 선택하기 (최대 100개) 첫 화면" src="https://github.com/user-attachments/assets/b7d43cb5-c3af-4282-b149-2fc4d68604ab" />
+
+### 10-7. 폴더 선택하기 (총 83개) 마지막 화면
+
+<img width="1252" height="599" alt="폴더 선택하기 (총 83개) 마지막 화면" src="https://github.com/user-attachments/assets/a563b557-35b4-4cdc-a84f-25800b2f802f" />
+
+### 10-8. 폴더 선택 후, 폴더 열기 완료 화면
+
+<img width="1253" height="599" alt="폴더 선택 후, 폴더 열기 완료 화면" src="https://github.com/user-attachments/assets/68d6250d-9abf-414b-9443-a50a005ca290" />
+
+### 10-9. 파일 선택 후, 파일 열 앱 (.pdf) 선택 화면
+
+<img width="1252" height="600" alt="파일 선택 후, 파일 열 앱 ( pdf) 선택 화면" src="https://github.com/user-attachments/assets/55fc72f5-f482-45cb-8a63-5ebda2b68693" />
+
+### 10-10. 이름순 정렬 (내림차순) 화면
+
+<img width="1253" height="601" alt="이름순 정렬 (내림차순) 화면" src="https://github.com/user-attachments/assets/59b58e7c-67ac-4b03-a363-920280e902f6" />
+
+### 10-11. 생성, 수정한 날짜순 정렬 (오름차순) 화면
+
+<img width="1252" height="599" alt="생성, 수정한 날짜순 정렬 (오름차순) 화면" src="https://github.com/user-attachments/assets/1a06e419-5076-4700-8e77-4d3f62c68693" />
+
+### 10-12. 크기순 정렬 (오름차순) 화면
+
+<img width="1252" height="599" alt="크기순 정렬 (오름차순) 화면" src="https://github.com/user-attachments/assets/ed6eeb9d-c75f-41f1-9aa7-24576104add4" />
+
+### 10-13. 유형별 정렬 (오름차순) 화면
+
+<img width="1253" height="600" alt="유형별 정렬 (오름차순) 화면" src="https://github.com/user-attachments/assets/1dda18c8-e5b6-46f3-9610-5d905e6b1848" />
+
+### 10-14. 검색 필터 설정 및 초기화 화면
+
+<img width="1253" height="599" alt="검색 필터 설정 및 초기화 화면" src="https://github.com/user-attachments/assets/f5cc5a7e-5d62-40eb-8a1c-f6c5fa42c514" />
+
+### 10-15. 필터 01_폴더 이름으로 검색 화면
+
+<img width="1255" height="600" alt="필터 01_폴더 이름으로 검색 화면" src="https://github.com/user-attachments/assets/a3d7b58a-3f0c-46bd-a438-4ac803f171ce" />
+
+### 10-16. 필터 02_파일 확장자로 검색 화면
+
+<img width="1253" height="600" alt="필터 02_파일 확장자로 검색 화면" src="https://github.com/user-attachments/assets/0541e470-98ee-41e6-90c6-9fd1971dd302" />
+
+### 10-17. 파일 선택 삭제하기 이전 화면
+
+<img width="1251" height="600" alt="파일 선택 삭제하기 이전 화면" src="https://github.com/user-attachments/assets/13b642e1-5a8e-4936-85e7-1cfbb1a1b43b" />
+
+### 10-18. 파일 선택 삭제하기 진행 화면
+
+<img width="1251" height="601" alt="파일 선택 삭제하기 진행 화면" src="https://github.com/user-attachments/assets/b7db18ee-fac9-47a4-9e4f-9dd417e4bdcb" />
+
+### 10-19. 파일 선택 삭제하기 완료 화면
+
+<img width="1253" height="599" alt="파일 선택 삭제하기 완료 화면" src="https://github.com/user-attachments/assets/0e1e9542-4442-499f-bb4b-e1fa7f7daaea" />
+
+### 10-20. 휴지통 복원하기 이전 화면
+
+<img width="1252" height="601" alt="휴지통 복원하기 이전 화면" src="https://github.com/user-attachments/assets/ad0fc4a2-ed4b-43ff-be05-7aef280d3775" />
+
+### 10-21. 휴지통 복원하기 완료 화면
+
+<img width="1252" height="601" alt="휴지통 복원하기 완료 화면" src="https://github.com/user-attachments/assets/b92049b0-ad45-493e-b1a9-dc1e4c407007" />
+
+### 10-22. 파일 일괄 삭제하기 이전 화면
+
+<img width="1252" height="599" alt="파일 일괄 삭제하기 이전 화면" src="https://github.com/user-attachments/assets/61f45f93-db95-471c-800b-af6ca625bf5c" />
+
+### 10-23. 파일 일괄 삭제하기 진행 화면
+
+<img width="1252" height="599" alt="파일 일괄 삭제하기 진행 화면" src="https://github.com/user-attachments/assets/97d08445-9354-4569-a0b0-9d90dd4aabac" />
+
+### 10-24. 파일 일괄 삭제하기 완료 화면
+
+<img width="1251" height="599" alt="파일 일괄 삭제하기 완료 화면" src="https://github.com/user-attachments/assets/322eb83a-444e-4b39-aa49-946314deac1e" />
+
+### 10-25. 파일 일괄 삭제하기 완료 화면
+
+<img width="1279" height="764" alt="MSSQL DB  로그 기록 화면" src="https://github.com/user-attachments/assets/3728b9cf-7b33-4798-a0a8-1ca0c4d74824" />
+
+## 11. 프로젝트 코드 화면
+
+<img width="1280" height="763" alt="프로젝트 코드 화면" src="https://github.com/user-attachments/assets/15cdff26-9659-4d25-8cff-609f3e1f2373" />
 
 ---
 
-## 11. 실행 방법
+## 12. 실행 방법
 ```bash
 git clone https://github.com/사용자명/Bin_Obj_Delete_Project.git
