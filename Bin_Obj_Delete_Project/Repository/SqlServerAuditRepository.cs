@@ -6,7 +6,6 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 
 namespace Bin_Obj_Delete_Project.Repository
 {
@@ -14,11 +13,13 @@ namespace Bin_Obj_Delete_Project.Repository
     {
         private readonly string _cs; // 연결 문자열 (App.config의 name="sqlDB")
 
-        private static bool IsFolder(DelMatchingInfo item) => string.Equals(item?.DelMatchingCategory, "파일 폴더", StringComparison.OrdinalIgnoreCase);
+        private static bool IsFolder(DelMatchingInfo item)
+            => string.Equals(item?.DelMatchingCategory, "파일 폴더", StringComparison.OrdinalIgnoreCase);
 
         public SqlServerAuditRepository(string connectionString)
         {
-            _cs = connectionString ?? throw new ArgumentNullException(nameof(connectionString)); // [QUERY] 구문 에러 시, 기본 예외 메시지 생성
+            _cs
+                = connectionString ?? throw new ArgumentNullException(nameof(connectionString)); // [QUERY] 구문 에러 시, 기본 예외 메시지 생성
         }
 
         /// <summary>
@@ -49,8 +50,8 @@ namespace Bin_Obj_Delete_Project.Repository
                         cmd.CommandType = CommandType.Text;
                         cmd.CommandTimeout = 30;
 
-                        cmd.Parameters.Add("@ACTION", SqlDbType.VarChar, 10).Value = actionType ?? "기타";
-                        cmd.Parameters.Add("@ITEM", SqlDbType.VarChar, 10).Value = IsFolder(item) ? "폴더" : "파일";
+                        cmd.Parameters.Add("@ACTION", SqlDbType.NVarChar, 10).Value = actionType ?? "기타";
+                        cmd.Parameters.Add("@ITEM", SqlDbType.NVarChar, 10).Value = IsFolder(item) ? "폴더" : "파일";
 
                         var name = (item != null && item.DelMatchingName != null) ? (object)item.DelMatchingName : DBNull.Value;
                         cmd.Parameters.Add("@NAME", SqlDbType.NVarChar, 260).Value = name;
@@ -71,11 +72,15 @@ namespace Bin_Obj_Delete_Project.Repository
             }
             catch (Exception ex)
             {
-                await Application.Current.Dispatcher.InvokeAsync(() =>
-                {
-                    Window mainWindow = Application.Current.MainWindow; // [MainWindow] 가져오기 (Owner 설정용)
-                    _ = MessageBox.Show(mainWindow, $"SQL 오류:\r\n{ex.Message}", "Query 재확인", MessageBoxButton.OK, MessageBoxImage.Error);
-                });
+                Console.WriteLine();
+                Console.WriteLine("========================================");
+                Console.WriteLine("[SQL] Audit Log Insert Failed");
+                Console.WriteLine($"Message     : {ex.Message}");
+                Console.WriteLine($"Exception   : {ex.GetType().FullName}");
+                Console.WriteLine($"StackTrace  : {ex.StackTrace}");
+                Console.WriteLine("========================================");
+                Console.WriteLine();
+
                 return false;
             }
 
